@@ -26,13 +26,13 @@
     }
   },
   "bundle": {
-    "active": false,
+    "active": true,
     "targets": ["nsis"],
     "publisher": "ibrahimqureshae",
     "copyright": "© 2026 ibrahimqureshae",
     "category": "Productivity",
     "shortDescription": "Convert documents to clean Markdown — offline.",
-    "longDescription": "MDFlux turns PDFs, Office files, images, audio and more into clean Markdown. It self-installs its dependencies on first launch, runs fully offline, and adds batch processing, cleanup, OCR/transcription, and an optional local/API intelligence layer on top of Microsoft's MarkItDown.",
+    "longDescription": "MDFlux turns PDFs, Office files, and more into clean Markdown. The offline installer bundles a private Python runtime and MarkItDown so conversion works with no first-launch download. Optional OCR/audio engines are not included in the basic offline build.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -48,8 +48,12 @@
       "resources/runtime/**/*"
     ],
     "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
       "nsis": {
-        "installMode": "currentUser"
+        "installMode": "currentUser",
+        "displayLanguageSelector": false
       }
     }
   }

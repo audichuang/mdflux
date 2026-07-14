@@ -1,5 +1,6 @@
-# Build the offline Windows portable zip and publish a public GitHub Release.
-# Release assets are downloadable without logging in (unlike Actions Artifacts).
+# Build offline Windows packages and publish a public GitHub Release.
+# Primary: NSIS Setup.exe (real installer). Optional: portable zip.
+# Release assets are downloadable without logging in.
 name: Portable build
 
 on:
@@ -19,7 +20,7 @@ concurrency:
 
 jobs:
   windows-offline:
-    name: Windows offline portable zip
+    name: Windows offline installer
     runs-on: windows-latest
     timeout-minutes: 90
     steps:
@@ -48,19 +49,32 @@ jobs:
         working-directory: app
         run: npm ci
 
-      - name: Bundle offline runtime + build portable zip
+      - name: Build NSIS installer (+ portable zip)
         shell: pwsh
-        run: pwsh -File scripts/make-portable.ps1
+        run: pwsh -File scripts/make-installer.ps1 -AlsoPortable
 
-      - name: Locate zip + release metadata
-        id: zip
+      - name: Locate packages + release metadata
+        id: pkg
         shell: pwsh
         run: |
-          $zips = Get-ChildItem -Path dist -Filter "MDFlux_*_portable_offline.zip" -ErrorAction Stop
-          if ($zips.Count -lt 1) { throw "No portable_offline zip found in dist/" }
-          $zip = $zips | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          $mb = [math]::Round($zip.Length / 1MB, 2)
-          Write-Host "Artifact: $($zip.FullName) ($mb MB)"
+          $setup = Get-ChildItem -Path dist -Filter "MDFlux_*_x64-setup.exe" -ErrorAction Stop |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          $zip = Get-ChildItem -Path dist -Filter "MDFlux_*_portable_offline.zip" -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+          if (-not $setup) { throw "Setup.exe not found in dist/" }
+
+          $setupMb = [math]::Round($setup.Length / 1MB, 2)
+          Write-Host "Installer: $($setup.FullName) ($setupMb MB)"
+
+          $files = @($setup.FullName)
+          if ($zip) {
+            $zipMb = [math]::Round($zip.Length / 1MB, 2)
+            Write-Host "Portable:  $($zip.FullName) ($zipMb MB)"
+            $files += $zip.FullName
+            "zip_name=$($zip.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            "zip_mb=$zipMb" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
 
           $conf = Get-Content app/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
           $version = $conf.version
@@ -68,62 +82,72 @@ jobs:
 
           if ($env:GITHUB_REF -like "refs/tags/*") {
             $tag = $env:GITHUB_REF_NAME
-            $title = "MDFlux $tag — offline portable (Windows)"
+            $title = "MDFlux $tag — Windows installer"
           } else {
-            # Rolling public release: always the same tag so the download URL stays stable.
             $tag = "offline-latest"
-            $title = "MDFlux $version — offline portable (Windows)"
+            $title = "MDFlux $version — Windows installer (offline)"
           }
 
-          "path=$($zip.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "name=$($zip.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "mb=$mb" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          # softprops accepts multiline files via newline-separated list in some versions;
+          # pass space-joined and also individual paths for upload-artifact.
+          "setup_path=$($setup.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "setup_name=$($setup.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "setup_mb=$setupMb" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "files=$($files -join `n)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "sha=$sha" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "title=$title" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.zip.outputs.name }}
-          path: ${{ steps.zip.outputs.path }}
+          name: MDFlux-windows-offline
+          path: |
+            dist/MDFlux_*_x64-setup.exe
+            dist/MDFlux_*_portable_offline.zip
           if-no-files-found: error
           retention-days: 14
 
-      # Public download (no login). Main/workflow_dispatch → tag offline-latest (rolling).
-      # Tag push v* → versioned release under that tag.
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.zip.outputs.tag }}
-          name: ${{ steps.zip.outputs.title }}
+          tag_name: ${{ steps.pkg.outputs.tag }}
+          name: ${{ steps.pkg.outputs.title }}
           target_commitish: ${{ github.sha }}
-          files: ${{ steps.zip.outputs.path }}
+          files: |
+            dist/MDFlux_*_x64-setup.exe
+            dist/MDFlux_*_portable_offline.zip
           fail_on_unmatched_files: true
           make_latest: true
           draft: false
           prerelease: false
           body: |
-            ## Offline portable (Windows x64)
+            ## Windows installer (offline) — recommended
 
-            Unzip and run `MDFlux.exe`. **No first-launch Python download.**
+            1. Download **`${{ steps.pkg.outputs.setup_name }}`**
+            2. Run the installer (current user, **no admin**)
+            3. Open **MDFlux** from the Start Menu
+
+            No unzip. No first-launch Python download.
 
             | | |
             |---|---|
-            | File | `${{ steps.zip.outputs.name }}` (~${{ steps.zip.outputs.mb }} MB) |
-            | App version | `${{ steps.zip.outputs.version }}` |
-            | Commit | `${{ steps.zip.outputs.sha }}` |
+            | **Installer (recommended)** | `${{ steps.pkg.outputs.setup_name }}` (~${{ steps.pkg.outputs.setup_mb }} MB) |
+            | Portable zip (optional) | `MDFlux_*_portable_offline.zip` (unzip & run) |
+            | Install mode | Current user |
+            | App version | `${{ steps.pkg.outputs.version }}` |
+            | Commit | `${{ steps.pkg.outputs.sha }}` |
             | Built | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
 
             ### Included
-            - GUI (existing Tauri + Svelte app)
-            - Bundled Python 3.12 + core conversion packages (MarkItDown stack)
+            - Desktop app + Start Menu shortcut
+            - Bundled Python 3.12 + MarkItDown core conversion stack
 
             ### Not included
             - OCR engine
             - Audio transcription engine
 
             ### Notes
-            - Unsigned build: Windows SmartScreen may warn — More info → Run anyway
-            - Needs WebView2 (ships with current Windows 10/11)
+            - Unsigned: SmartScreen may warn — More info → Run anyway
+            - WebView2 is required (bootstrapper can download it if missing)

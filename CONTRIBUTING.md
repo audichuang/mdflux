@@ -41,34 +41,28 @@ npm run tauri dev
 ### CI (recommended)
 
 GitHub Actions workflow [`.github/workflows/portable.yml`](../.github/workflows/portable.yml)
-builds the offline Windows zip on `windows-latest` and **publishes a public GitHub Release**
-(downloadable without logging in):
+builds offline Windows packages on `windows-latest` and **publishes a public GitHub Release**:
 
-- **Push to `main`** or **manual “Run workflow”** → updates release tag **`offline-latest`**
-  (stable URL under Releases)
-- **Push a tag `v*`** → versioned release under that tag
+- **Primary:** NSIS **`MDFlux_<ver>_x64-setup.exe`** (real installer, Start Menu, current-user)
+- **Also:** portable zip (optional unzip-and-run)
+- **Push to `main`** / **Run workflow** → updates tag **`offline-latest`**
+- **Tag `v*`** → versioned release
 
-Also uploads an Actions Artifact (login required; secondary). Prefer the Release asset.
+Prefer the Release **setup.exe** (no login needed to download).
 
-### Local (optional)
+### Local (optional, Windows)
 
 ```bash
-# 1) Offline Python + markitdown stack (~300 MB on disk; any OS with curl + uv)
+# Offline Python runtime (any OS with curl + uv)
 bash scripts/bundle-runtime.sh
 
-# 2) On Windows: compile Tauri + package zip
-pwsh -File scripts/make-portable.ps1
+# On Windows: NSIS installer (+ optional portable zip)
+pwsh -File scripts/make-installer.ps1 -AlsoPortable
+# -> dist/MDFlux_<version>_x64-setup.exe
 # -> dist/MDFlux_<version>_portable_offline.zip
 ```
 
-| Flag | Effect |
-|---|---|
-| (default) | Bundle offline runtime + build + zip |
-| `-ForceRuntime` | Rebuild the offline runtime even if present |
-| `-SkipRuntime` | Classic small zip (first launch downloads Python) |
-| `-NoBuild` | Only re-zip an existing `target/release` build |
-
-MDFlux ships as a portable zip, not an installer (`bundle.active: false` in `tauri.conf.json`).
+`bundle.active` is **true** in `tauri.conf.json` (NSIS target).
 
 ## Checks before a PR
 
