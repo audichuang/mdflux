@@ -73,7 +73,7 @@
 </script>
 
 <div
-  class="flex-1 flex flex-col items-center justify-center gap-6 w-full max-w-[500px] mx-auto py-8"
+  class="flex-1 flex flex-col items-center justify-center gap-6 w-full max-w-[500px] self-center py-8"
 >
   <header class="text-center select-none">
     <h1 class="text-lg font-bold text-zinc-50">Setting up MDFlux</h1>

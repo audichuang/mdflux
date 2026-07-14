@@ -595,6 +595,7 @@ fn run_uv_streamed(
 
 fn create_venv(app: &AppHandle, uv: &Path, venv_dir: &Path) -> Result<(), String> {
     let mut cmd = std::process::Command::new(uv);
+    cmd.env("UV_HTTP_TIMEOUT", "120");
     cmd.args(["venv", "--python", "3.12", &venv_dir.to_string_lossy()]);
 
     let (status, stderr) = run_uv_streamed(cmd, |line| {
@@ -641,6 +642,7 @@ fn install_packages(
 ) -> Result<(), String> {
     let python = venv_dir.join(platform::PYTHON_BIN);
     let mut cmd = std::process::Command::new(uv);
+    cmd.env("UV_HTTP_TIMEOUT", "120");
     cmd.args([
         "pip",
         "install",
