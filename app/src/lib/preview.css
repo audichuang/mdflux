@@ -1,0 +1,156 @@
+/* Shared Markdown preview — single source for ResultView + DocViewer.
+   Soft Claude-like content: hairline dividers, no table cages, elevation over boxes. */
+
+.md-preview {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.md-preview h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--divider);
+  color: var(--text-primary);
+}
+
+.md-preview h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 24px 0 8px;
+  color: var(--text-primary);
+}
+
+.md-preview h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 20px 0 8px;
+  color: var(--text-primary);
+}
+
+.md-preview h4,
+.md-preview h5,
+.md-preview h6 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 4px;
+  color: var(--text-primary);
+}
+
+.md-preview p {
+  margin: 0 0 12px;
+}
+
+.md-preview ul,
+.md-preview ol {
+  margin: 0 0 12px;
+  padding-left: 24px;
+}
+
+.md-preview li {
+  margin: 2px 0;
+}
+
+.md-preview a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.md-preview strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.md-preview em {
+  font-style: italic;
+}
+
+.md-preview blockquote {
+  margin: 0 0 12px;
+  padding: 4px 16px;
+  border-left: 3px solid color-mix(in srgb, var(--accent) 35%, var(--divider));
+  color: var(--text-secondary);
+}
+
+.md-preview hr {
+  border: none;
+  border-top: 1px solid var(--divider);
+  margin: 20px 0;
+}
+
+.md-preview code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--surface-2);
+  padding: 1px 5px;
+  border-radius: 6px;
+}
+
+.md-preview pre {
+  background: var(--surface-2);
+  border: none;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 0 0 12px;
+}
+
+.md-preview pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.92em;
+}
+
+/* Soft tables — row dividers only; wide tables scroll via .md-preview overflow-x */
+.md-preview table {
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0 0 16px;
+  font-size: 13px;
+  width: max(100%, max-content);
+  min-width: 100%;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  overflow: hidden;
+}
+
+.md-preview th,
+.md-preview td {
+  border: none;
+  border-bottom: 1px solid var(--divider);
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.md-preview tr:last-child th,
+.md-preview tr:last-child td {
+  border-bottom: none;
+}
+
+.md-preview th {
+  background: color-mix(in srgb, var(--surface-2) 80%, transparent);
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.md-preview thead th {
+  border-bottom: 1px solid var(--border);
+}
+
+.md-preview tbody tr:hover td {
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
+}
+
+.md-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}

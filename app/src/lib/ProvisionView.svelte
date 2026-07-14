@@ -82,10 +82,7 @@
 
   <Stepper steps={STEPS} {current} {done} />
 
-  <div
-    class="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-5 flex flex-col gap-3.5 select-text shadow-xl"
-    aria-live="polite"
-  >
+  <div class="panel w-full p-5 flex flex-col gap-3.5 select-text" aria-live="polite">
     <p class="text-xs font-semibold text-zinc-200">{done ? 'Setup complete.' : progress.message}</p>
 
     {#if detail && !done}
@@ -94,7 +91,7 @@
 
     {#if hasTotal && !done}
       <div
-        class="h-2 bg-zinc-950 rounded-full overflow-hidden"
+        class="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden"
         role="progressbar"
         aria-valuenow={Math.round(frac * 100)}
         aria-valuemin={0}
@@ -107,7 +104,7 @@
       </div>
     {:else if !done}
       <div
-        class="h-2 bg-zinc-950 rounded-full overflow-hidden relative"
+        class="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden relative"
         role="progressbar"
         aria-busy="true"
         aria-label={progress.message}
@@ -127,9 +124,7 @@
     {/if}
 
     {#if current === 2 && !done}
-      <ul
-        class="flex flex-col gap-2 pt-3.5 mt-1.5 border-t border-zinc-800/80 list-none select-none"
-      >
+      <ul class="flex flex-col gap-2 pt-3.5 mt-1.5 hairline-t list-none select-none">
         {#each PACKAGES as p}
           <li class="flex items-baseline gap-2 text-xs">
             <span class="font-semibold text-zinc-200">{p.name}</span>

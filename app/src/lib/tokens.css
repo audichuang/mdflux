@@ -250,14 +250,14 @@ body {
 }
 
 .btn-secondary {
-  background: var(--surface-1);
+  background: var(--surface-2);
   color: var(--text-primary);
-  border-color: var(--border);
+  border-color: transparent;
   box-shadow: var(--seg-shadow);
 }
 .btn-secondary:hover:not(:disabled) {
-  background: var(--surface-2);
-  border-color: var(--border-strong);
+  background: var(--surface-3);
+  border-color: transparent;
 }
 
 .btn-tertiary {

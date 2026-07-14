@@ -28,7 +28,7 @@
   </p>
 
   <div
-    class="w-full max-w-[280px] h-2 bg-zinc-900 rounded-full overflow-hidden"
+    class="w-full max-w-[280px] h-2 bg-[var(--surface-2)] rounded-full overflow-hidden"
     role="progressbar"
     aria-label="Conversion in progress"
     aria-busy="true"

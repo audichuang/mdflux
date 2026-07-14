@@ -478,7 +478,7 @@
           aria-label="Before cleanup"
         >
           <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-          <div class="preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>
+          <div class="md-preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>
             {@html beforeHtml}
           </div>
         </div>
@@ -498,7 +498,7 @@
           aria-label="After cleanup"
         >
           <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-          <div class="preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>
+          <div class="md-preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>
             {@html afterHtml}
           </div>
         </div>
@@ -549,7 +549,7 @@
       {:else if cleanup.viewMode === 'preview'}
         <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
         <div
-          class="preview text-zinc-300 text-sm leading-relaxed"
+          class="md-preview"
           style="max-width: 768px; margin: 0 auto;"
           onclick={onPreviewClick}
         >
@@ -681,120 +681,3 @@
     </div>
   </div>
 {/if}
-
-<style>
-  .preview :global(h1) {
-    font-size: 26px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin: 0 0 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--divider);
-  }
-  .preview :global(h2) {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 24px 0 8px;
-  }
-  .preview :global(h3) {
-    font-size: 16px;
-    font-weight: 600;
-    margin: 20px 0 8px;
-  }
-  .preview :global(h4),
-  .preview :global(h5),
-  .preview :global(h6) {
-    font-size: 14px;
-    font-weight: 600;
-    margin: 16px 0 4px;
-  }
-  .preview :global(p) {
-    margin: 0 0 12px;
-  }
-  .preview :global(ul),
-  .preview :global(ol) {
-    margin: 0 0 12px;
-    padding-left: 24px;
-  }
-  .preview :global(li) {
-    margin: 2px 0;
-  }
-  .preview :global(a) {
-    color: var(--accent);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-  .preview :global(strong) {
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-  .preview :global(em) {
-    font-style: italic;
-  }
-  .preview :global(blockquote) {
-    margin: 0 0 12px;
-    padding: 4px 16px;
-    border-left: 3px solid color-mix(in srgb, var(--accent) 35%, var(--divider));
-    color: var(--text-secondary);
-  }
-  .preview :global(hr) {
-    border: none;
-    border-top: 1px solid var(--divider);
-    margin: 20px 0;
-  }
-  .preview :global(code) {
-    font-family: var(--font-mono);
-    font-size: 0.88em;
-    background: var(--surface-2);
-    padding: 1px 5px;
-    border-radius: 6px;
-  }
-  .preview :global(pre) {
-    background: var(--surface-2);
-    border: none;
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    overflow-x: auto;
-    margin: 0 0 12px;
-  }
-  .preview :global(pre code) {
-    background: none;
-    padding: 0;
-  }
-  /* Soft tables — row dividers only, no full grid cages */
-  .preview :global(table) {
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 0 0 16px;
-    font-size: 13px;
-    width: 100%;
-    display: table;
-    overflow: hidden;
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--surface-2) 55%, transparent);
-  }
-  .preview :global(th),
-  .preview :global(td) {
-    border: none;
-    border-bottom: 1px solid var(--divider);
-    padding: 10px 14px;
-    text-align: left;
-    vertical-align: top;
-  }
-  .preview :global(tr:last-child th),
-  .preview :global(tr:last-child td) {
-    border-bottom: none;
-  }
-  .preview :global(th) {
-    background: color-mix(in srgb, var(--surface-2) 80%, transparent);
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-size: 12px;
-  }
-  .preview :global(tbody tr:hover td) {
-    background: color-mix(in srgb, var(--accent) 4%, transparent);
-  }
-  .preview :global(img) {
-    max-width: 100%;
-  }
-</style>

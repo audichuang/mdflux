@@ -1,7 +1,5 @@
 <script lang="ts">
-  // Horizontal multi-step indicator, modelled on Nuxt UI's <UStepper>.
-  // Steps before `current` render as complete (check), `current` is active,
-  // the rest are pending. When `error` is set, the active step turns red.
+  // Horizontal multi-step indicator. Complete / active / error / pending.
   export interface Step {
     title: string;
     description?: string;
@@ -27,30 +25,13 @@
   }
 </script>
 
-<ol class="flex items-center justify-between w-full select-none" role="list">
+<ol class="stepper" role="list">
   {#each steps as step, i}
     {@const st = stateOf(i)}
-    <li class="flex-1 flex flex-col items-center text-center relative" data-state={st}>
-      <div class="flex items-center w-full justify-center">
-        <!-- Left line -->
-        <span
-          class="h-[2px] flex-1 transition-colors duration-300 {i === 0 ? 'invisible' : ''} {i <=
-            current && i > 0
-            ? 'bg-blue-500'
-            : 'bg-zinc-800'}"
-        ></span>
-
-        <!-- Marker -->
-        <span
-          class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-2 text-xs font-semibold font-mono transition-all duration-300
-          {st === 'complete' ? 'bg-blue-500 border-blue-500 text-zinc-950' : ''}
-          {st === 'active'
-            ? 'border-blue-500 text-blue-500 shadow-[0_0_0_4px_rgba(59,130,246,0.15)] bg-zinc-900'
-            : ''}
-          {st === 'error' ? 'bg-red-500 border-red-500 text-zinc-950' : ''}
-          {st === 'pending' ? 'border-zinc-850 bg-zinc-900/60 text-zinc-500' : ''}"
-          aria-hidden="true"
-        >
+    <li class="step" data-state={st}>
+      <div class="row">
+        <span class="line left" class:on={i > 0 && i <= current} class:hide={i === 0}></span>
+        <span class="marker" aria-hidden="true">
           {#if st === 'complete'}
             <svg
               viewBox="0 0 24 24"
@@ -78,34 +59,146 @@
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           {:else if st === 'active'}
-            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+            <span class="dot"></span>
           {:else}
-            <span>{i + 1}</span>
+            <span class="num">{i + 1}</span>
           {/if}
         </span>
-
-        <!-- Right line -->
         <span
-          class="h-[2px] flex-1 transition-colors duration-300 {i === steps.length - 1
-            ? 'invisible'
-            : ''} {i < current ? 'bg-blue-500' : 'bg-zinc-800'}"
+          class="line right"
+          class:on={i < current}
+          class:hide={i === steps.length - 1}
         ></span>
       </div>
-
-      <div class="flex flex-col gap-0.5 mt-2 px-1">
-        <span
-          class="text-xs font-semibold transition-colors duration-300
-          {st === 'active' ? 'text-zinc-50 font-bold' : ''}
-          {st === 'complete' ? 'text-zinc-300' : ''}
-          {st === 'error' ? 'text-red-400' : ''}
-          {st === 'pending' ? 'text-zinc-500' : ''}"
-        >
-          {step.title}
-        </span>
+      <div class="labels">
+        <span class="title">{step.title}</span>
         {#if step.description}
-          <span class="text-[10px] text-zinc-500 leading-normal">{step.description}</span>
+          <span class="desc">{step.description}</span>
         {/if}
       </div>
     </li>
   {/each}
 </ol>
+
+<style>
+  .stepper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+  }
+  .step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+  }
+  .line {
+    height: 2px;
+    flex: 1;
+    background: var(--divider);
+    transition: background var(--transition);
+  }
+  .line.on {
+    background: var(--accent);
+  }
+  .line.hide {
+    visibility: hidden;
+  }
+  .marker {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface-1);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    transition: all var(--transition);
+  }
+  .step[data-state='complete'] .marker {
+    background: var(--accent);
+    border-color: var(--accent-edge);
+    color: var(--on-accent);
+  }
+  .step[data-state='active'] .marker {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--surface-1);
+    box-shadow: 0 0 0 4px var(--accent-dim);
+  }
+  .step[data-state='error'] .marker {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--on-accent);
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--accent);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  .num {
+    line-height: 1;
+  }
+  .labels {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 8px;
+    padding: 0 4px;
+  }
+  .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: color var(--transition);
+  }
+  .step[data-state='active'] .title {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+  .step[data-state='complete'] .title {
+    color: var(--text-secondary);
+  }
+  .step[data-state='error'] .title {
+    color: var(--red);
+  }
+  .desc {
+    font-size: 10px;
+    color: var(--text-muted);
+    line-height: 1.35;
+  }
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dot {
+      animation: none;
+    }
+  }
+</style>

@@ -55,7 +55,7 @@
   <div class="flex gap-3 flex-wrap flex-shrink-0">
     {#if done > 0}
       <span
-        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-green-950/10"
+        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-full bg-green-950/15"
       >
         <span class="text-lg font-bold font-mono text-green-400 leading-none">{done}</span>
         <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider"
@@ -65,7 +65,7 @@
     {/if}
     {#if failed > 0}
       <span
-        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-red-950/10"
+        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-full bg-red-950/15"
       >
         <span class="text-lg font-bold font-mono text-red-400 leading-none">{failed}</span>
         <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">failed</span>
@@ -73,7 +73,7 @@
     {/if}
     {#if cancelled > 0}
       <span
-        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900/40"
+        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-2)]"
       >
         <span class="text-lg font-bold font-mono text-zinc-400 leading-none">{cancelled}</span>
         <span class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider"
@@ -83,7 +83,7 @@
     {/if}
     {#if warned > 0}
       <span
-        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-amber-950/10"
+        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-full bg-amber-950/15"
         title="Converted, but the file had no extractable content"
       >
         <span class="text-lg font-bold font-mono text-amber-400 leading-none">{warned}</span>
@@ -95,7 +95,7 @@
 
   {#if cleanupApplied && done > 0}
     <div
-      class="flex items-center gap-2 rounded-lg border border-blue-950/60 bg-blue-950/10 px-3.5 py-2.5 text-xs text-zinc-300 leading-normal flex-shrink-0"
+      class="flex items-center gap-2 rounded-xl bg-blue-950/15 px-3.5 py-2.5 text-xs text-zinc-300 leading-normal flex-shrink-0"
     >
       <svg
         class="text-blue-400 flex-shrink-0"
@@ -123,7 +123,7 @@
 
   <!-- Results list -->
   <ul
-    class="flex-1 overflow-y-auto bg-zinc-950/30 border border-zinc-800 rounded-lg divide-y divide-zinc-900/50"
+    class="panel-inset flex-1 overflow-y-auto divide-y divide-[var(--divider)]"
     aria-label="Conversion results"
   >
     {#each items as item (item.id)}
@@ -167,7 +167,7 @@
 
         {#if item.status === 'done' && onOpen}
           <button
-            class="flex-shrink-0 inline-flex items-center justify-center rounded-md text-[11px] font-semibold h-6 px-2.5 border border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors self-center ml-2"
+            class="btn-secondary btn-sm flex-shrink-0 self-center ml-2"
             title="View the converted Markdown"
             onclick={() => onOpen?.(item)}>View</button
           >

@@ -2,6 +2,7 @@
   import '@fontsource-variable/inter';
   import '@fontsource/jetbrains-mono/400.css';
   import '$lib/tokens.css';
+  import '$lib/preview.css';
   // Side-effect: restore theme preference + watch system scheme
   import '$lib/theme.svelte';
 

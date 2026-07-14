@@ -876,15 +876,16 @@
   /* Diagnostics icon button */
   .diag-btn {
     background: var(--surface-2);
-    border: 1px solid var(--border-strong);
+    border: 1px solid transparent;
     color: var(--text-secondary);
     cursor: pointer;
     width: 34px;
     height: 34px;
-    border-radius: var(--radius-sm);
+    border-radius: 999px;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: var(--seg-shadow);
     transition:
       color var(--transition-fast),
       background var(--transition-fast),
@@ -893,7 +894,6 @@
   .diag-btn:hover {
     color: var(--text-primary);
     background: var(--surface-3);
-    border-color: var(--border-strong);
   }
   .diag-btn.diag-active {
     color: var(--on-accent, #fff);
@@ -1088,9 +1088,9 @@
     flex-direction: column;
     gap: 0;
     margin-top: var(--sp-3);
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    border: none;
+    border-radius: var(--radius);
     overflow: hidden;
   }
   .health-row {
@@ -1098,7 +1098,7 @@
     align-items: center;
     gap: var(--sp-2);
     padding: var(--sp-2) var(--sp-3);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--divider);
   }
   .health-row:last-child {
     border-bottom: none;

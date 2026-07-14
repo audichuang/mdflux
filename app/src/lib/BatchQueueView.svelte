@@ -44,7 +44,7 @@
 
 <div class="w-full max-w-2xl self-center py-6 px-1 flex flex-col gap-5 h-full min-h-0">
   <!-- Header -->
-  <div class="flex flex-col gap-3 border-b border-zinc-800 pb-4 flex-shrink-0">
+  <div class="flex flex-col gap-3 hairline-b pb-4 flex-shrink-0">
     <div class="flex items-baseline justify-between">
       <span class="text-sm font-semibold text-zinc-200"
         >Converting {total} file{total === 1 ? '' : 's'}</span
@@ -56,7 +56,7 @@
 
     <!-- Overall progress bar -->
     <div
-      class="h-2 bg-zinc-900 rounded-full overflow-hidden"
+      class="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden"
       role="progressbar"
       aria-valuenow={Math.round(progress * 100)}
       aria-valuemin={0}
@@ -83,12 +83,12 @@
 
   <!-- File list -->
   <ul
-    class="flex-1 overflow-y-auto bg-zinc-950/30 border border-zinc-800 rounded-lg divide-y divide-zinc-900/50"
+    class="panel-inset flex-1 overflow-y-auto divide-y divide-[var(--divider)]"
     aria-label="Conversion queue"
   >
     {#each items as item (item.id)}
       <li
-        class="flex items-start gap-3 p-3 transition-colors hover:bg-zinc-900/25 {item.status ===
+        class="flex items-start gap-3 p-3 transition-colors hover:bg-zinc-900/30 {item.status ===
         'failed'
           ? 'bg-red-950/5'
           : ''} {item.status === 'cancelled' ? 'opacity-40' : ''}"
@@ -157,7 +157,7 @@
 
           {#if item.status === 'running' && item.frac !== null}
             <div
-              class="h-1.5 bg-zinc-900 rounded-full overflow-hidden"
+              class="h-1.5 bg-[var(--surface-2)] rounded-full overflow-hidden"
               role="progressbar"
               aria-valuenow={Math.round((item.frac ?? 0) * 100)}
               aria-valuemin={0}
@@ -170,12 +170,12 @@
             </div>
           {:else if item.status === 'running'}
             <div
-              class="h-1.5 bg-zinc-900 rounded-full overflow-hidden relative"
+              class="h-1.5 bg-[var(--surface-2)] rounded-full overflow-hidden relative"
               role="progressbar"
               aria-label="Converting"
             >
               <div
-                class="shimmer-fill absolute inset-0 bg-gradient-to-r from-zinc-900 via-blue-500 to-zinc-900 bg-[size:200%_100%] animate-[shimmer_1.4s_infinite]"
+                class="shimmer-fill absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent bg-[size:200%_100%] animate-[shimmer_1.4s_infinite]"
               ></div>
             </div>
           {:else if item.status === 'failed' && item.error}
@@ -191,7 +191,7 @@
 
         {#if item.status === 'done' && onOpen}
           <button
-            class="flex-shrink-0 inline-flex items-center justify-center rounded-md text-[11px] font-semibold h-6 px-2.5 border border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors self-center ml-2"
+            class="btn-secondary btn-sm flex-shrink-0 self-center ml-2"
             title="View the converted Markdown"
             onclick={() => onOpen?.(item)}>View</button
           >

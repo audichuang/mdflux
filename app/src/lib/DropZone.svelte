@@ -82,10 +82,10 @@
 </script>
 
 <div
-  class="flex-1 relative rounded-2xl bg-zinc-900/20 border border-zinc-800/80 hover:bg-zinc-900/50 hover:border-zinc-700/80 transition-all duration-300 cursor-pointer outline-none flex items-center justify-center overflow-hidden min-h-[320px] group {localState ===
+  class="flex-1 relative rounded-[var(--radius-lg)] bg-[var(--surface-2)]/40 hover:bg-[var(--surface-2)]/70 transition-all duration-300 cursor-pointer outline-none flex items-center justify-center overflow-hidden min-h-[320px] group {localState ===
   'drag-hover'
-    ? 'bg-zinc-900/50 border-blue-500/50'
-    : ''} {dropState === 'error' ? 'cursor-default border-red-950 bg-red-950/5' : ''}"
+    ? 'bg-[color-mix(in_srgb,var(--accent)_8%,var(--surface-2))]'
+    : ''} {dropState === 'error' ? 'cursor-default bg-red-950/5' : ''}"
   role="button"
   tabindex={0}
   aria-label="Drop files or a folder, or click to browse"
@@ -93,7 +93,7 @@
   onclick={browse}
   onkeydown={onKeyDown}
 >
-  <!-- Animated gradient border ring -->
+  <!-- Soft accent ring only (no double ink frame) -->
   <div
     class="border-ring"
     aria-hidden="true"

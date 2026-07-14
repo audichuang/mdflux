@@ -366,9 +366,7 @@
           {/each}
         </div>
       {:else if setup.method === 'ai' && llmMode === 'api'}
-        <p
-          class="text-xs text-amber-400 bg-amber-950/20 border border-amber-900/30 rounded-lg p-3 leading-relaxed"
-        >
+        <p class="text-xs text-amber-400 bg-amber-950/20 rounded-xl px-3 py-3 leading-relaxed">
           ⚠ AI cleanup sends the text of all {files.length} files to your configured API provider — cost
           and privacy implications, once per file.
         </p>
@@ -378,7 +376,7 @@
 
   {#if heavyCount > 0}
     <div
-      class="flex items-start gap-3 rounded-lg border border-blue-950/60 bg-blue-950/15 px-4 py-3.5 text-xs text-blue-400 leading-normal"
+      class="flex items-start gap-3 rounded-xl bg-blue-950/15 px-4 py-3.5 text-xs text-blue-400 leading-normal"
     >
       <svg
         class="flex-shrink-0 mt-0.5 text-blue-400"

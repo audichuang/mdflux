@@ -716,11 +716,11 @@
     <section class="section">
       <h2 class="section-title">LLM provider</h2>
 
-      <!-- Mode tabs -->
-      <div class="mode-tabs" role="group" aria-label="LLM mode">
+      <!-- Mode tabs — same soft pill seg as header -->
+      <div class="seg" role="group" aria-label="LLM mode">
         {#each [['off', 'Off'], ['local', 'Local'], ['api', 'API']] as [m, label]}
           <button
-            class="mode-tab"
+            class="seg-btn"
             class:active={config.llm_mode === m}
             aria-pressed={config.llm_mode === m}
             onclick={() => setMode(m)}
@@ -928,7 +928,7 @@
     align-items: center;
     gap: var(--sp-3);
     padding-bottom: var(--sp-4);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--divider);
     margin-bottom: var(--sp-4);
     flex-shrink: 0;
   }
@@ -937,7 +937,7 @@
     align-items: center;
     gap: var(--sp-1);
     background: var(--surface-2);
-    border: 1px solid var(--border-strong);
+    border: 1px solid transparent;
     color: var(--text-primary);
     font-size: 12.5px;
     font-weight: 600;
@@ -945,6 +945,7 @@
     cursor: pointer;
     padding: 6px 12px;
     border-radius: var(--radius-sm);
+    box-shadow: var(--seg-shadow);
     transition:
       color var(--transition-fast),
       background var(--transition-fast),
@@ -952,7 +953,6 @@
   }
   .back-btn:hover {
     background: var(--surface-3);
-    border-color: var(--border-strong);
   }
   .back-btn:focus-visible {
     outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
@@ -965,8 +965,9 @@
   }
   .refresh-btn {
     background: var(--surface-2);
-    border: 1px solid var(--border-strong);
+    border: 1px solid transparent;
     color: var(--text-secondary);
+    box-shadow: var(--seg-shadow);
     cursor: pointer;
     width: 32px;
     height: 32px;
@@ -982,7 +983,6 @@
   .refresh-btn:hover {
     color: var(--text-primary);
     background: var(--surface-3);
-    border-color: var(--border-strong);
   }
   .refresh-btn:disabled {
     opacity: 0.4;
@@ -1087,9 +1087,9 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    background: var(--divider);
+    border: none;
+    border-radius: var(--radius);
     overflow: hidden;
   }
   .runtime-item {
@@ -1119,14 +1119,14 @@
     white-space: nowrap;
   }
 
-  /* Capability list */
+  /* Capability list — elevation only, hairline rows */
   .cap-list {
     display: flex;
     flex-direction: column;
     gap: 0;
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    border: none;
+    border-radius: var(--radius);
     overflow: hidden;
   }
   .cap-row {
@@ -1134,7 +1134,7 @@
     align-items: center;
     gap: var(--sp-2);
     padding: 7px var(--sp-3);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--divider);
     transition: background var(--transition-fast);
   }
   .cap-row:last-child {
@@ -1219,42 +1219,7 @@
     font-family: var(--font-ui);
   }
 
-  /* LLM provider section */
-  .mode-tabs {
-    display: inline-flex;
-    background: var(--seg-track);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 3px;
-    gap: 3px;
-    align-self: flex-start;
-  }
-  .mode-tab {
-    padding: 4px 13px;
-    font-size: 11.5px;
-    font-weight: 500;
-    font-family: var(--font-ui);
-    border: 1px solid transparent;
-    border-radius: 4px;
-    background: transparent;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-  }
-  .mode-tab:hover:not(.active) {
-    color: var(--text-secondary);
-  }
-  .mode-tab.active {
-    background: var(--surface-1);
-    border-color: var(--border);
-    color: var(--text-primary);
-    box-shadow: var(--seg-shadow);
-  }
-  .mode-tab:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
-    outline-offset: 1px;
-  }
-
+  /* LLM mode uses global .seg / .seg-btn */
   .provider-note {
     font-size: 12px;
     color: var(--text-muted);

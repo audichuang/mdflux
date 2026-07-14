@@ -28,6 +28,8 @@ Not cold zinc-blue SaaS; not neon; not pure black `#000`; light mode is **warm p
 | Rule | Do | Don't |
 |---|---|---|
 | Tokens | Palette / radius / spacing only in `app/src/lib/tokens.css` (`:root` shared + `[data-theme='light'|'dark']`) | Scatter hex colors or one-off radii in components |
+| Markdown preview | Shared `app/src/lib/preview.css` (`.md-preview`) — soft tables (row dividers only), borderless `pre` | Duplicate `.preview` CSS in ResultView/DocViewer; full grid table cages |
+| Frames | Prefer `.panel` / `.panel-inset` / `.hairline-*` over ink boxes | `border border-zinc-800 rounded-lg divide-y` stacks |
 | Theme state | Preference + resolve via `app/src/lib/theme.svelte.ts`; paint with `document.documentElement.dataset.theme` | Invent a second theme store or hardcode dark-only backgrounds (`#09090b`, cold slate) |
 | Theme UI | Use `ThemeSwitch.svelte` (system / light / dark) | Drop light mode or ship dark-only without discussion |
 | Accent | Warm terracotta / clay **orange** in both themes; **primary buttons use `--accent`** (`btn-primary`) | Monochrome black primary; blue-500 / indigo brand |
