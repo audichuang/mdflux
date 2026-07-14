@@ -1,6 +1,7 @@
-# Build offline Windows packages and publish a public GitHub Release.
-# Primary: NSIS Setup.exe (real installer). Optional: portable zip.
-# Release assets are downloadable without logging in.
+# Build offline packages and publish a public GitHub Release.
+# - Windows: NSIS Setup.exe + portable zip
+# - macOS arm64: DMG (Homebrew cask input)
+# On v* tags: also update audichuang/homebrew-tap Casks/mdflux.rb (needs HOMEBREW_TAP_TOKEN).
 name: Portable build
 
 on:
@@ -53,49 +54,7 @@ jobs:
         shell: pwsh
         run: pwsh -File scripts/make-installer.ps1 -AlsoPortable
 
-      - name: Locate packages + release metadata
-        id: pkg
-        shell: pwsh
-        run: |
-          $setup = Get-ChildItem -Path dist -Filter "MDFlux_*_x64-setup.exe" -ErrorAction Stop |
-            Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          $zip = Get-ChildItem -Path dist -Filter "MDFlux_*_portable_offline.zip" -ErrorAction Stop |
-            Sort-Object LastWriteTime -Descending | Select-Object -First 1
-
-          if (-not $setup) { throw "Setup.exe not found in dist/" }
-          if (-not $zip) { throw "Portable zip not found in dist/ (both setup.exe and zip are required)" }
-
-          $setupMb = [math]::Round($setup.Length / 1MB, 2)
-          Write-Host "Installer: $($setup.FullName) ($setupMb MB)"
-
-          if ($zip) {
-            $zipMb = [math]::Round($zip.Length / 1MB, 2)
-            Write-Host "Portable:  $($zip.FullName) ($zipMb MB)"
-            "zip_name=$($zip.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-            "zip_mb=$zipMb" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          }
-
-          $conf = Get-Content app/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
-          $version = $conf.version
-          $sha = $env:GITHUB_SHA.Substring(0, 7)
-
-          if ($env:GITHUB_REF -like "refs/tags/*") {
-            $tag = $env:GITHUB_REF_NAME
-            $title = "MDFlux $tag — Windows installer"
-          } else {
-            $tag = "offline-latest"
-            $title = "MDFlux $version — Windows installer (offline)"
-          }
-
-          "setup_path=$($setup.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "setup_name=$($setup.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "setup_mb=$setupMb" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "sha=$sha" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "title=$title" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-
-      - name: Upload artifacts
+      - name: Upload Windows packages
         uses: actions/upload-artifact@v4
         with:
           name: MDFlux-windows-offline
@@ -104,6 +63,102 @@ jobs:
             dist/MDFlux_*_portable_offline.zip
           if-no-files-found: error
           retention-days: 14
+
+  macos-arm64-offline:
+    name: macOS arm64 DMG
+    runs-on: macos-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build macOS DMG (offline runtime)
+        run: bash scripts/make-macos-dmg.sh
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: MDFlux-macos-arm64-offline
+          path: dist/MDFlux_*_aarch64.dmg
+          if-no-files-found: error
+          retention-days: 14
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: [windows-offline, macos-arm64-offline]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Windows packages
+        uses: actions/download-artifact@v4
+        with:
+          name: MDFlux-windows-offline
+          path: dist
+
+      - name: Download macOS DMG
+        uses: actions/download-artifact@v4
+        with:
+          name: MDFlux-macos-arm64-offline
+          path: dist
+
+      - name: Release metadata
+        id: pkg
+        shell: bash
+        run: |
+          set -euo pipefail
+          setup=$(ls -1 dist/MDFlux_*_x64-setup.exe | head -1)
+          zip=$(ls -1 dist/MDFlux_*_portable_offline.zip | head -1)
+          dmg=$(ls -1 dist/MDFlux_*_aarch64.dmg | head -1)
+          test -f "$setup" && test -f "$zip" && test -f "$dmg"
+
+          setup_mb=$(du -m "$setup" | awk '{print $1}')
+          zip_mb=$(du -m "$zip" | awk '{print $1}')
+          dmg_mb=$(du -m "$dmg" | awk '{print $1}')
+          version=$(python3 -c "import json; print(json.load(open('app/src-tauri/tauri.conf.json'))['version'])")
+          sha="${GITHUB_SHA:0:7}"
+
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            tag="$GITHUB_REF_NAME"
+            title="MDFlux $tag — offline packages"
+          else
+            tag="offline-latest"
+            title="MDFlux $version — offline packages (Windows + macOS arm64)"
+          fi
+
+          {
+            echo "setup_name=$(basename "$setup")"
+            echo "zip_name=$(basename "$zip")"
+            echo "dmg_name=$(basename "$dmg")"
+            echo "setup_mb=$setup_mb"
+            echo "zip_mb=$zip_mb"
+            echo "dmg_mb=$dmg_mb"
+            echo "version=$version"
+            echo "sha=$sha"
+            echo "tag=$tag"
+            echo "title=$title"
+          } >> "$GITHUB_OUTPUT"
+
+          ls -la dist/
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -114,30 +169,52 @@ jobs:
           files: |
             dist/MDFlux_*_x64-setup.exe
             dist/MDFlux_*_portable_offline.zip
+            dist/MDFlux_*_aarch64.dmg
           fail_on_unmatched_files: true
           make_latest: true
           draft: false
           prerelease: false
           body: |
-            ## Windows installer (offline) — recommended
+            ## Offline packages — Windows + macOS (Apple Silicon)
+
+            ### Windows (recommended)
 
             1. Download **`${{ steps.pkg.outputs.setup_name }}`**
             2. Run the installer (current user, **no admin**)
             3. Open **MDFlux** from the Start Menu
 
-            No unzip. No first-launch Python download.
+            | | |
+            |---|---|
+            | **Installer** | `${{ steps.pkg.outputs.setup_name }}` (~${{ steps.pkg.outputs.setup_mb }} MB) |
+            | Portable zip | `${{ steps.pkg.outputs.zip_name }}` (~${{ steps.pkg.outputs.zip_mb }} MB) |
+
+            ### macOS (Apple Silicon)
 
             | | |
             |---|---|
-            | **Installer (recommended)** | `${{ steps.pkg.outputs.setup_name }}` (~${{ steps.pkg.outputs.setup_mb }} MB) |
-            | Portable zip | `MDFlux_*_portable_offline.zip` (unzip & run) |
-            | Install mode | Current user |
+            | **DMG** | `${{ steps.pkg.outputs.dmg_name }}` (~${{ steps.pkg.outputs.dmg_mb }} MB) |
+
+            Open the DMG → drag **MDFlux.app** to Applications.
+
+            #### Homebrew (cask, after tag release updates the tap)
+
+            ```bash
+            brew tap audichuang/tap
+            brew install --cask audichuang/tap/mdflux
+            ```
+
+            Requires Apple Silicon (arm64). First-open may need System Settings → Privacy if unsigned.
+
+            ### Meta
+
+            | | |
+            |---|---|
             | App version | `${{ steps.pkg.outputs.version }}` |
             | Commit | `${{ steps.pkg.outputs.sha }}` |
             | Built | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
 
             ### Included
-            - Desktop app + Start Menu shortcut
+            - Desktop app
             - Bundled Python 3.12 + MarkItDown core conversion stack
 
             ### Not included
@@ -145,5 +222,91 @@ jobs:
             - Audio transcription engine
 
             ### Notes
-            - Unsigned: SmartScreen may warn — More info → Run anyway
-            - WebView2 is required (bootstrapper can download it if missing)
+            - Windows: unsigned (SmartScreen may warn)
+            - macOS: unsigned unless you add Apple codesign/notarization secrets
+            - Windows needs WebView2 (bootstrapper can install)
+
+  publish-homebrew:
+    name: Update Homebrew cask
+    needs: [publish-release]
+    # Only stable version tags — not offline-latest floating tag
+    if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require tap token
+        env:
+          TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::HOMEBREW_TAP_TOKEN is not set. Add a PAT with repo scope for audichuang/homebrew-tap."
+            exit 1
+          fi
+
+      - name: Checkout Homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: audichuang/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+
+      - name: Download macOS DMG artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: MDFlux-macos-arm64-offline
+          path: dist
+
+      - name: Update Casks/mdflux.rb
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION="${RELEASE_TAG#v}"
+          DMG=$(ls -1 dist/MDFlux_*_aarch64.dmg | head -1)
+          test -f "$DMG"
+          SHA=$(sha256sum "$DMG" | awk '{print $1}')
+          echo "version=$VERSION sha256=$SHA dmg=$(basename "$DMG")"
+
+          mkdir -p tap/Casks
+          python3 - "$VERSION" "$SHA" <<'PY'
+          import sys, textwrap
+          from pathlib import Path
+          version, sha = sys.argv[1], sys.argv[2]
+          body = textwrap.dedent(f'''\
+          cask "mdflux" do
+            version "{version}"
+            sha256 "{sha}"
+
+            url "https://github.com/audichuang/mdflux/releases/download/v#{{version}}/MDFlux_#{{version}}_aarch64.dmg"
+            name "MDFlux"
+            desc "Convert documents to clean Markdown — offline desktop app"
+            homepage "https://github.com/audichuang/mdflux"
+
+            depends_on macos: ">= :big_sur"
+            depends_on arch: :arm64
+
+            app "MDFlux.app"
+
+            zap trash: [
+              "~/Library/Application Support/com.projektvisyo.mdflux",
+              "~/Library/Caches/com.projektvisyo.mdflux",
+              "~/Library/Preferences/com.projektvisyo.mdflux.plist",
+              "~/Library/WebKit/com.projektvisyo.mdflux",
+            ]
+          end
+          ''')
+          Path("tap/Casks/mdflux.rb").write_text(body)
+          print(body)
+          PY
+
+      - name: Commit and push tap
+        run: |
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/mdflux.rb
+          if git diff --cached --quiet; then
+            echo "No cask changes"
+          else
+            git commit -m "mdflux ${{ github.ref_name }}: update Homebrew cask"
+            git push
+          fi

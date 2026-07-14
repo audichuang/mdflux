@@ -117,8 +117,9 @@ pub fn app_data_dir(app: &AppHandle) -> PathBuf {
 }
 
 /// Root of the offline-bundled Python runtime next to the app resources, if present.
-/// Layout: `resources/runtime/python/python.exe` (Windows) produced by
-/// `scripts/bundle-runtime.sh` / `.ps1`.
+/// Layout produced by `scripts/bundle-runtime.sh`:
+/// - Windows: `resources/runtime/python/python.exe`
+/// - macOS:   `resources/runtime/python/bin/python`
 fn runtime_dir(app: &AppHandle) -> Option<PathBuf> {
     let resource_dir = app.path().resource_dir().ok()?;
     let dir = resource_dir.join("resources").join("runtime");

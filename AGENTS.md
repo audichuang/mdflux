@@ -50,22 +50,28 @@ Light = warm paper (`#FAF9F5` family); dark = warm charcoal — **not** cold zin
 
 ## Hard constraints
 
-1. **Do not commit** `app/src-tauri/resources/runtime/python/` — build artefact. Only `runtime/README.md` is tracked. Build with `scripts/bundle-runtime.sh` (or `.ps1`).
+1. **Do not commit** `app/src-tauri/resources/runtime/python/` — build artefact. Only `runtime/README.md` is tracked.
 2. **Offline ship path is intentional**: bundled runtime; `bootstrap.rs` skips first-launch download when present. Don’t remove without discussion.
 3. **Basic offline build has no OCR/audio engines** (optional extras). Don’t assume RapidOCR / faster-whisper ship in the package.
-4. **Windows is the shipping OS.** CI `portable.yml` → public Release tag **`offline-latest`** (NSIS + optional portable zip).
+4. **Ship platforms:** Windows (NSIS + portable zip) + **macOS Apple Silicon DMG**. CI `portable.yml` publishes both to **`offline-latest`** (main) or **`v*`** tags. Homebrew cask updates on `v*` only (needs `HOMEBREW_TAP_TOKEN` → `audichuang/homebrew-tap`).
+5. **Runtime platform must match the package:** `bundle-runtime.sh --platform windows-x64` vs `macos-arm64` (never mix into the same tree).
 
 ## Commands (prefer scoped)
 
 ```bash
 cd app && npm ci && npm run check
 cd app/src-tauri && cargo check --locked
-bash scripts/bundle-runtime.sh
-# Full installer: Windows only
-pwsh -File scripts/make-installer.ps1 -AlsoPortable
+
+# Offline Python trees (cross-fetch wheels OK)
+bash scripts/bundle-runtime.sh --platform windows-x64
+bash scripts/bundle-runtime.sh --platform macos-arm64 --force
+
+# Packages (prefer CI)
+pwsh -File scripts/make-installer.ps1 -AlsoPortable   # Windows host
+bash scripts/make-macos-dmg.sh                        # macOS arm64 host
 ```
 
-Prefer CI for ship packages over local Windows unless debugging packaging.
+Prefer CI (`Portable build`) for ship packages.
 
 ## Start here (judgment, not a tree)
 
@@ -78,7 +84,7 @@ Prefer CI for ship packages over local Windows unless debugging packaging.
 | Conversion / formats | `resources/sidecar/main.py`, `worker.py`, `capabilities.py` |
 | Offline Python / first-run | `src/bootstrap.rs` |
 | Batch / IPC | `src/lib.rs`, `src/converter.rs` |
-| Packaging / Release | `scripts/make-installer.ps1`, `.github/workflows/portable.yml` |
+| Packaging / Release / brew | `scripts/make-installer.ps1`, `make-macos-dmg.sh`, `bundle-runtime.sh`, `packaging/homebrew/Casks/mdflux.rb`, `.github/workflows/portable.yml` |
 
 Structure: use `tree` / search — don’t paste directory trees here. Human docs: `CONTRIBUTING.md`, `README.md`.
 
@@ -89,6 +95,7 @@ Structure: use `tree` / search — don’t paste directory trees here. Human doc
 | Edit app code, scripts, docs; `npm run check` / `cargo check` | `git push`, force-push, amend published history |
 | Local `bundle-runtime` experiments | Push to **upstream** or open upstream PR |
 | Token / layout tweaks that stay Claude-warm + flat reader + wide column | Overwrite Release tags (`offline-latest`, `v*`) outside normal CI |
+| Local runtime / packaging experiments | Push to **homebrew-tap** without going through CI `publish-homebrew` |
 | | Broad lockfile bumps without a reason |
 | | New brand palette, or removing light/dark, or re-boxing the reader in `.panel` |
 

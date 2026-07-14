@@ -42,10 +42,10 @@ if (-not $SkipRuntime) {
     Write-Host "SkipRuntime: installer will rely on first-launch online provision."
 }
 
-# Full Tauri build with NSIS (bundle.active must be true in tauri.conf.json).
+# Full Tauri build — NSIS only (config also lists dmg for macOS CI).
 Push-Location (Join-Path $root "app")
 try {
-    npm run tauri build
+    npx tauri build --bundles nsis
     if ($LASTEXITCODE -ne 0) { throw "tauri build failed (exit $LASTEXITCODE)" }
 } finally {
     Pop-Location
