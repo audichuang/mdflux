@@ -38,8 +38,8 @@
   }
 </script>
 
-<div class="panel flex-1 flex flex-col min-h-0 bg-zinc-950">
-  <div class="flex items-center gap-3 px-4 py-2.5 hairline-b bg-zinc-900/30 flex-shrink-0">
+<div class="doc-shell flex-1 flex flex-col min-h-0">
+  <div class="doc-chrome flex items-center gap-3 px-5 py-3 hairline-b flex-shrink-0">
     <button class="btn-secondary btn-sm" onclick={onBack} title={tr('back')}>
       <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
         <path
@@ -77,20 +77,37 @@
   </div>
 
   <div
-    class="flex-1 overflow-y-auto px-6 py-6 min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+    class="doc-scroll flex-1 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
     tabindex="0"
     role="region"
     aria-label="Document"
   >
     {#if view === 'preview'}
       <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-      <div class="md-preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>
+      <div class="md-preview doc-col" onclick={onPreviewClick}>
         {@html previewHtml}
       </div>
     {:else}
       <pre
-        class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0"
-        style="max-width: 768px; margin: 0 auto;">{markdown}</pre>
+        class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0 doc-col"
+        >{markdown}</pre
+      >
     {/if}
   </div>
 </div>
+
+<style>
+  .doc-shell,
+  .doc-chrome {
+    background: transparent;
+  }
+  .doc-scroll {
+    background: transparent;
+    padding: 28px 32px 40px;
+  }
+  .doc-col {
+    max-width: 44rem;
+    margin: 0 auto;
+    width: 100%;
+  }
+</style>

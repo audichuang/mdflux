@@ -3,8 +3,8 @@
 
 .md-preview {
   color: var(--text-secondary);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.7;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -93,12 +93,12 @@
 }
 
 .md-preview pre {
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
   border: none;
-  border-radius: var(--radius);
-  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
   overflow-x: auto;
-  margin: 0 0 12px;
+  margin: 0 0 16px;
 }
 
 .md-preview pre code {
@@ -107,27 +107,33 @@
   font-size: 0.92em;
 }
 
-/* Soft tables — row dividers only; wide tables scroll via .md-preview overflow-x */
+/* Tables as inline content (not mini floating cards) */
 .md-preview table {
   border-collapse: separate;
   border-spacing: 0;
-  margin: 4px 0 20px;
-  font-size: 13px;
-  width: max(100%, max-content);
-  min-width: 100%;
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
-  overflow: hidden;
+  margin: 12px 0 24px;
+  font-size: 14px;
+  width: 100%;
+  min-width: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+  border-top: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider);
 }
 
 .md-preview th,
 .md-preview td {
   border: none;
   border-bottom: 1px solid var(--divider);
-  /* Generous cell padding — text should not hug the card edges */
-  padding: 16px 22px;
+  padding: 14px 4px 14px 0;
   text-align: left;
   vertical-align: top;
+}
+
+.md-preview th:not(:last-child),
+.md-preview td:not(:last-child) {
+  padding-right: 20px;
 }
 
 .md-preview tr:last-child th,
@@ -136,10 +142,14 @@
 }
 
 .md-preview th {
-  background: color-mix(in srgb, var(--surface-2) 80%, transparent);
+  background: transparent;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .md-preview thead th {
@@ -147,7 +157,8 @@
 }
 
 .md-preview tbody tr:hover td {
-  background: color-mix(in srgb, var(--accent) 4%, transparent);
+  background: transparent;
+  color: var(--text-primary);
 }
 
 .md-preview img {

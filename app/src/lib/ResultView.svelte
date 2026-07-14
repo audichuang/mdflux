@@ -275,11 +275,9 @@
   }
 </script>
 
-<div class="panel flex-1 flex flex-col min-h-0 bg-zinc-950">
+<div class="result-shell flex-1 flex flex-col min-h-0">
   <!-- Header: filename + view toggle -->
-  <div
-    class="flex items-center justify-between gap-3 px-4 py-2.5 hairline-b bg-zinc-900/30 flex-shrink-0"
-  >
+  <div class="result-chrome flex items-center justify-between gap-3 px-5 py-3 hairline-b flex-shrink-0">
     <div class="flex items-center gap-2 min-w-0 text-zinc-400" title={sourceStem}>
       <svg width="14" height="14" viewBox="0 0 15 15" fill="none" aria-hidden="true">
         <path
@@ -320,7 +318,7 @@
   </div>
 
   <!-- Cleanup bar -->
-  <div class="flex-shrink-0 flex flex-col gap-2.5 px-4 py-3 hairline-b bg-zinc-950">
+  <div class="result-chrome flex-shrink-0 flex flex-col gap-2.5 px-5 py-3.5 hairline-b">
     <div class="flex items-center gap-3">
       <span class="text-xs font-semibold tracking-wider text-zinc-500 uppercase"
         >{tr('clean_up')}</span
@@ -462,15 +460,15 @@
 
   <!-- Content -->
   {#if cleanup.viewMode === 'split' && hasChanges}
-    <div class="flex-1 flex min-h-0 divide-x divide-[var(--divider)] flex-col md:flex-row">
+    <div class="result-body flex-1 flex min-h-0 divide-x divide-[var(--divider)] flex-col md:flex-row">
       <div class="flex-1 min-w-0 flex flex-col min-h-0">
         <div
-          class="flex-shrink-0 px-6 py-1.5 text-[9px] font-semibold text-zinc-550 uppercase tracking-wider bg-zinc-900/40 hairline-b"
+          class="flex-shrink-0 px-6 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hairline-b"
         >
           Before cleanup
         </div>
         <div
-          class="flex-1 min-w-0 overflow-y-auto px-6 py-5 min-h-0 bg-zinc-950 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          class="result-scroll flex-1 min-w-0 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           bind:this={splitSrcEl}
           onscroll={() => syncScroll('src')}
           tabindex="0"
@@ -478,19 +476,19 @@
           aria-label="Before cleanup"
         >
           <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-          <div class="md-preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>
+          <div class="md-preview result-col" onclick={onPreviewClick}>
             {@html beforeHtml}
           </div>
         </div>
       </div>
       <div class="flex-1 min-w-0 flex flex-col min-h-0">
         <div
-          class="flex-shrink-0 px-6 py-1.5 text-[9px] font-semibold text-zinc-550 uppercase tracking-wider bg-zinc-900/40 hairline-b"
+          class="flex-shrink-0 px-6 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hairline-b"
         >
           After cleanup
         </div>
         <div
-          class="flex-1 min-w-0 overflow-y-auto px-6 py-5 min-h-0 bg-zinc-950 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          class="result-scroll flex-1 min-w-0 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           bind:this={splitPrevEl}
           onscroll={() => syncScroll('prev')}
           tabindex="0"
@@ -498,7 +496,7 @@
           aria-label="After cleanup"
         >
           <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-          <div class="md-preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>
+          <div class="md-preview result-col" onclick={onPreviewClick}>
             {@html afterHtml}
           </div>
         </div>
@@ -506,17 +504,14 @@
     </div>
   {:else}
     <div
-      class="flex-1 overflow-y-auto px-6 py-6 min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-zinc-950"
+      class="result-scroll flex-1 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       tabindex="0"
       role="region"
       aria-label="Markdown result"
     >
       {#if cleanup.viewMode === 'changes' && diff}
         {#if diff.kind === 'summary'}
-          <div
-            class="text-sm text-zinc-300 flex flex-col gap-2"
-            style="max-width: 768px; margin: 0 auto;"
-          >
+          <div class="text-sm text-zinc-300 flex flex-col gap-2 result-col">
             <p>{diff.note}</p>
             <p class="font-mono text-xs">
               <span class="text-green-400">+{diff.added.toLocaleString()}</span>
@@ -524,10 +519,7 @@
             </p>
           </div>
         {:else}
-          <div
-            class="font-mono text-xs leading-relaxed select-text"
-            style="max-width: 768px; margin: 0 auto;"
-          >
+          <div class="font-mono text-xs leading-relaxed select-text result-col">
             {#each diff.rows as row}
               <div
                 class="flex gap-2 px-1 rounded-sm {row.type === 'add'
@@ -548,27 +540,22 @@
         {/if}
       {:else if cleanup.viewMode === 'preview'}
         <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-        <div
-          class="md-preview"
-          style="max-width: 768px; margin: 0 auto;"
-          onclick={onPreviewClick}
-        >
+        <div class="md-preview result-col" onclick={onPreviewClick}>
           {@html previewHtml}
         </div>
       {:else}
         <pre
-          class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0"
-          style="max-width: 768px; margin: 0 auto;">{activeMarkdown}</pre>
+          class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0 result-col"
+          >{activeMarkdown}</pre
+        >
       {/if}
     </div>
   {/if}
 
   <!-- Bottom bar -->
-  <div
-    class="flex items-center justify-between gap-3 px-4 py-3 hairline-t bg-zinc-900/30 flex-shrink-0"
-  >
+  <div class="result-chrome flex items-center justify-between gap-3 px-5 py-3 hairline-t flex-shrink-0">
     <span
-      class="inline-flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 bg-zinc-900/50 px-2.5 py-1 rounded-full"
+      class="inline-flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 px-1"
       title="Source format · {converterPath}"
     >
       {tr('from_format', { format: detectedFormat })}{#if warnings.length}<span
@@ -681,3 +668,22 @@
     </div>
   </div>
 {/if}
+
+<style>
+  /* Single flat reading surface — no nested white card on canvas */
+  .result-shell {
+    background: transparent;
+  }
+  .result-chrome {
+    background: transparent;
+  }
+  .result-scroll {
+    background: transparent;
+    padding: 28px 32px 40px;
+  }
+  .result-col {
+    max-width: 44rem; /* ~704px — readable column without huge side voids inside a box */
+    margin: 0 auto;
+    width: 100%;
+  }
+</style>
