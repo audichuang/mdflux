@@ -46,6 +46,7 @@
   import { CLEANUP_RULES } from './cleanup';
   import { SUPPORTED_EXTS, isHeavyExt } from './formats';
   import { buildOutputFilename, type NamingCase } from './naming';
+  import { tr } from './locale';
 
   let {
     files,
@@ -160,20 +161,20 @@
     <div class="flex items-baseline gap-2">
       <span class="text-3xl font-bold font-mono tracking-tight text-zinc-50">{files.length}</span>
       <span class="text-sm font-medium text-zinc-400"
-        >file{files.length === 1 ? '' : 's'} ready</span
+        >{files.length === 1 ? tr('file_ready') : tr('files_ready')}</span
       >
     </div>
     <button
       class="text-sm font-medium text-zinc-400 hover:text-zinc-100 underline underline-offset-4 cursor-pointer transition-colors"
       onclick={onClear}
-      title="Remove all staged files">Clear all</button
+      title="Remove all staged files">{tr('clear_all')}</button
     >
   </div>
 
   <!-- File list (drop more anywhere on this view) -->
   <div
-    class="flex flex-col gap-2 p-3 border border-dashed border-zinc-800 rounded-lg bg-zinc-950/40 min-h-[120px] max-h-[260px] overflow-y-auto transition-colors duration-200 {dragHover
-      ? 'border-blue-500 bg-blue-950/10'
+    class="flex flex-col gap-2 p-3 border border-zinc-800 rounded-xl bg-zinc-950/30 min-h-[120px] max-h-[300px] overflow-y-auto transition-colors duration-200 {dragHover
+      ? 'border-accent bg-accent-dim'
       : ''}"
   >
     {#each files as f (f.path)}
@@ -181,7 +182,7 @@
         class="flex items-center gap-3 p-2.5 bg-zinc-900/30 border border-zinc-800/40 rounded-lg hover:bg-zinc-900/60 hover:border-zinc-800 transition-all group"
       >
         <span
-          class="flex-shrink-0 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md border border-zinc-800 bg-zinc-950 text-zinc-400 group-hover:text-blue-400 group-hover:border-blue-950 min-w-[48px] text-center uppercase tracking-wider transition-colors"
+          class="flex-shrink-0 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md border border-zinc-800 bg-zinc-950 text-zinc-400 group-hover:text-accent group-hover:border-accent-edge min-w-[48px] text-center uppercase tracking-wider transition-colors"
           >{f.ext || 'FILE'}</span
         >
         <span class="flex-1 min-w-0 text-sm font-medium text-zinc-300 truncate" title={f.path}
@@ -209,35 +210,35 @@
 
   <!-- Add more -->
   <div class="flex items-center gap-3 flex-wrap text-xs text-zinc-400">
-    <span>Add more — drop files anywhere, or</span>
-    <button class="btn-secondary btn-sm" onclick={browseFiles}>Choose files…</button>
-    <button class="btn-secondary btn-sm" onclick={browseFolder}>Choose folder…</button>
+    <span>{tr('add_more')}</span>
+    <button class="btn-secondary btn-sm" onclick={browseFiles}>{tr('choose_files')}</button>
+    <button class="btn-secondary btn-sm" onclick={browseFolder}>{tr('choose_folder')}</button>
   </div>
 
   {#if isBatch}
     <!-- Output destination (batch only; a single file is saved from the result view) -->
     <div class="flex flex-col gap-3 border-t border-zinc-800/60 pt-5">
       <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase"
-        >Save output to</span
+        >{tr('save_output_to')}</span
       >
       <div class="seg" role="group" aria-label="Output location">
         <button
           class="seg-btn"
           class:active={setup.outputRule === 'next_to_source'}
           title="Each .md is saved beside its source file"
-          onclick={() => setRule('next_to_source')}>Next to source</button
+          onclick={() => setRule('next_to_source')}>{tr('next_to_source')}</button
         >
         <button
           class="seg-btn"
           class:active={setup.outputRule === 'fixed_folder'}
           title="All .md files go into one chosen folder"
-          onclick={() => setRule('fixed_folder')}>One folder</button
+          onclick={() => setRule('fixed_folder')}>{tr('one_folder')}</button
         >
         <button
           class="seg-btn"
           class:active={setup.outputRule === 'mirror_tree'}
           title="Recreate the source folder structure under a chosen root"
-          onclick={() => setRule('mirror_tree')}>Mirror folders</button
+          onclick={() => setRule('mirror_tree')}>{tr('mirror_folders')}</button
         >
       </div>
 
@@ -262,9 +263,9 @@
             class="flex-1 font-mono text-xs text-zinc-300 truncate {!setup.outputFolder
               ? 'text-zinc-500 font-sans italic'
               : ''}"
-            title={setup.outputFolder ?? 'Choose a folder'}
+            title={setup.outputFolder ?? tr('no_folder_chosen')}
           >
-            {setup.outputFolder ?? 'No folder chosen'}
+            {setup.outputFolder ?? tr('no_folder_chosen')}
           </span>
           {#if setup.outputFolder}
             <button
@@ -286,7 +287,7 @@
           <button
             class="btn-secondary btn-sm"
             title="Pick the folder to save into"
-            onclick={chooseFolder}>{setup.outputFolder ? 'Change…' : 'Choose folder…'}</button
+            onclick={chooseFolder}>{setup.outputFolder ? tr('change') : tr('choose_folder')}</button
           >
         </div>
         {#if setup.outputRule === 'mirror_tree'}
@@ -317,19 +318,19 @@
     <!-- Cleanup method (batch applies one choice to every file) -->
     <div class="flex flex-col gap-3 border-t border-zinc-800/60 pt-5">
       <div class="flex items-center gap-3 justify-between">
-        <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase">Clean up</span>
+        <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase">{tr('clean_up')}</span>
         <div class="seg" role="group" aria-label="Cleanup method">
           <button
             class="seg-btn"
             class:active={setup.method === 'none'}
             title="Convert files as-is, no cleanup"
-            onclick={() => selectMethod('none')}>Off</button
+            onclick={() => selectMethod('none')}>{tr('off')}</button
           >
           <button
             class="seg-btn"
             class:active={setup.method === 'rules'}
             title="Clean every file with fast, offline rules"
-            onclick={() => selectMethod('rules')}>Rule-based</button
+            onclick={() => selectMethod('rules')}>{tr('rule_based')}</button
           >
           <button
             class="seg-btn"
@@ -338,7 +339,7 @@
             title={llmAvailable
               ? 'Clean every file with your configured AI model'
               : 'Switch to Local or API mode to enable AI cleanup'}
-            onclick={() => selectMethod('ai')}>AI</button
+            onclick={() => selectMethod('ai')}>{tr('ai')}</button
           >
         </div>
       </div>
@@ -395,10 +396,7 @@
         />
       </svg>
       <span>
-        {heavyCount}
-        {heavyCount === 1 ? 'file needs' : 'files need'} OCR or transcription — expect a longer run{isBatch
-          ? ' across the batch'
-          : ''}, and the engine's model loads on first use.
+        {heavyCount === 1 ? tr('ocr_notice_1', { count: heavyCount }) : tr('ocr_notice_n', { count: heavyCount })}
       </span>
     </div>
   {/if}
@@ -413,6 +411,6 @@
         fill="currentColor"
       />
     </svg>
-    Convert to AI-Ready Markdown
+    {tr('convert_btn')}
   </button>
 </div>

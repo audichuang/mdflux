@@ -8,6 +8,7 @@
   import ResultView from '$lib/ResultView.svelte';
   import ModeSwitch from '$lib/ModeSwitch.svelte';
   import DiagnosticsView from '$lib/DiagnosticsView.svelte';
+  import { getLang, setLang, tr } from '$lib/locale';
   import BatchQueueView from '$lib/BatchQueueView.svelte';
   import BatchSummaryView from '$lib/BatchSummaryView.svelte';
   import DocViewer from '$lib/DocViewer.svelte';
@@ -607,10 +608,30 @@
     <span class="wordmark">MDFlux</span>
     {#if phase === 'ready'}
       <span class="badge" class:green={allGreen()} class:amber={!allGreen()}>
-        {allGreen() ? 'Ready' : 'Partial'}
+        {allGreen() ? tr('ready') : tr('partial')}
       </span>
     {/if}
     <div class="header-right">
+      <!-- Language Picker -->
+      <div class="seg" role="group" aria-label="Language Selector">
+        <button
+          class="seg-btn"
+          class:active={getLang() === 'en'}
+          onclick={() => setLang('en')}
+          title="English"
+        >
+          EN
+        </button>
+        <button
+          class="seg-btn"
+          class:active={getLang() === 'zh'}
+          onclick={() => setLang('zh')}
+          title="繁體中文"
+        >
+          繁中
+        </button>
+      </div>
+
       {#if phase === 'ready' && config}
         <ModeSwitch
           mode={config.llm_mode}
@@ -620,8 +641,8 @@
           class="diag-btn"
           class:diag-active={view === 'diagnostics'}
           onclick={() => (view === 'diagnostics' ? closeDiagnostics() : openDiagnostics())}
-          aria-label="Diagnostics"
-          title="Diagnostics"
+          aria-label={tr('diagnostics')}
+          title={tr('diagnostics')}
           aria-pressed={view === 'diagnostics'}
         >
           <svg
@@ -661,7 +682,7 @@
     {#if phase === 'checking' || phase === 'health-checking'}
       <div class="centered">
         <div class="spinner" aria-label="Loading"></div>
-        <p class="hint">Checking environment…</p>
+        <p class="hint">{tr('checking_env')}</p>
       </div>
     {:else if phase === 'provisioning'}
       <ProvisionView {progress} />
@@ -768,7 +789,7 @@
             ></span>
           {/each}
         </span>
-        {#if !allGreen()}<span class="warn-badge">Issues found</span>{/if}
+        {#if !allGreen()}<span class="warn-badge">{tr('issues_found')}</span>{/if}
       </summary>
       <div class="health-grid">
         {@render HealthRow({ label: 'Python', value: health.python_version, ok: true })}
@@ -785,7 +806,7 @@
           })}
         {/each}
         {#if !allGreen()}
-          <button class="repair-btn" onclick={() => boot(true)}>Repair</button>
+          <button class="repair-btn" onclick={() => boot(true)}>{tr('repair')}</button>
         {/if}
       </div>
     </details>

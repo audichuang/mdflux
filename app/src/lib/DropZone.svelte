@@ -5,7 +5,7 @@
   import type { ConvertError } from './ErrorCard.svelte';
   import ErrorCard from './ErrorCard.svelte';
   import { SUPPORTED_EXTS } from './formats';
-
+  import { tr } from './locale';
   let {
     onAdd,
     error = null,
@@ -145,15 +145,15 @@
           />
         </svg>
       </div>
-      <p class="text-sm font-semibold text-zinc-200">Drop files or a folder here</p>
+      <p class="text-sm font-semibold text-zinc-200">{tr('drop_files')}</p>
       <p class="text-xs text-zinc-400">
-        or <span
+        {tr('or')} <span
           class="text-blue-400 group-hover:text-blue-300 underline underline-offset-2 transition-colors"
-          >browse to choose</span
+          >{tr('browse_choose')}</span
         >
       </p>
       <p class="text-[10px] font-mono tracking-wider text-zinc-500 mt-2.5 uppercase">
-        PDF · DOCX · PPTX · XLSX · EPUB · HTML · CSV · JSON · images · audio
+        {tr('supported_formats')}
       </p>
     </div>
   {/if}

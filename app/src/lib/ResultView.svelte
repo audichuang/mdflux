@@ -7,6 +7,7 @@
   import { renderMarkdown } from './mdpreview';
   import { buildOutputFilename, type NamingCase } from './naming';
   import { onDestroy } from 'svelte';
+  import { tr } from './locale';
 
   let {
     markdown,
@@ -179,7 +180,7 @@
     await runRules();
   }
 
-  let copyLabel = $state('Copy');
+  let copyStatus = $state<'copy' | 'copied' | 'failed'>('copy');
   let copyTimeout: ReturnType<typeof setTimeout>;
   let confirming = $state(false);
 
@@ -189,11 +190,11 @@
     try {
       await navigator.clipboard.writeText(activeMarkdown);
       clearTimeout(copyTimeout);
-      copyLabel = 'Copied!';
-      copyTimeout = setTimeout(() => (copyLabel = 'Copy'), 2000);
+      copyStatus = 'copied';
+      copyTimeout = setTimeout(() => (copyStatus = 'copy'), 2000);
     } catch {
-      copyLabel = 'Failed';
-      copyTimeout = setTimeout(() => (copyLabel = 'Copy'), 2000);
+      copyStatus = 'failed';
+      copyTimeout = setTimeout(() => (copyStatus = 'copy'), 2000);
     }
   }
   let saveError = $state<string | null>(null);
@@ -298,23 +299,23 @@
       <button
         class="seg-btn"
         class:active={cleanup.viewMode === 'preview'}
-        onclick={() => setView('preview')}>Preview</button
+        onclick={() => setView('preview')}>{tr('preview')}</button
       >
       <button
         class="seg-btn"
         class:active={cleanup.viewMode === 'source'}
-        onclick={() => setView('source')}>Source</button
+        onclick={() => setView('source')}>{tr('source')}</button
       >
       {#if hasChanges}
         <button
           class="seg-btn"
           class:active={cleanup.viewMode === 'split'}
-          onclick={() => setView('split')}>Split</button
+          onclick={() => setView('split')}>{tr('split')}</button
         >
         <button
           class="seg-btn"
           class:active={cleanup.viewMode === 'changes'}
-          onclick={() => setView('changes')}>Changes</button
+          onclick={() => setView('changes')}>{tr('changes')}</button
         >
       {/if}
     </div>
@@ -323,19 +324,19 @@
   <!-- Cleanup bar -->
   <div class="flex-shrink-0 flex flex-col gap-2.5 px-4 py-3 border-b border-zinc-800 bg-zinc-950">
     <div class="flex items-center gap-3">
-      <span class="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">Clean up</span>
+      <span class="text-xs font-semibold tracking-wider text-zinc-500 uppercase">{tr('clean_up')}</span>
       <div class="seg" role="group" aria-label="Cleanup method">
         <button
           class="seg-btn"
           class:active={cleanup.method === 'none'}
           title="Show the raw conversion, unchanged"
-          onclick={() => selectMethod('none')}>Off</button
+          onclick={() => selectMethod('none')}>{tr('off')}</button
         >
         <button
           class="seg-btn"
           class:active={cleanup.method === 'rules'}
           title="Clean up using fast, offline rules"
-          onclick={() => selectMethod('rules')}>Rule-based</button
+          onclick={() => selectMethod('rules')}>{tr('rule_based')}</button
         >
         <button
           class="seg-btn"
@@ -344,7 +345,7 @@
           disabled={!llmAvailable}
           title={llmAvailable
             ? 'Clean up with your configured AI model'
-            : 'Switch to Local or API mode to enable AI cleanup'}>AI</button
+            : 'Switch to Local or API mode to enable AI cleanup'}>{tr('ai')}</button
         >
       </div>
       {#if !cleanupSeen && cleanup.method === 'none'}
@@ -562,7 +563,7 @@
       class="inline-flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 bg-zinc-900 border border-zinc-850 px-2.5 py-1 rounded-full"
       title="Source format · {converterPath}"
     >
-      From: {detectedFormat}{#if warnings.length}<span
+      {tr('from_format', { format: detectedFormat })}{#if warnings.length}<span
           class="text-amber-500 cursor-help"
           title={warnings.join('\n')}>⚠</span
         >{/if}
@@ -589,7 +590,7 @@
             stroke-linecap="round"
           />
         </svg>
-        Open a New File
+        {tr('open_new')}
       </button>
       <button
         class="btn-secondary"
@@ -612,7 +613,7 @@
             stroke-width="1.2"
           />
         </svg>
-        {copyLabel}
+        {copyStatus === 'copy' ? tr('copy') : copyStatus === 'copied' ? tr('copied') : 'Failed'}
       </button>
       <button
         class="btn-primary"
@@ -629,7 +630,7 @@
           />
           <path d="M2.5 11.5h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
         </svg>
-        Save as .md
+        {tr('save_md')}
       </button>
     </div>
   </div>
@@ -654,9 +655,9 @@
       aria-labelledby="modal-title"
       tabindex="-1"
     >
-      <p id="modal-title" class="text-sm font-semibold text-zinc-50">Open a new file?</p>
+      <p id="modal-title" class="text-sm font-semibold text-zinc-50">{tr('modal_title')}</p>
       <p class="text-xs text-zinc-400 leading-relaxed">
-        Your current result will be lost unless you save it first.
+        {tr('modal_desc')}
       </p>
       <div class="flex justify-end gap-2 mt-2">
         <button
@@ -664,15 +665,15 @@
           onclick={() => {
             confirming = false;
             openNewBtnEl?.focus();
-          }}>Cancel</button
+          }}>{tr('cancel')}</button
         >
         <button
           class="btn-danger btn-sm"
-          onclick={discardAndOpen}>Discard</button
+          onclick={discardAndOpen}>{tr('discard')}</button
         >
         <button
           class="btn-primary btn-sm"
-          onclick={saveAndOpen}>Save &amp; Open</button
+          onclick={saveAndOpen}>{tr('save_open')}</button
         >
       </div>
     </div>
