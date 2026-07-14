@@ -405,10 +405,7 @@
     </div>
   {/if}
 
-  <button
-    class="w-full flex items-center justify-center gap-2 h-12 rounded-lg text-sm font-semibold bg-zinc-50 hover:bg-zinc-200/90 text-zinc-950 shadow-sm transition-all cursor-pointer font-ui mt-2 active:translate-y-[1px]"
-    onclick={convert}
-  >
+  <button class="btn-primary btn-cta" onclick={convert}>
     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path
         d="M10 2.5l1.6 4.1 4.4.3-3.4 2.8 1.1 4.3L10 11.8 6.3 14l1.1-4.3L4 6.9l4.4-.3L10 2.5z"

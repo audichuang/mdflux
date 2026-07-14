@@ -30,7 +30,7 @@ Not cold zinc-blue SaaS; not neon; not pure black `#000`; light mode is **warm p
 | Tokens | Palette / radius / spacing only in `app/src/lib/tokens.css` (`:root` shared + `[data-theme='light'|'dark']`) | Scatter hex colors or one-off radii in components |
 | Theme state | Preference + resolve via `app/src/lib/theme.svelte.ts`; paint with `document.documentElement.dataset.theme` | Invent a second theme store or hardcode dark-only backgrounds (`#09090b`, cold slate) |
 | Theme UI | Use `ThemeSwitch.svelte` (system / light / dark) | Drop light mode or ship dark-only without discussion |
-| Accent | Warm terracotta family in **both** themes (`--accent` / hover / edge / dim) | Blue-500 / indigo “default shadcn” as brand |
+| Accent | Warm terracotta / clay **orange** in both themes; **primary buttons use `--accent`** (`btn-primary`) | Monochrome black primary; blue-500 / indigo brand |
 | Surfaces | Token stack `--canvas` → `--surface-1/2/3` (values flip per theme) | Cold slate-only or pure-black panels |
 | Buttons / segs | Global classes: `btn-primary`, `btn-secondary`, `btn-tertiary`, `btn-danger`, `btn-accent-soft`, `btn-sm`, `seg` / `seg-btn`; seg track via `--seg-track` | Redefine the same button recipe per view |
 | Utilities | Tailwind v4 OK; `zinc-*` / `blue-*` are **semantically remapped** to tokens in `@theme` | Assume `bg-zinc-950` is literal Tailwind zinc; hardcode theme-specific grays |

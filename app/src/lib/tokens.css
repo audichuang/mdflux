@@ -88,10 +88,11 @@
   --text-primary: #f9f9f7; /* warm milk white */
   --text-secondary: #c8c8bd;
   --text-muted: #85857c;
-  --accent: #cc7d5e; /* Claude terracotta */
-  --accent-hover: #d69073;
-  --accent-edge: #b56a4b;
-  --accent-dim: rgba(204, 125, 94, 0.15);
+  /* Claude dark accent — warm terracotta / clay orange */
+  --accent: #d4a27f;
+  --accent-hover: #e0b08f;
+  --accent-edge: #c48d68;
+  --accent-dim: rgba(212, 162, 127, 0.18);
   --green: #81c784;
   --red: #e57373;
   --amber: #ffb74d;
@@ -112,10 +113,11 @@
   --text-primary: #141413; /* warm near-black (Claude light fg) */
   --text-secondary: #5c5b56;
   --text-muted: #8a8983;
-  --accent: #d97757; /* Claude light terracotta */
-  --accent-hover: #e08a6c;
+  /* Claude light accent — warm clay orange (matches Claude UI “強調色”) */
+  --accent: #d97757;
+  --accent-hover: #e2896b;
   --accent-edge: #c4653f;
-  --accent-dim: rgba(217, 119, 87, 0.12);
+  --accent-dim: rgba(217, 119, 87, 0.14);
   --green: #3d8f4a;
   --red: #c75050;
   --amber: #b87a12;
@@ -218,14 +220,27 @@ body {
   font-size: 11.5px;
 }
 
+/* Full-width hero CTA (e.g. convert) — same terracotta family, larger hit target */
+.btn-cta {
+  width: 100%;
+  height: 48px;
+  padding: 0 20px;
+  margin-top: var(--sp-2);
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  box-shadow: var(--seg-shadow);
+}
+
+/* Primary CTA = Claude terracotta / clay orange (not monochrome black). */
 .btn-primary {
-  background: var(--text-primary);
-  color: var(--canvas);
-  border-color: var(--text-primary);
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent-edge);
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--text-secondary);
-  border-color: var(--text-secondary);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 .btn-secondary {
