@@ -23,29 +23,50 @@
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius);
   --radius-lg: var(--radius-lg);
+
+  /* Redefine tailwind zinc classes to follow design variables */
+  --color-zinc-50: var(--text-primary);
+  --color-zinc-100: var(--text-primary);
+  --color-zinc-200: var(--text-primary);
+  --color-zinc-300: var(--text-secondary);
+  --color-zinc-400: var(--text-secondary);
+  --color-zinc-500: var(--text-muted);
+  --color-zinc-600: var(--text-muted);
+  --color-zinc-700: var(--border-strong);
+  --color-zinc-800: var(--border);
+  --color-zinc-850: var(--border);
+  --color-zinc-900: var(--surface-1);
+  --color-zinc-950: var(--canvas);
+
+  /* Map standard tailwind blue classes to use our terracotta brand accent */
+  --color-blue-300: var(--accent-hover);
+  --color-blue-400: var(--accent-hover);
+  --color-blue-500: var(--accent);
+  --color-blue-600: var(--accent-edge);
+  --color-blue-950: var(--accent-dim);
 }
 
 /* Design tokens — single source of truth. All components use var(--…) exclusively. */
 
 /* ── Palette ──────────────────────────────────────────────────────────────── */
 :root {
-  /* MDFlux brand palette — cool dark surfaces + blue mark accent. */
-  --canvas: #0c0c0e; /* rich slate-carbon window background */
-  --surface-1: #131316; /* panels and cards (depth card surface) */
-  --surface-2: #1e1e24; /* elevated: hover, result bg, secondary buttons */
-  --surface-3: #2c2c35; /* button active / active tabs */
-  --border: #1e1e24; /* clean slate-border lines */
-  --border-strong: #2e2e3a; /* button borders, emphasis edges */
-  --text-primary: #fafafa; /* headings, labels (zinc-50) */
-  --text-secondary: #d4d4d8; /* metadata, secondary (zinc-300) */
-  --text-muted: #888893; /* hints, placeholders (zinc-500) */
-  --accent: #3b82f6; /* brand Primary — blue-500 */
-  --accent-hover: #60a5fa; /* brand Light — blue-400 */
-  --accent-edge: #2563eb; /* brand Deep — blue-600 */
-  --accent-dim: rgba(59, 130, 246, 0.15);
-  --green: #22c55e; /* brand Success (green-500) */
-  --red: #ef4444; /* error (red-500) */
-  --amber: #f59e0b; /* partial / warning (amber-500) */
+  /* MDFlux brand palette — warm Claude charcoal surfaces + terracotta clay accent. */
+  --canvas: #151514; /* warm charcoal window background */
+  --surface-1: #20201d; /* panels and cards (depth card surface) */
+  --surface-2: #2a2a26; /* elevated: hover, result bg, secondary buttons */
+  --surface-3: #373732; /* button active / active tabs */
+  --border: #282825; /* clean warm-border lines */
+  --border-strong: #3d3d37; /* button borders, emphasis edges */
+  --text-primary: #f9f9f7; /* headings, labels (warm milk white) */
+  --text-secondary: #c8c8bd; /* metadata, secondary (warm gray-beige) */
+  --text-muted: #85857c; /* hints, placeholders (warm gray-500) */
+  --accent: #cc7d5e; /* Claude terracotta accent */
+  --accent-hover: #d69073; /* lighter terracotta hover */
+  --accent-edge: #b56a4b; /* deep terracotta edge */
+  --accent-dim: rgba(204, 125, 94, 0.15);
+  --green: #81c784; /* soft success green */
+  --red: #e57373; /* soft error red */
+  --amber: #ffb74d; /* soft warning amber */
 
   /* ── Typography ───────────────────────────────────────────────────────── */
   --font-ui: 'Inter', 'Inter Variable', system-ui, sans-serif;
@@ -166,13 +187,13 @@ body {
 }
 
 .btn-primary {
-  background: #fafafa;
-  color: #09090b;
-  border-color: #fafafa;
+  background: var(--text-primary);
+  color: var(--canvas);
+  border-color: var(--text-primary);
 }
 .btn-primary:hover:not(:disabled) {
-  background: #e4e4e7;
-  border-color: #e4e4e7;
+  background: var(--text-secondary);
+  border-color: var(--text-secondary);
 }
 
 .btn-secondary {
