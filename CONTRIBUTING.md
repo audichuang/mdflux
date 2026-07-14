@@ -41,12 +41,14 @@ npm run tauri dev
 ### CI (recommended)
 
 GitHub Actions workflow [`.github/workflows/portable.yml`](../.github/workflows/portable.yml)
-builds the offline Windows zip on `windows-latest`:
+builds the offline Windows zip on `windows-latest` and **publishes a public GitHub Release**
+(downloadable without logging in):
 
-- **Push to `main`** or **manual “Run workflow”** → zip as a run **Artifact**
-- **Push a tag `v*`** → same zip attached to a **GitHub Release**
+- **Push to `main`** or **manual “Run workflow”** → updates release tag **`offline-latest`**
+  (stable URL under Releases)
+- **Push a tag `v*`** → versioned release under that tag
 
-Download from the Actions run page (Artifacts) or from the Release assets.
+Also uploads an Actions Artifact (login required; secondary). Prefer the Release asset.
 
 ### Local (optional)
 
