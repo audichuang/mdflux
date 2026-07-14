@@ -10,23 +10,22 @@ Local-first · reads scanned PDFs · up to 6× fewer tokens than vision models
 **Works with** PDF · DOCX · PPTX · XLSX · EPUB · HTML · CSV · JSON · XML · images · audio
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-3b82f6.svg)](LICENSE)
-[![Download v0.1.0](https://img.shields.io/badge/download-v0.1.0-3b82f6)](https://github.com/ibrahimqureshae/mdflux/releases/latest)
+[![Release](https://img.shields.io/github/v/release/audichuang/mdflux?include_prereleases&label=release)](https://github.com/audichuang/mdflux/releases)
+[![Homebrew](https://img.shields.io/badge/homebrew-audichuang%2Ftap-orange?logo=homebrew)](https://github.com/audichuang/homebrew-tap)
 [![Up to 6x fewer tokens](https://img.shields.io/badge/vs%20vision-up%20to%206%C3%97%20fewer%20tokens-3b82f6)](#the-proof-fewer-tokens-lower-cost)
-[![Platform](https://img.shields.io/badge/platform-Windows-3b82f6.svg)](https://github.com/ibrahimqureshae/mdflux/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20arm64-3b82f6.svg)](https://github.com/audichuang/mdflux/releases)
 [![Works offline](https://img.shields.io/badge/works-offline-3fb950)](#)
-[![GitHub stars](https://img.shields.io/github/stars/ibrahimqureshae/mdflux?style=flat&label=stars&color=3b82f6)](https://github.com/ibrahimqureshae/mdflux/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/audichuang/mdflux?style=flat&label=stars&color=3b82f6)](https://github.com/audichuang/mdflux/stargazers)
 
-[**⬇️ Download for Windows**](https://github.com/ibrahimqureshae/mdflux/releases/latest)
+[**⬇️ Download**](https://github.com/audichuang/mdflux/releases/tag/offline-latest)
 &nbsp;&nbsp;·&nbsp;&nbsp;
-[Website](https://ibrahimqureshae.github.io/mdflux/)
+[**🍺 Homebrew**](#macos-homebrew)
 &nbsp;&nbsp;·&nbsp;&nbsp;
 [The proof](#the-proof-fewer-tokens-lower-cost)
 &nbsp;&nbsp;·&nbsp;&nbsp;
 [How it compares](#how-it-compares-to-microsoft-markitdown)
 &nbsp;&nbsp;·&nbsp;&nbsp;
-[Report a bug](https://github.com/ibrahimqureshae/mdflux/issues)
-&nbsp;&nbsp;·&nbsp;&nbsp;
-[❤️ Sponsor](https://github.com/sponsors/ibrahimqureshae)
+[Report a bug](https://github.com/audichuang/mdflux/issues)
 
 <img src="docs/media/demo-hero.gif" width="780" alt="Drop a document, get clean Markdown in seconds"/>
 
@@ -72,7 +71,9 @@ That's the full text recovered in about 5.7 times fewer tokens than the vision m
 
 <div align="center">
 
-[**⬇️ Download for Windows**](https://github.com/ibrahimqureshae/mdflux/releases/latest)
+[**⬇️ Download**](https://github.com/audichuang/mdflux/releases/tag/offline-latest)
+&nbsp;·&nbsp;
+[**🍺 brew install**](#macos-homebrew)
 &nbsp;·&nbsp; Free &amp; MIT-licensed &nbsp;·&nbsp; No account, no cloud
 
 </div>
@@ -87,7 +88,7 @@ That's the full text recovered in about 5.7 times fewer tokens than the vision m
 | 🔒 **Local and private** | Your documents never leave your machine. No cloud, no API key, no account. |
 | 🔍 **Reads scanned PDFs** | Built-in OCR recovers text that plain extractors return as zero characters. |
 | 🧱 **Real structure** | Proper Markdown with headings, tables, and lists intact. Readable, greppable, diff-able. |
-| 🖥️ **No terminal needed** | Portable app. Unzip, run, click through a one-time setup. Done. |
+| 🖥️ **No terminal needed** | Desktop app — Windows installer/portable, or macOS via DMG / Homebrew. |
 | 📦 **Many formats** | PDF, DOCX, PPTX, XLSX, EPUB, HTML, CSV, JSON, XML, images, and audio. |
 | 🔁 **Batch a whole folder** | Convert everything at once, with progress, cancellation, and per-file diagnostics. |
 | 🧹 **Optional cleanup** | Off, rule-based, or an AI pass (local or API) to tidy up messy extractions. |
@@ -177,25 +178,68 @@ On already-clean files the output is close to identical, because under the hood 
 
 ## Getting started
 
-**Requirements:** Windows 10 or 11 (x64) with the WebView2 runtime, which ships with current Windows. The first launch needs internet to set up a local Python environment; everything after runs offline. macOS is on the [roadmap](#roadmap).
+### Install
 
-**1. Download and run.** Get the portable zip from [Releases](https://github.com/ibrahimqureshae/mdflux/releases/latest), extract it anywhere, and double-click `MDFlux.exe`. No installer, no admin rights.
+#### macOS (Homebrew)
 
-> **SmartScreen warning?** The build is open source and unsigned. Click "More info" then "Run anyway". You'll need the WebView2 runtime, already on current Windows 10/11.
+Apple Silicon (arm64) only for now:
 
-**2. First launch (one-time, internet required).** MDFlux sets up a private, self-contained Python environment. This happens once. After that, it runs fully offline.
+```bash
+brew tap audichuang/tap
+brew install --cask audichuang/tap/mdflux
+```
+
+Upgrade later with:
+
+```bash
+brew update
+brew upgrade --cask mdflux
+```
+
+Or download the DMG from [Releases](https://github.com/audichuang/mdflux/releases/tag/offline-latest) (`MDFlux_*_aarch64.dmg`) and drag **MDFlux.app** into Applications.
+
+> **“MDFlux is damaged” / can’t open?** Builds are open source and **unsigned**. After installing, clear quarantine:
+>
+> ```bash
+> xattr -cr /Applications/MDFlux.app
+> ```
+
+#### Windows
+
+| Package | Link |
+|---------|------|
+| **Installer (recommended)** | [MDFlux_*_x64-setup.exe](https://github.com/audichuang/mdflux/releases/tag/offline-latest) |
+| Portable zip | same [Releases](https://github.com/audichuang/mdflux/releases/tag/offline-latest) page |
+
+- **Installer:** run the setup (current user, no admin) → open MDFlux from the Start Menu.
+- **Portable:** unzip anywhere → double-click `MDFlux.exe`.
+
+**Requirements:** Windows 10/11 (x64) with WebView2 (ships with current Windows).
+
+> **SmartScreen warning?** Open source, unsigned build. Click **More info** → **Run anyway**.
+
+Offline packages embed Python + MarkItDown, so you **do not** need a first-launch download for basic conversion. Optional OCR/audio engines are not in the basic offline build.
+
+#### All downloads
+
+Latest floating build: [offline-latest](https://github.com/audichuang/mdflux/releases/tag/offline-latest)  
+Versioned tags: [Releases](https://github.com/audichuang/mdflux/releases) (e.g. `v0.1.2`)
+
+Upstream project: [ibrahimqureshae/mdflux](https://github.com/ibrahimqureshae/mdflux). This fork adds offline packaging, macOS arm64 DMG, and Homebrew cask.
+
+### First run & convert
+
+**1. Open the app.** Offline builds are ready immediately for core formats. If you use a non-bundled build, the first launch may set up a private Python environment once (internet required).
 
 <div align="center">
 <img src="docs/media/screenshot-setup.png" width="560" alt="MDFlux first-run setup screen">
 </div>
 
-**3. Convert.** Drop a document onto the window, pick a cleanup mode, and click "Convert to AI-Ready Markdown". Preview it, then copy straight from the preview or save as `.md`. For a whole folder, you pick an output folder up front and every converted file lands there.
+**2. Convert.** Drop a document onto the window, pick a cleanup mode, and click "Convert to AI-Ready Markdown". Preview it, then copy or save as `.md`. For a whole folder, pick an output folder up front and every converted file lands there.
 
 <div align="center">
 <img src="docs/media/converting-to-markdown.gif" width="720" alt="Converting a document to clean Markdown"/>
 </div>
-
-To verify your download, check the SHA-256 posted on the [release page](https://github.com/ibrahimqureshae/mdflux/releases/latest).
 
 ---
 
@@ -211,9 +255,13 @@ To verify your download, check the SHA-256 posted on the [release page](https://
 
 ## Troubleshooting
 
-**"Windows protected your PC"**: That's SmartScreen reacting to an unsigned build. Click "More info" then "Run anyway". The build is open source; code signing is on the roadmap.
+**"Windows protected your PC"**: SmartScreen on an unsigned build. **More info** → **Run anyway**. Code signing is on the roadmap.
 
-**The first launch is downloading for a while**: That's the one-time setup of the local Python environment. It only happens once, and every launch after is instant and offline.
+**macOS Gatekeeper / “damaged” app**: Clear quarantine after install: `xattr -cr /Applications/MDFlux.app`.
+
+**The first launch is downloading for a while**: Non-bundled builds set up a local Python environment once. Official **offline** installers/DMG already include the core runtime, so basic conversion should not download anything.
+
+**Homebrew can’t find the cask**: Make sure you tapped this fork’s tap: `brew tap audichuang/tap` then `brew install --cask audichuang/tap/mdflux`. Apple Silicon only.
 
 **A conversion finished with a warning or looks empty**: Open the diagnostics panel. It tells you what's installed and healthy and what went wrong, so you get a clear next step instead of a silent empty file.
 
@@ -223,7 +271,7 @@ To verify your download, check the SHA-256 posted on the [release page](https://
 
 **Where are my converted files?** In the output folder shown in the app. For batch jobs you pick the folder up front.
 
-**Anything else**: [Open an issue](https://github.com/ibrahimqureshae/mdflux/issues). Bug reports genuinely help.
+**Anything else**: [Open an issue](https://github.com/audichuang/mdflux/issues). Bug reports genuinely help.
 
 ---
 
@@ -231,8 +279,9 @@ To verify your download, check the SHA-256 posted on the [release page](https://
 
 - [ ] MCP server, so Claude Code and other agents can convert documents through MDFlux directly
 - [ ] CLI for scripted, headless conversion in pipelines and CI
-- [ ] macOS build (arm64 and Intel)
-- [ ] Code signing, to remove the SmartScreen warning
+- [x] macOS arm64 offline DMG + Homebrew cask (`audichuang/tap/mdflux`)
+- [ ] macOS Intel build
+- [ ] Code signing / notarization (Windows SmartScreen + macOS Gatekeeper)
 - [ ] More OCR languages and tuning presets
 
 The full list lives in [ROADMAP.md](ROADMAP.md). Open an issue if you want to shape it.
