@@ -59,10 +59,11 @@ jobs:
         run: |
           $setup = Get-ChildItem -Path dist -Filter "MDFlux_*_x64-setup.exe" -ErrorAction Stop |
             Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          $zip = Get-ChildItem -Path dist -Filter "MDFlux_*_portable_offline.zip" -ErrorAction SilentlyContinue |
+          $zip = Get-ChildItem -Path dist -Filter "MDFlux_*_portable_offline.zip" -ErrorAction Stop |
             Sort-Object LastWriteTime -Descending | Select-Object -First 1
 
           if (-not $setup) { throw "Setup.exe not found in dist/" }
+          if (-not $zip) { throw "Portable zip not found in dist/ (both setup.exe and zip are required)" }
 
           $setupMb = [math]::Round($setup.Length / 1MB, 2)
           Write-Host "Installer: $($setup.FullName) ($setupMb MB)"
@@ -129,7 +130,7 @@ jobs:
             | | |
             |---|---|
             | **Installer (recommended)** | `${{ steps.pkg.outputs.setup_name }}` (~${{ steps.pkg.outputs.setup_mb }} MB) |
-            | Portable zip (optional) | `MDFlux_*_portable_offline.zip` (unzip & run) |
+            | Portable zip | `MDFlux_*_portable_offline.zip` (unzip & run) |
             | Install mode | Current user |
             | App version | `${{ steps.pkg.outputs.version }}` |
             | Commit | `${{ steps.pkg.outputs.sha }}` |
