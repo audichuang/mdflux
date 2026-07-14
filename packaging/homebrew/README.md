@@ -1,34 +1,54 @@
 # Homebrew cask — MDFlux
 
-## User install (after a `v*` release updates the tap)
+Live cask lives in **[audichuang/homebrew-tap](https://github.com/audichuang/homebrew-tap)** (`Casks/mdflux.rb`).  
+This folder is a **draft/template** only; CI rewrites the live file on each stable tag.
+
+## User install
 
 ```bash
 brew tap audichuang/tap
 brew install --cask audichuang/tap/mdflux
 ```
 
-- **Apple Silicon only** (`arm64`) for the first ship
-- Artifact: `MDFlux_<version>_aarch64.dmg` from GitHub Releases
-- Windows stays on **setup.exe / portable zip** (not Homebrew)
+| | |
+|---|---|
+| Arch | **Apple Silicon only** (`arm64`) |
+| Artifact | `MDFlux_<version>_aarch64.dmg` from GitHub Releases |
+| Version source | Stable `v*` tags (not `offline-latest`, not `v*-rc`) |
+| Windows | setup.exe / portable zip only (never via Homebrew) |
 
-## Maintainer flow (mirrors aghub)
+```bash
+brew update && brew upgrade --cask mdflux
+brew uninstall --cask mdflux          # or: brew uninstall --cask --zap mdflux
+```
 
-1. Bump version in `app/package.json`, `app/src-tauri/tauri.conf.json`, `Cargo.toml`
+If the cask “does not exist” after a release: `brew update` (stale local tap). Details: [tap README](https://github.com/audichuang/homebrew-tap).
+
+Unsigned builds may need:
+
+```bash
+xattr -cr /Applications/MDFlux.app
+```
+
+## Maintainer flow
+
+1. Bump version in `app/package.json`, `app/src-tauri/tauri.conf.json`, `Cargo.toml` (+ lock)
 2. Tag `vX.Y.Z` and push
-3. CI `Portable build`:
-   - Windows → setup.exe + zip
+3. CI **Portable build**:
+   - Windows → setup.exe + portable zip
    - macOS → aarch64 dmg
    - Publish release assets
-   - `publish-homebrew` rewrites `audichuang/homebrew-tap` `Casks/mdflux.rb` (sha256 + version)
+   - **`publish-homebrew`** rewrites `audichuang/homebrew-tap` `Casks/mdflux.rb` (version + sha256 + modern stanzas)
 
-## Repo secret required
+## Repo secret
 
 | Secret | Purpose |
 |--------|---------|
 | `HOMEBREW_TAP_TOKEN` | PAT with write access to `audichuang/homebrew-tap` |
 
-Without it, Windows+mac packages still publish; only the tap update job fails on tags.
+Without it, Windows + mac packages still publish; only the tap job fails on tags.
 
 ## Draft cask
 
-`Casks/mdflux.rb` in this folder is a template. CI overwrites the live tap file with real sha256 on each stable tag.
+`Casks/mdflux.rb` here is the template shape (livecheck, `depends_on macos: :big_sur`, zap paths).  
+CI embeds real `version` / `sha256` into the live tap file — do not commit a real sha into this draft.

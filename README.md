@@ -182,21 +182,25 @@ On already-clean files the output is close to identical, because under the hood 
 
 #### macOS (Homebrew)
 
-Apple Silicon (arm64) only for now:
+**Apple Silicon only** (arm64). Tracks stable versioned releases (`v*`), not the floating `offline-latest` tag.
 
 ```bash
 brew tap audichuang/tap
 brew install --cask audichuang/tap/mdflux
 ```
 
-Upgrade later with:
-
 ```bash
-brew update
-brew upgrade --cask mdflux
+# upgrade
+brew update && brew upgrade --cask mdflux
+
+# uninstall (keeps app data unless you also zap)
+brew uninstall --cask mdflux
+# brew uninstall --cask --zap mdflux   # also remove app support / caches
 ```
 
-Or download the DMG from [Releases](https://github.com/audichuang/mdflux/releases/tag/offline-latest) (`MDFlux_*_aarch64.dmg`) and drag **MDFlux.app** into Applications.
+Tap: [audichuang/homebrew-tap](https://github.com/audichuang/homebrew-tap) · cask: `mdflux`
+
+Or skip Homebrew and download the DMG from [Releases](https://github.com/audichuang/mdflux/releases/tag/offline-latest) (`MDFlux_*_aarch64.dmg`) → drag **MDFlux.app** into Applications.
 
 > **“MDFlux is damaged” / can’t open?** Builds are open source and **unsigned**. After installing, clear quarantine:
 >
@@ -261,7 +265,7 @@ Upstream project: [ibrahimqureshae/mdflux](https://github.com/ibrahimqureshae/md
 
 **The first launch is downloading for a while**: Non-bundled builds set up a local Python environment once. Official **offline** installers/DMG already include the core runtime, so basic conversion should not download anything.
 
-**Homebrew can’t find the cask**: Make sure you tapped this fork’s tap: `brew tap audichuang/tap` then `brew install --cask audichuang/tap/mdflux`. Apple Silicon only.
+**Homebrew can’t find the cask / “cask unavailable”**: Usually a **stale local tap**, not a missing remote file. Run `brew update` (or `brew untap audichuang/tap && brew tap audichuang/tap`), then `brew install --cask audichuang/tap/mdflux`. **Apple Silicon only**; the cask ships on stable `v*` tags (see [homebrew-tap](https://github.com/audichuang/homebrew-tap)).
 
 **A conversion finished with a warning or looks empty**: Open the diagnostics panel. It tells you what's installed and healthy and what went wrong, so you get a clear next step instead of a silent empty file.
 
