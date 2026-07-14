@@ -660,18 +660,18 @@
       </p>
       <div class="flex justify-end gap-2 mt-2">
         <button
-          class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-3 border border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
+          class="btn-secondary btn-sm"
           onclick={() => {
             confirming = false;
             openNewBtnEl?.focus();
           }}>Cancel</button
         >
         <button
-          class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-3 border border-red-950 bg-red-950/20 hover:bg-red-950/45 text-red-400 hover:text-red-300 cursor-pointer transition-colors"
+          class="btn-danger btn-sm"
           onclick={discardAndOpen}>Discard</button
         >
         <button
-          class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-3.5 border border-zinc-850 bg-zinc-50 hover:bg-zinc-200 text-zinc-950 cursor-pointer transition-colors"
+          class="btn-primary btn-sm"
           onclick={saveAndOpen}>Save &amp; Open</button
         >
       </div>
