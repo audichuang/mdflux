@@ -67,11 +67,9 @@ jobs:
           $setupMb = [math]::Round($setup.Length / 1MB, 2)
           Write-Host "Installer: $($setup.FullName) ($setupMb MB)"
 
-          $files = @($setup.FullName)
           if ($zip) {
             $zipMb = [math]::Round($zip.Length / 1MB, 2)
             Write-Host "Portable:  $($zip.FullName) ($zipMb MB)"
-            $files += $zip.FullName
             "zip_name=$($zip.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
             "zip_mb=$zipMb" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           }
@@ -88,12 +86,9 @@ jobs:
             $title = "MDFlux $version — Windows installer (offline)"
           }
 
-          # softprops accepts multiline files via newline-separated list in some versions;
-          # pass space-joined and also individual paths for upload-artifact.
           "setup_path=$($setup.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "setup_name=$($setup.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "setup_mb=$setupMb" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "files=$($files -join `n)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "sha=$sha" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
