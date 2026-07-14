@@ -1291,7 +1291,7 @@
   }
   .field-input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 2px var(--accent-dim);
   }
   .field-input::placeholder {
     color: var(--text-muted);
@@ -1608,7 +1608,7 @@
     position: relative;
     width: 36px;
     height: 20px;
-    background: #27272a;
+    background: var(--surface-3);
     border: 1px solid transparent;
     border-radius: 99px;
     cursor: pointer;
