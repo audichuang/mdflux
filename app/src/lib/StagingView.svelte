@@ -217,7 +217,7 @@
 
   {#if isBatch}
     <!-- Output destination (batch only; a single file is saved from the result view) -->
-    <div class="flex flex-col gap-3 border-t border-zinc-800/60 pt-5">
+    <div class="flex flex-col gap-3 hairline-t pt-5">
       <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase"
         >{tr('save_output_to')}</span
       >
@@ -243,7 +243,7 @@
       </div>
 
       {#if setup.outputRule !== 'next_to_source'}
-        <div class="flex items-center gap-3 p-3 bg-zinc-900/20 border border-zinc-800 rounded-lg">
+        <div class="flex items-center gap-3 p-3 panel-inset">
           <svg
             class="text-zinc-500 flex-shrink-0"
             width="16"
@@ -316,7 +316,7 @@
     </div>
 
     <!-- Cleanup method (batch applies one choice to every file) -->
-    <div class="flex flex-col gap-3 border-t border-zinc-800/60 pt-5">
+    <div class="flex flex-col gap-3 hairline-t pt-5">
       <div class="flex items-center gap-3 justify-between">
         <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase"
           >{tr('clean_up')}</span
@@ -347,10 +347,10 @@
       </div>
 
       {#if setup.method === 'rules'}
-        <div class="flex flex-col gap-1 p-2 bg-zinc-950 border border-zinc-850 rounded-lg">
+        <div class="panel-inset flex flex-col gap-0.5 p-1.5">
           {#each CLEANUP_RULES as rule}
             <label
-              class="flex items-start gap-3 p-2.5 rounded-md hover:bg-zinc-900/40 transition-colors cursor-pointer"
+              class="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-900/35 transition-colors cursor-pointer"
               title="{rule.hint}. {setup.rules[rule.key] ? 'On' : 'Off'} — click to toggle."
             >
               <input
