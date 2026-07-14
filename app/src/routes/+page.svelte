@@ -7,6 +7,7 @@
   import ConvertProgress from '$lib/ConvertProgress.svelte';
   import ResultView from '$lib/ResultView.svelte';
   import ModeSwitch from '$lib/ModeSwitch.svelte';
+  import ThemeSwitch from '$lib/ThemeSwitch.svelte';
   import DiagnosticsView from '$lib/DiagnosticsView.svelte';
   import { locale, setLang, tr } from '$lib/locale.svelte';
   import BatchQueueView from '$lib/BatchQueueView.svelte';
@@ -612,6 +613,8 @@
       </span>
     {/if}
     <div class="header-right">
+      <ThemeSwitch />
+
       <!-- Language Picker -->
       <div class="seg" role="group" aria-label="Language Selector">
         <button
@@ -890,10 +893,10 @@
   .diag-btn:hover {
     color: var(--text-primary);
     background: var(--surface-3);
-    border-color: #565660;
+    border-color: var(--border-strong);
   }
   .diag-btn.diag-active {
-    color: #fff;
+    color: var(--on-accent, #fff);
     background: var(--accent);
     border-color: var(--accent-edge);
   }
@@ -1009,7 +1012,7 @@
     font-size: 13px;
     font-weight: 600;
     font-family: var(--font-ui);
-    color: #fff;
+    color: var(--on-accent, #fff);
     background: var(--accent);
     border: 1px solid var(--accent-edge);
     border-radius: var(--radius-sm);
@@ -1132,7 +1135,7 @@
     font-size: 12.5px;
     font-weight: 600;
     font-family: var(--font-ui);
-    color: #fff;
+    color: var(--on-accent, #fff);
     background: var(--accent);
     border: 1px solid var(--accent-edge);
     border-radius: var(--radius-sm);

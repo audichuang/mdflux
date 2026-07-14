@@ -46,31 +46,14 @@
   --color-blue-950: var(--accent-dim);
 }
 
-/* Design tokens — single source of truth. All components use var(--…) exclusively. */
+/* Design tokens — single source of truth. All components use var(--…) exclusively.
+   Theme is selected via <html data-theme="light|dark"> (see theme.svelte.ts). */
 
-/* ── Palette ──────────────────────────────────────────────────────────────── */
+/* ── Shared non-color tokens ──────────────────────────────────────────────── */
 :root {
-  /* MDFlux brand palette — warm Claude charcoal surfaces + terracotta clay accent. */
-  --canvas: #1e1e1c; /* warm charcoal content canvas background (softer, like Claude) */
-  --surface-1: #141412; /* dark charcoal layout panels and headers (depth separator) */
-  --surface-2: #282825; /* elevated: hover, cards, secondary buttons */
-  --surface-3: #353530; /* button active / active tabs */
-  --border: #2c2c29; /* clean warm-border lines */
-  --border-strong: #3d3d38; /* button borders, emphasis edges */
-  --text-primary: #f9f9f7; /* headings, labels (warm milk white) */
-  --text-secondary: #c8c8bd; /* metadata, secondary (warm gray-beige) */
-  --text-muted: #85857c; /* hints, placeholders (warm gray-500) */
-  --accent: #cc7d5e; /* Claude terracotta accent */
-  --accent-hover: #d69073; /* lighter terracotta hover */
-  --accent-edge: #b56a4b; /* deep terracotta edge */
-  --accent-dim: rgba(204, 125, 94, 0.15);
-  --green: #81c784; /* soft success green */
-  --red: #e57373; /* soft error red */
-  --amber: #ffb74d; /* soft warning amber */
-
   /* ── Typography ───────────────────────────────────────────────────────── */
-  --font-ui: 'Inter', 'Inter Variable', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+  --font-ui: 'Inter', 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
 
   /* ── Spacing scale ────────────────────────────────────────────────────── */
   --sp-1: 4px;
@@ -90,6 +73,55 @@
   /* ── Transitions ──────────────────────────────────────────────────────── */
   --transition-fast: 120ms ease;
   --transition: 200ms ease;
+}
+
+/* ── Dark palette (default) — Claude warm charcoal + terracotta ─────────── */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --canvas: #1e1e1c; /* warm charcoal content canvas */
+  --surface-1: #141412; /* dark chrome / panels */
+  --surface-2: #282825; /* elevated: hover, cards, secondary buttons */
+  --surface-3: #353530; /* button active / active tabs */
+  --border: #2c2c29;
+  --border-strong: #3d3d38;
+  --text-primary: #f9f9f7; /* warm milk white */
+  --text-secondary: #c8c8bd;
+  --text-muted: #85857c;
+  --accent: #cc7d5e; /* Claude terracotta */
+  --accent-hover: #d69073;
+  --accent-edge: #b56a4b;
+  --accent-dim: rgba(204, 125, 94, 0.15);
+  --green: #81c784;
+  --red: #e57373;
+  --amber: #ffb74d;
+  --seg-track: rgba(0, 0, 0, 0.3);
+  --seg-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --on-accent: #ffffff;
+}
+
+/* ── Light palette — Claude paper (#FAF9F5) + terracotta (#D97757) ──────── */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --canvas: #faf9f5; /* warm paper background (Claude light) */
+  --surface-1: #ffffff; /* elevated cards / panels */
+  --surface-2: #f0efe9; /* hover, secondary fills */
+  --surface-3: #e5e4dd; /* active / pressed */
+  --border: #e8e6e0;
+  --border-strong: #d4d2ca;
+  --text-primary: #141413; /* warm near-black (Claude light fg) */
+  --text-secondary: #5c5b56;
+  --text-muted: #8a8983;
+  --accent: #d97757; /* Claude light terracotta */
+  --accent-hover: #e08a6c;
+  --accent-edge: #c4653f;
+  --accent-dim: rgba(217, 119, 87, 0.12);
+  --green: #3d8f4a;
+  --red: #c75050;
+  --amber: #b87a12;
+  --seg-track: rgba(20, 20, 19, 0.06);
+  --seg-shadow: 0 1px 2px rgba(20, 20, 19, 0.08);
+  --on-accent: #ffffff;
 }
 
 /* ── Base reset ───────────────────────────────────────────────────────────── */
@@ -232,14 +264,14 @@ body {
 }
 .btn-accent-soft:hover:not(:disabled) {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border-color: var(--accent);
 }
 
 /* ── Segmented control (canonical) ───────────────────────────────────────────── */
 .seg {
   display: inline-flex;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--seg-track);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 2.5px;
@@ -261,10 +293,14 @@ body {
   color: var(--text-secondary);
 }
 .seg-btn.active {
-  background: var(--surface-2);
+  background: var(--surface-1);
   border-color: var(--border-strong);
   color: var(--text-primary);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--seg-shadow);
+}
+
+:root[data-theme='dark'] .seg-btn.active {
+  background: var(--surface-2);
 }
 .seg-btn:disabled {
   opacity: 0.4;

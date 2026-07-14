@@ -39,6 +39,13 @@ const translations: Record<Lang, Record<string, string>> = {
     intelligence: 'Intelligence',
     diagnostics: 'Diagnostics',
     back: 'Back',
+    theme: 'Theme',
+    theme_system: 'System',
+    theme_light: 'Light',
+    theme_dark: 'Dark',
+    theme_system_hint: 'Follow system light/dark preference',
+    theme_light_hint: 'Light theme (Claude paper)',
+    theme_dark_hint: 'Dark theme (Claude charcoal)',
 
     // Dropzone
     drop_files: 'Drop files or a folder here',
@@ -127,6 +134,13 @@ const translations: Record<Lang, Record<string, string>> = {
     intelligence: 'AI 智慧優化',
     diagnostics: '系統診斷',
     back: '返回主畫面',
+    theme: '主題',
+    theme_system: '系統',
+    theme_light: '淺色',
+    theme_dark: '深色',
+    theme_system_hint: '跟隨系統淺色／深色',
+    theme_light_hint: '淺色主題（Claude 紙感）',
+    theme_dark_hint: '深色主題（Claude 炭黑）',
 
     // Dropzone
     drop_files: '將檔案或資料夾拖曳至此處',

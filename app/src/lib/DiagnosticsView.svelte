@@ -952,7 +952,7 @@
   }
   .back-btn:hover {
     background: var(--surface-3);
-    border-color: #565660;
+    border-color: var(--border-strong);
   }
   .back-btn:focus-visible {
     outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
@@ -982,7 +982,7 @@
   .refresh-btn:hover {
     color: var(--text-primary);
     background: var(--surface-3);
-    border-color: #565660;
+    border-color: var(--border-strong);
   }
   .refresh-btn:disabled {
     opacity: 0.4;
@@ -1065,7 +1065,7 @@
   }
   .retry-btn:hover {
     background: var(--surface-3);
-    border-color: #565660;
+    border-color: var(--border-strong);
   }
 
   /* Section */
@@ -1222,7 +1222,7 @@
   /* LLM provider section */
   .mode-tabs {
     display: inline-flex;
-    background: #09090b;
+    background: var(--seg-track);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 3px;
@@ -1248,7 +1248,7 @@
     background: var(--surface-1);
     border-color: var(--border);
     color: var(--text-primary);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--seg-shadow);
   }
   .mode-tab:focus-visible {
     outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
@@ -1322,7 +1322,7 @@
     font-weight: 600;
     font-family: var(--font-ui);
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     border: 1px solid var(--accent-edge);
     border-radius: var(--radius-sm);
     cursor: pointer;
@@ -1431,7 +1431,7 @@
   }
   .change-btn:hover {
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     border-color: var(--accent);
   }
 
@@ -1624,10 +1624,10 @@
     left: 2px;
     width: 14px;
     height: 14px;
-    background: #fff;
+    background: var(--on-accent);
     border-radius: 50%;
     transition: transform var(--transition-fast);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--seg-shadow);
   }
   .toggle-btn.toggle-on .toggle-thumb {
     transform: translateX(16px);
