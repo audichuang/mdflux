@@ -294,38 +294,26 @@
       <span class="text-xs font-semibold text-zinc-300 truncate">{sourceStem}</span>
     </div>
 
-    <div
-      class="inline-flex h-8 items-center justify-start rounded-md bg-zinc-900 p-0.5 text-zinc-400 border border-zinc-800 w-fit"
-      role="group"
-      aria-label="View mode"
-    >
+    <div class="seg" role="group" aria-label="View mode">
       <button
-        class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1 text-[11px] font-semibold transition-all duration-150 cursor-pointer {cleanup.viewMode ===
-        'preview'
-          ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-          : 'hover:text-zinc-200'}"
+        class="seg-btn"
+        class:active={cleanup.viewMode === 'preview'}
         onclick={() => setView('preview')}>Preview</button
       >
       <button
-        class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1 text-[11px] font-semibold transition-all duration-150 cursor-pointer {cleanup.viewMode ===
-        'source'
-          ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-          : 'hover:text-zinc-200'}"
+        class="seg-btn"
+        class:active={cleanup.viewMode === 'source'}
         onclick={() => setView('source')}>Source</button
       >
       {#if hasChanges}
         <button
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1 text-[11px] font-semibold transition-all duration-150 cursor-pointer {cleanup.viewMode ===
-          'split'
-            ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-            : 'hover:text-zinc-200'}"
+          class="seg-btn"
+          class:active={cleanup.viewMode === 'split'}
           onclick={() => setView('split')}>Split</button
         >
         <button
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1 text-[11px] font-semibold transition-all duration-150 cursor-pointer {cleanup.viewMode ===
-          'changes'
-            ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-            : 'hover:text-zinc-200'}"
+          class="seg-btn"
+          class:active={cleanup.viewMode === 'changes'}
           onclick={() => setView('changes')}>Changes</button
         >
       {/if}
@@ -336,32 +324,22 @@
   <div class="flex-shrink-0 flex flex-col gap-2.5 px-4 py-3 border-b border-zinc-800 bg-zinc-950">
     <div class="flex items-center gap-3">
       <span class="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">Clean up</span>
-      <div
-        class="inline-flex h-8 items-center justify-start rounded-md bg-zinc-900 p-0.5 text-zinc-400 border border-zinc-800 w-fit"
-        role="group"
-        aria-label="Cleanup method"
-      >
+      <div class="seg" role="group" aria-label="Cleanup method">
         <button
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3.5 py-1 text-[11px] font-semibold transition-all duration-150 cursor-pointer {cleanup.method ===
-          'none'
-            ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-            : 'hover:text-zinc-200'}"
+          class="seg-btn"
+          class:active={cleanup.method === 'none'}
           title="Show the raw conversion, unchanged"
           onclick={() => selectMethod('none')}>Off</button
         >
         <button
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3.5 py-1 text-[11px] font-semibold transition-all duration-150 cursor-pointer {cleanup.method ===
-          'rules'
-            ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-            : 'hover:text-zinc-200'}"
+          class="seg-btn"
+          class:active={cleanup.method === 'rules'}
           title="Clean up using fast, offline rules"
           onclick={() => selectMethod('rules')}>Rule-based</button
         >
         <button
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3.5 py-1 text-[11px] font-semibold transition-all duration-150 cursor-pointer {cleanup.method ===
-          'ai'
-            ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-            : 'hover:text-zinc-200'} disabled:pointer-events-none disabled:opacity-40"
+          class="seg-btn"
+          class:active={cleanup.method === 'ai'}
           onclick={() => selectMethod('ai')}
           disabled={!llmAvailable}
           title={llmAvailable

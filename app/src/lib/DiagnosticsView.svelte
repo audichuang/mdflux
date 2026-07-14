@@ -1241,14 +1241,19 @@
     cursor: pointer;
     transition: all var(--transition-fast);
   }
-  .mode-tab:hover:not(.active) { color: var(--text-secondary); }
+  .mode-tab:hover:not(.active) {
+    color: var(--text-secondary);
+  }
   .mode-tab.active {
     background: var(--surface-1);
     border-color: var(--border);
     color: var(--text-primary);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   }
-  .mode-tab:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset: 1px; }
+  .mode-tab:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+    outline-offset: 1px;
+  }
 
   .provider-note {
     font-size: 12px;
@@ -1284,7 +1289,10 @@
     outline: none;
     transition: all var(--transition-fast);
   }
-  .field-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); }
+  .field-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  }
   .field-input::placeholder {
     color: var(--text-muted);
   }

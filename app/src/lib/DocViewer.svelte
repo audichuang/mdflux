@@ -63,24 +63,16 @@
       >{name}</span
     >
 
-    <div
-      class="inline-flex h-8 items-center justify-start rounded-md bg-zinc-900 p-0.5 text-zinc-400 border border-zinc-800 w-fit"
-      role="group"
-      aria-label="View mode"
-    >
+    <div class="seg" role="group" aria-label="View mode">
       <button
-        class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1 text-[11px] font-semibold transition-all duration-150 cursor-pointer {view ===
-        'preview'
-          ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-          : 'hover:text-zinc-200'}"
+        class="seg-btn"
+        class:active={view === 'preview'}
         title="Rendered Markdown"
         onclick={() => (view = 'preview')}>Preview</button
       >
       <button
-        class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1 text-[11px] font-semibold transition-all duration-150 cursor-pointer {view ===
-        'source'
-          ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-          : 'hover:text-zinc-200'}"
+        class="seg-btn"
+        class:active={view === 'source'}
         title="Raw Markdown text"
         onclick={() => (view = 'source')}>Source</button
       >

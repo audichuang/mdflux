@@ -30,15 +30,15 @@
 /* ── Palette ──────────────────────────────────────────────────────────────── */
 :root {
   /* MDFlux brand palette — cool dark surfaces + blue mark accent. */
-  --canvas: #09090b; /* window background (zinc-950) */
-  --surface-1: #18181b; /* cards, panels (zinc-900) */
-  --surface-2: #27272a; /* elevated: hover, result bg, secondary buttons (zinc-800) */
-  --surface-3: #3f3f46; /* button hover, active surfaces (zinc-700) */
-  --border: #27272a; /* all borders (zinc-800) */
-  --border-strong: #3f3f46; /* button borders, emphasis edges (zinc-700) */
+  --canvas: #0c0c0e; /* rich slate-carbon window background */
+  --surface-1: #131316; /* panels and cards (depth card surface) */
+  --surface-2: #1e1e24; /* elevated: hover, result bg, secondary buttons */
+  --surface-3: #2c2c35; /* button active / active tabs */
+  --border: #1e1e24; /* clean slate-border lines */
+  --border-strong: #2e2e3a; /* button borders, emphasis edges */
   --text-primary: #fafafa; /* headings, labels (zinc-50) */
   --text-secondary: #d4d4d8; /* metadata, secondary (zinc-300) */
-  --text-muted: #a1a1aa; /* hints, placeholders (zinc-400) */
+  --text-muted: #888893; /* hints, placeholders (zinc-500) */
   --accent: #3b82f6; /* brand Primary — blue-500 */
   --accent-hover: #60a5fa; /* brand Light — blue-400 */
   --accent-edge: #2563eb; /* brand Deep — blue-600 */
@@ -218,15 +218,15 @@ body {
 /* ── Segmented control (canonical) ───────────────────────────────────────────── */
 .seg {
   display: inline-flex;
-  background: #09090b;
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 3px;
-  gap: 3px;
+  padding: 2.5px;
+  gap: 2px;
 }
 .seg-btn {
-  padding: 4px 13px;
-  font-size: 11.5px;
+  padding: 4px 12px;
+  font-size: 11px;
   font-weight: 500;
   font-family: var(--font-ui);
   border: 1px solid transparent;
@@ -240,8 +240,8 @@ body {
   color: var(--text-secondary);
 }
 .seg-btn.active {
-  background: var(--surface-1);
-  border-color: var(--border);
+  background: var(--surface-2);
+  border-color: var(--border-strong);
   color: var(--text-primary);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
