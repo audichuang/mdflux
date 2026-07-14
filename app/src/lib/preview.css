@@ -111,11 +111,11 @@
 .md-preview table {
   border-collapse: separate;
   border-spacing: 0;
-  margin: 0 0 16px;
+  margin: 4px 0 20px;
   font-size: 13px;
   width: max(100%, max-content);
   min-width: 100%;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   background: color-mix(in srgb, var(--surface-2) 55%, transparent);
   overflow: hidden;
 }
@@ -124,7 +124,8 @@
 .md-preview td {
   border: none;
   border-bottom: 1px solid var(--divider);
-  padding: 10px 14px;
+  /* Generous cell padding — text should not hug the card edges */
+  padding: 16px 22px;
   text-align: left;
   vertical-align: top;
 }
