@@ -2,7 +2,7 @@ export type Lang = 'en' | 'zh';
 
 // Svelte 5 Shared Reactive State Object
 export const locale = $state({
-  current: 'en' as Lang
+  current: 'en' as Lang,
 });
 
 // Safely load from localStorage, catching webview SecurityError
@@ -64,8 +64,10 @@ const translations: Record<Lang, Record<string, string>> = {
     rule_based: 'Rule-based',
     ai: 'AI',
     convert_btn: 'Convert to AI-Ready Markdown',
-    ocr_notice_1: '{count} file needs OCR or transcription — expect a longer run, and the engine\'s model loads on first use.',
-    ocr_notice_n: '{count} files need OCR or transcription — expect a longer run across the batch, and the engine\'s model loads on first use.',
+    ocr_notice_1:
+      "{count} file needs OCR or transcription — expect a longer run, and the engine's model loads on first use.",
+    ocr_notice_n:
+      "{count} files need OCR or transcription — expect a longer run across the batch, and the engine's model loads on first use.",
 
     // ResultView
     preview: 'Preview',
@@ -106,12 +108,14 @@ const translations: Record<Lang, Record<string, string>> = {
     letter_case: 'Letter case',
     open_after_batch: 'Open the output folder when a batch finishes',
     llm_provider: 'LLM Provider',
-    save_naming_hint: 'Single files are saved with a Save dialog; this rule applies to batch conversions.',
-    naming_tokens_hint: 'Tokens: {stem} name · {ext} format · {date} today. .md is added automatically.',
+    save_naming_hint:
+      'Single files are saved with a Save dialog; this rule applies to batch conversions.',
+    naming_tokens_hint:
+      'Tokens: {stem} name · {ext} format · {date} today. .md is added automatically.',
     naming_case_keep: 'Keep',
     naming_case_lower: 'lowercase',
     naming_case_slug: 'slug-case',
-    reveal_folder_desc: 'Reveal the converted files in your file manager after a batch run.'
+    reveal_folder_desc: 'Reveal the converted files in your file manager after a batch run.',
   },
   zh: {
     // Header
@@ -148,8 +152,10 @@ const translations: Record<Lang, Record<string, string>> = {
     rule_based: '規則清理 (離線)',
     ai: 'AI 智慧清理',
     convert_btn: '開始轉換為乾淨 Markdown',
-    ocr_notice_1: '有 {count} 個檔案需要進行 OCR 識別或語音轉文字 — 轉換時間會較長，且首次執行需下載模型。',
-    ocr_notice_n: '有 {count} 個檔案需要進行 OCR 識別或語音轉文字 — 批次轉換時間會較長，且首次執行需下載模型。',
+    ocr_notice_1:
+      '有 {count} 個檔案需要進行 OCR 識別或語音轉文字 — 轉換時間會較長，且首次執行需下載模型。',
+    ocr_notice_n:
+      '有 {count} 個檔案需要進行 OCR 識別或語音轉文字 — 批次轉換時間會較長，且首次執行需下載模型。',
 
     // ResultView
     preview: '成品預覽',
@@ -191,12 +197,13 @@ const translations: Record<Lang, Record<string, string>> = {
     open_after_batch: '批次完成後自動打開資料夾',
     llm_provider: 'AI 模型服務商設定',
     save_naming_hint: '單一檔案轉換時會彈出儲存對話框；此規則僅適用於多檔案批次轉換。',
-    naming_tokens_hint: '參數: {stem} 主檔名 · {ext} 原始格式 · {date} 今日日期。系統會自動補上 .md 附檔名。',
+    naming_tokens_hint:
+      '參數: {stem} 主檔名 · {ext} 原始格式 · {date} 今日日期。系統會自動補上 .md 附檔名。',
     naming_case_keep: '保持原樣',
     naming_case_lower: '全部小寫',
     naming_case_slug: '網址格式 (slug-case)',
-    reveal_folder_desc: '轉換完成後，自動在檔案總管中顯露出檔案位置。'
-  }
+    reveal_folder_desc: '轉換完成後，自動在檔案總管中顯露出檔案位置。',
+  },
 };
 
 export function tr(key: string, vars?: Record<string, string | number>): string {

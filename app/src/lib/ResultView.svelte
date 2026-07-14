@@ -7,7 +7,7 @@
   import { renderMarkdown } from './mdpreview';
   import { buildOutputFilename, type NamingCase } from './naming';
   import { onDestroy } from 'svelte';
-  import { tr } from './locale';
+  import { tr } from './locale.svelte';
 
   let {
     markdown,
@@ -324,7 +324,9 @@
   <!-- Cleanup bar -->
   <div class="flex-shrink-0 flex flex-col gap-2.5 px-4 py-3 border-b border-zinc-800 bg-zinc-950">
     <div class="flex items-center gap-3">
-      <span class="text-xs font-semibold tracking-wider text-zinc-500 uppercase">{tr('clean_up')}</span>
+      <span class="text-xs font-semibold tracking-wider text-zinc-500 uppercase"
+        >{tr('clean_up')}</span
+      >
       <div class="seg" role="group" aria-label="Cleanup method">
         <button
           class="seg-btn"
@@ -480,7 +482,9 @@
           aria-label="Before cleanup"
         >
           <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-          <div class="preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>{@html beforeHtml}</div>
+          <div class="preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>
+            {@html beforeHtml}
+          </div>
         </div>
       </div>
       <div class="flex-1 min-w-0 flex flex-col min-h-0">
@@ -498,7 +502,9 @@
           aria-label="After cleanup"
         >
           <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-          <div class="preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>{@html afterHtml}</div>
+          <div class="preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>
+            {@html afterHtml}
+          </div>
         </div>
       </div>
     </div>
@@ -511,7 +517,10 @@
     >
       {#if cleanup.viewMode === 'changes' && diff}
         {#if diff.kind === 'summary'}
-          <div class="text-sm text-zinc-300 flex flex-col gap-2" style="max-width: 768px; margin: 0 auto;">
+          <div
+            class="text-sm text-zinc-300 flex flex-col gap-2"
+            style="max-width: 768px; margin: 0 auto;"
+          >
             <p>{diff.note}</p>
             <p class="font-mono text-xs">
               <span class="text-green-400">+{diff.added.toLocaleString()}</span>
@@ -519,7 +528,10 @@
             </p>
           </div>
         {:else}
-          <div class="font-mono text-xs leading-relaxed select-text" style="max-width: 768px; margin: 0 auto;">
+          <div
+            class="font-mono text-xs leading-relaxed select-text"
+            style="max-width: 768px; margin: 0 auto;"
+          >
             {#each diff.rows as row}
               <div
                 class="flex gap-2 px-1 rounded-sm {row.type === 'add'
@@ -667,14 +679,8 @@
             openNewBtnEl?.focus();
           }}>{tr('cancel')}</button
         >
-        <button
-          class="btn-danger btn-sm"
-          onclick={discardAndOpen}>{tr('discard')}</button
-        >
-        <button
-          class="btn-primary btn-sm"
-          onclick={saveAndOpen}>{tr('save_open')}</button
-        >
+        <button class="btn-danger btn-sm" onclick={discardAndOpen}>{tr('discard')}</button>
+        <button class="btn-primary btn-sm" onclick={saveAndOpen}>{tr('save_open')}</button>
       </div>
     </div>
   </div>

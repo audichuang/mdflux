@@ -5,7 +5,7 @@
   import type { ConvertError } from './ErrorCard.svelte';
   import ErrorCard from './ErrorCard.svelte';
   import { SUPPORTED_EXTS } from './formats';
-  import { tr } from './locale';
+  import { tr } from './locale.svelte';
   let {
     onAdd,
     error = null,
@@ -147,7 +147,8 @@
       </div>
       <p class="text-sm font-semibold text-zinc-200">{tr('drop_files')}</p>
       <p class="text-xs text-zinc-400">
-        {tr('or')} <span
+        {tr('or')}
+        <span
           class="text-blue-400 group-hover:text-blue-300 underline underline-offset-2 transition-colors"
           >{tr('browse_choose')}</span
         >

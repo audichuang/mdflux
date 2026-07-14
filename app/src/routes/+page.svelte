@@ -8,7 +8,7 @@
   import ResultView from '$lib/ResultView.svelte';
   import ModeSwitch from '$lib/ModeSwitch.svelte';
   import DiagnosticsView from '$lib/DiagnosticsView.svelte';
-  import { locale, setLang, tr } from '$lib/locale';
+  import { locale, setLang, tr } from '$lib/locale.svelte';
   import BatchQueueView from '$lib/BatchQueueView.svelte';
   import BatchSummaryView from '$lib/BatchSummaryView.svelte';
   import DocViewer from '$lib/DocViewer.svelte';

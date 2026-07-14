@@ -46,7 +46,7 @@
   import { CLEANUP_RULES } from './cleanup';
   import { SUPPORTED_EXTS, isHeavyExt } from './formats';
   import { buildOutputFilename, type NamingCase } from './naming';
-  import { tr } from './locale';
+  import { tr } from './locale.svelte';
 
   let {
     files,
@@ -318,7 +318,9 @@
     <!-- Cleanup method (batch applies one choice to every file) -->
     <div class="flex flex-col gap-3 border-t border-zinc-800/60 pt-5">
       <div class="flex items-center gap-3 justify-between">
-        <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase">{tr('clean_up')}</span>
+        <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase"
+          >{tr('clean_up')}</span
+        >
         <div class="seg" role="group" aria-label="Cleanup method">
           <button
             class="seg-btn"
@@ -396,7 +398,9 @@
         />
       </svg>
       <span>
-        {heavyCount === 1 ? tr('ocr_notice_1', { count: heavyCount }) : tr('ocr_notice_n', { count: heavyCount })}
+        {heavyCount === 1
+          ? tr('ocr_notice_1', { count: heavyCount })
+          : tr('ocr_notice_n', { count: heavyCount })}
       </span>
     </div>
   {/if}
