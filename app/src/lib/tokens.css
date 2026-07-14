@@ -83,9 +83,9 @@
   --sp-12: 48px;
 
   /* ── Radii ────────────────────────────────────────────────────────────── */
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 16px;
+  --radius-sm: 12px; /* soft rounded buttons, badges, inputs */
+  --radius: 16px; /* rounded inner cards and list blocks */
+  --radius-lg: 24px; /* large rounded workspace panels, dropzones */
 
   /* ── Transitions ──────────────────────────────────────────────────────── */
   --transition-fast: 120ms ease;
@@ -251,7 +251,7 @@ body {
   font-weight: 500;
   font-family: var(--font-ui);
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: calc(var(--radius-sm) - 2px); /* concentric inner rounding (8px) */
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;

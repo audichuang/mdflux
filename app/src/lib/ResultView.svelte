@@ -570,7 +570,7 @@
     <div class="flex gap-2 items-center flex-wrap">
       {#if saveError}<p class="text-xs text-red-400 mr-2">{saveError}</p>{/if}
       <button
-        class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold h-8 px-3 border border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
+        class="btn-secondary"
         title="Discard this result and convert a different file"
         onclick={requestOpenNew}
         bind:this={openNewBtnEl}
@@ -592,7 +592,7 @@
         Open a New File
       </button>
       <button
-        class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold h-8 px-3 border border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
+        class="btn-secondary"
         title="Copy the current Markdown to the clipboard"
         onclick={copyMarkdown}
       >
@@ -615,7 +615,7 @@
         {copyLabel}
       </button>
       <button
-        class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold h-8 px-3.5 border border-zinc-850 bg-zinc-50 hover:bg-zinc-200 text-zinc-950 cursor-pointer transition-colors"
+        class="btn-primary"
         title="Save the current Markdown to a .md file"
         onclick={saveMarkdown}
       >
