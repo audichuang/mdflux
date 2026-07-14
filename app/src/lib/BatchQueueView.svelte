@@ -71,7 +71,7 @@
 
     <!-- Cancel -->
     <button
-      class="self-end inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-850 bg-zinc-900/60 text-zinc-200 hover:bg-red-950/20 hover:text-red-400 hover:border-red-950/40 disabled:pointer-events-none disabled:opacity-40 cursor-pointer transition-colors"
+      class="self-end btn-danger btn-sm"
       onclick={onCancel}
       disabled={isCancelling}
       aria-label={isCancelling ? 'Cancelling…' : 'Cancel batch'}

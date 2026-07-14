@@ -210,14 +210,8 @@
   <!-- Add more -->
   <div class="flex items-center gap-3 flex-wrap text-xs text-zinc-400">
     <span>Add more — drop files anywhere, or</span>
-    <button
-      class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-3.5 border border-zinc-800 bg-zinc-900/80 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
-      onclick={browseFiles}>Choose files…</button
-    >
-    <button
-      class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-3.5 border border-zinc-800 bg-zinc-900/80 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
-      onclick={browseFolder}>Choose folder…</button
-    >
+    <button class="btn-secondary btn-sm" onclick={browseFiles}>Choose files…</button>
+    <button class="btn-secondary btn-sm" onclick={browseFolder}>Choose folder…</button>
   </div>
 
   {#if isBatch}
@@ -226,32 +220,22 @@
       <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase"
         >Save output to</span
       >
-      <div
-        class="inline-flex h-10 items-center justify-start rounded-lg bg-zinc-900/60 p-1 text-zinc-400 border border-zinc-850 w-fit"
-        role="group"
-        aria-label="Output location"
-      >
+      <div class="seg" role="group" aria-label="Output location">
         <button
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 cursor-pointer {setup.outputRule ===
-          'next_to_source'
-            ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-            : 'hover:text-zinc-200'}"
+          class="seg-btn"
+          class:active={setup.outputRule === 'next_to_source'}
           title="Each .md is saved beside its source file"
           onclick={() => setRule('next_to_source')}>Next to source</button
         >
         <button
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 cursor-pointer {setup.outputRule ===
-          'fixed_folder'
-            ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-            : 'hover:text-zinc-200'}"
+          class="seg-btn"
+          class:active={setup.outputRule === 'fixed_folder'}
           title="All .md files go into one chosen folder"
           onclick={() => setRule('fixed_folder')}>One folder</button
         >
         <button
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 cursor-pointer {setup.outputRule ===
-          'mirror_tree'
-            ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-            : 'hover:text-zinc-200'}"
+          class="seg-btn"
+          class:active={setup.outputRule === 'mirror_tree'}
           title="Recreate the source folder structure under a chosen root"
           onclick={() => setRule('mirror_tree')}>Mirror folders</button
         >
@@ -300,7 +284,7 @@
             </button>
           {/if}
           <button
-            class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-3 border border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
+            class="btn-secondary btn-sm"
             title="Pick the folder to save into"
             onclick={chooseFolder}>{setup.outputFolder ? 'Change…' : 'Choose folder…'}</button
           >
@@ -334,32 +318,22 @@
     <div class="flex flex-col gap-3 border-t border-zinc-800/60 pt-5">
       <div class="flex items-center gap-3 justify-between">
         <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase">Clean up</span>
-        <div
-          class="inline-flex h-10 items-center justify-start rounded-lg bg-zinc-900/60 p-1 text-zinc-400 border border-zinc-850"
-          role="group"
-          aria-label="Cleanup method"
-        >
+        <div class="seg" role="group" aria-label="Cleanup method">
           <button
-            class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-xs font-semibold transition-all duration-150 cursor-pointer {setup.method ===
-            'none'
-              ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-              : 'hover:text-zinc-200'}"
+            class="seg-btn"
+            class:active={setup.method === 'none'}
             title="Convert files as-is, no cleanup"
             onclick={() => selectMethod('none')}>Off</button
           >
           <button
-            class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-xs font-semibold transition-all duration-150 cursor-pointer {setup.method ===
-            'rules'
-              ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-              : 'hover:text-zinc-200'}"
+            class="seg-btn"
+            class:active={setup.method === 'rules'}
             title="Clean every file with fast, offline rules"
             onclick={() => selectMethod('rules')}>Rule-based</button
           >
           <button
-            class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-xs font-semibold transition-all duration-150 cursor-pointer {setup.method ===
-            'ai'
-              ? 'bg-zinc-950 text-zinc-50 shadow-sm border border-zinc-800'
-              : 'hover:text-zinc-200'} disabled:pointer-events-none disabled:opacity-40"
+            class="seg-btn"
+            class:active={setup.method === 'ai'}
             disabled={!llmAvailable}
             title={llmAvailable
               ? 'Clean every file with your configured AI model'

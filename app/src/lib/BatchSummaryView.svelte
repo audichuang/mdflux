@@ -180,14 +180,14 @@
   <div class="flex gap-2 items-center flex-wrap flex-shrink-0">
     {#if hasFailed}
       <button
-        class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-850 bg-zinc-50 hover:bg-zinc-200 text-zinc-950 cursor-pointer transition-colors"
+        class="btn-primary btn-sm"
         title="Re-run only the files that failed, with the same settings"
         onclick={onRetry}
       >
         Retry {failed} failed file{failed === 1 ? '' : 's'}
       </button>
       <button
-        class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-850 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
+        class="btn-secondary btn-sm"
         title="Copy the list of failed files and their errors"
         onclick={copyFailures}
       >
@@ -196,7 +196,7 @@
     {/if}
     {#if done > 0 && onOpenFolder}
       <button
-        class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-850 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
+        class="btn-secondary btn-sm"
         title="Reveal the converted files in your file manager"
         onclick={onOpenFolder}
       >
@@ -204,7 +204,7 @@
       </button>
     {/if}
     <button
-      class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-850 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
+      class="btn-secondary btn-sm"
       title="Clear this summary and start a new conversion"
       onclick={onClose}
     >

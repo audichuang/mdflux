@@ -37,7 +37,7 @@
   </div>
 
   <button
-    class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-850 bg-zinc-900 text-zinc-200 hover:bg-red-950/20 hover:text-red-400 hover:border-red-950/40 disabled:pointer-events-none disabled:opacity-40 cursor-pointer transition-colors"
+    class="btn-secondary btn-sm"
     onclick={handleCancel}
     disabled={cancelPending}
     aria-label="Cancel conversion"
