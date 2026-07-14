@@ -9,7 +9,7 @@ Local-first desktop app: documents → clean Markdown.
 |---|---|
 | Svelte (`app/src`) | UI only |
 | Rust/Tauri (`app/src-tauri/src`) | Window, dialogs, sidecar, provision / bundled runtime |
-| Python sidecar (`resources/sidecar`) | **All** conversion (MarkItDown), cleanup, OCR/audio workers |
+| Python sidecar (`app/src-tauri/resources/sidecar`) | **All** conversion (MarkItDown), cleanup, OCR/audio workers |
 
 Shell **never** converts; sidecar **never** owns UI. Coupling = NDJSON IPC only (`main.py` ↔ `converter.rs` / `lib.rs`).
 
@@ -32,17 +32,19 @@ Canonical: `tokens.css`, `preview.css`, `theme.svelte.ts`, `locale.svelte.ts`, `
 | Platform | Artefacts | How users get it |
 |---|---|---|
 | Windows x64 | `MDFlux_<ver>_x64-setup.exe` + `_portable_offline.zip` | GitHub Release |
-| macOS arm64 | `MDFlux_<ver>_aarch64.dmg` | Release **or** `brew install --cask audichuang/tap/mdflux` |
+| macOS arm64 only | `MDFlux_<ver>_aarch64.dmg` | Release **or** Homebrew **cask** (not Formula) |
 
-1. **Do not commit** `resources/runtime/python/` — only `runtime/README.md`. Build with `bundle-runtime.sh --platform windows-x64|macos-arm64` (never mix platforms in one tree).
-2. **Offline runtime is intentional** (`bootstrap.rs` prefers bundled Python). Basic package has **no** OCR/audio engines.
-3. **CI** (`.github/workflows/portable.yml`): Windows + mac jobs → one `publish-release` with **all three** assets. `main` → tag **`offline-latest`**; `vX.Y.Z` → version tag. Prefer CI over local packaging.
-4. **Homebrew is macOS cask only** (not Formula, not Windows). Live file: **`audichuang/homebrew-tap` `Casks/mdflux.rb`**. Repo `packaging/homebrew/` is a **draft** — CI `publish-homebrew` rewrites the tap on **stable `v*` tags only** (not `offline-latest`, not `v*-rc`).
-5. **Secret:** `HOMEBREW_TAP_TOKEN` (PAT → write `homebrew-tap`). No tokens in this file. Without it, packages still publish; tap job fails on tags.
-6. **Release hygiene:** `softprops` **merges** assets onto an existing tag — old filenames can linger; delete stale assets when version bumps.
-7. **Version bump** (together): `app/package.json`, `tauri.conf.json`, `Cargo.toml` (+ lock package `app`).
+1. **Do not commit** `app/src-tauri/resources/runtime/python/` — only `runtime/README.md`. Build: `bundle-runtime.sh --platform windows-x64|macos-arm64` (**never mix** platforms in one tree).
+2. **Offline runtime intentional** (`bootstrap.rs` prefers bundled Python). Basic package has **no** OCR/audio engines.
+3. **CI** `portable.yml`: Windows + mac → `publish-release` requires **all three** files. `main` → **`offline-latest`**; tag **`vX.Y.Z`** → version release. Prefer CI over local packaging. Local: `make-installer.ps1` uses `--bundles nsis`; `make-macos-dmg.sh` uses `--bundles dmg`.
+4. **Homebrew:** live cask is **`audichuang/homebrew-tap` `Casks/mdflux.rb`**. Repo `packaging/homebrew/` is a **draft only**. CI `publish-homebrew` runs on **stable `v*` tags only** — not `offline-latest`, not `v*-rc`. Windows is never via brew.
+5. **Secret name only:** `HOMEBREW_TAP_TOKEN` (write access to `homebrew-tap`). No token values in git. Without it, packages still publish; tap job fails on tags.
+6. **Release hygiene:** `softprops` **merges** assets onto an existing tag — old version filenames can linger; delete stale assets when bumping.
+7. **Version bump together:** `app/package.json`, `tauri.conf.json`, `Cargo.toml` (+ `Cargo.lock` package name `app`).
 
-Human detail: `packaging/homebrew/README.md`, `README.md` install section.
+**Ops gotcha:** After a new cask lands on the remote tap, local Homebrew may still miss it until `brew update` (or re-tap). “Cask unavailable / path does not exist” is usually a **stale local tap**, not a missing remote file.
+
+Detail: `packaging/homebrew/README.md`, `README.md` install section.
 
 ## Commands (prefer scoped)
 
@@ -51,8 +53,8 @@ cd app && npm ci && npm run check
 cd app/src-tauri && cargo check --locked
 bash scripts/bundle-runtime.sh --platform windows-x64   # or macos-arm64 --force
 # Prefer CI "Portable build". Local:
-pwsh -File scripts/make-installer.ps1 -AlsoPortable   # Windows
-bash scripts/make-macos-dmg.sh                        # macOS arm64
+pwsh -File scripts/make-installer.ps1 -AlsoPortable   # Windows host
+bash scripts/make-macos-dmg.sh                        # macOS arm64 host
 ```
 
 ## Start here (judgment, not a tree)
@@ -60,12 +62,12 @@ bash scripts/make-macos-dmg.sh                        # macOS arm64
 | When changing… | Read first |
 |---|---|
 | UI / theme / reader | `tokens.css`, `preview.css`, `theme.svelte.ts`, `ResultView.svelte` |
-| Conversion | `resources/sidecar/main.py`, `worker.py`, `capabilities.py` |
-| Provision / runtime path | `src/bootstrap.rs` |
-| Batch / IPC | `src/lib.rs`, `src/converter.rs` |
-| Release / brew | `portable.yml`, `bundle-runtime.sh`, `make-installer.ps1`, `make-macos-dmg.sh` |
+| Conversion | `app/src-tauri/resources/sidecar/main.py`, `worker.py`, `capabilities.py` |
+| Provision / runtime path | `app/src-tauri/src/bootstrap.rs` |
+| Batch / IPC | `app/src-tauri/src/lib.rs`, `converter.rs` |
+| Release / brew | `.github/workflows/portable.yml`, `bundle-runtime.sh`, `make-installer.ps1`, `make-macos-dmg.sh` |
 
-Structure: `tree` / search. Docs: `README.md`, `CONTRIBUTING.md`, `packaging/homebrew/README.md`.
+Structure: `tree` / search — no directory trees here. Docs: `README.md`, `CONTRIBUTING.md`, `packaging/homebrew/README.md`.
 
 ## Permissions / ask first
 
@@ -76,4 +78,4 @@ Structure: `tree` / search. Docs: `README.md`, `CONTRIBUTING.md`, `packaging/hom
 | Token/layout tweaks staying Claude-warm + flat reader | Manual push to **homebrew-tap** (use CI `publish-homebrew`) |
 | | Overwrite Release tags outside normal CI; broad lock bumps; new brand palette / drop light-dark / re-box reader |
 
-No secrets/PII here. App data lives under OS app-data dir at runtime, not the repo.
+No secrets/PII here. App data lives under the OS app-data dir at runtime, not the repo.
