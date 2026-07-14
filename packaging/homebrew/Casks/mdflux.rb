@@ -11,7 +11,7 @@
 #   (prefer the published tap; local path install is for maintainers only)
 
 cask "mdflux" do
-  version "0.1.1"
+  version "0.1.2"
   sha256 "REPLACE_WITH_CI_SHA256_OF_MDFlux_VERSION_aarch64.dmg"
 
   url "https://github.com/audichuang/mdflux/releases/download/v#{version}/MDFlux_#{version}_aarch64.dmg"
