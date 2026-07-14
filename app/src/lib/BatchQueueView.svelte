@@ -42,7 +42,7 @@
   };
 </script>
 
-<div class="w-full max-w-2xl mx-auto py-6 px-1 flex flex-col gap-5 h-full min-h-0">
+<div class="w-full max-w-2xl self-center py-6 px-1 flex flex-col gap-5 h-full min-h-0">
   <!-- Header -->
   <div class="flex flex-col gap-3 border-b border-zinc-800 pb-4 flex-shrink-0">
     <div class="flex items-baseline justify-between">

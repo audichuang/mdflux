@@ -50,7 +50,7 @@
   }
 </script>
 
-<div class="w-full max-w-2xl mx-auto py-6 px-1 flex flex-col gap-5 h-full min-h-0">
+<div class="w-full max-w-2xl self-center py-6 px-1 flex flex-col gap-5 h-full min-h-0">
   <!-- Stats row -->
   <div class="flex gap-3 flex-wrap flex-shrink-0">
     {#if done > 0}
