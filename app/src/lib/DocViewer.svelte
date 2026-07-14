@@ -103,11 +103,17 @@
   }
   .doc-scroll {
     background: transparent;
-    padding: 28px 32px 40px;
+    padding: 24px clamp(20px, 3vw, 40px) 40px;
   }
   .doc-col {
-    max-width: 44rem;
+    max-width: min(72rem, 100%);
     margin: 0 auto;
     width: 100%;
+  }
+
+  @media (min-width: 1600px) {
+    .doc-col {
+      max-width: min(80rem, 100%);
+    }
   }
 </style>

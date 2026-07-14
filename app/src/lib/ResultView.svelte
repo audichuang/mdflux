@@ -679,11 +679,19 @@
   }
   .result-scroll {
     background: transparent;
-    padding: 28px 32px 40px;
+    /* Side padding only; column uses most of the available width on large screens */
+    padding: 24px clamp(20px, 3vw, 40px) 40px;
   }
   .result-col {
-    max-width: 44rem; /* ~704px — readable column without huge side voids inside a box */
+    /* Grow with viewport — avoid a thin strip on wide monitors; cap so prose lines stay readable */
+    max-width: min(72rem, 100%); /* ~1152px */
     margin: 0 auto;
     width: 100%;
+  }
+
+  @media (min-width: 1600px) {
+    .result-col {
+      max-width: min(80rem, 100%); /* ~1280px on very wide displays */
+    }
   }
 </style>
