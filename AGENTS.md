@@ -1,102 +1,79 @@
 # MDFlux — agent context
 
 Local-first desktop app: documents → clean Markdown.  
-**This clone is the `audichuang` fork** with offline packaging (bundled Python). Upstream: `ibrahimqureshae/mdflux` (`upstream` remote).
+**This clone is the `audichuang` fork** (offline packages + macOS arm64 + Homebrew). Upstream: `ibrahimqureshae/mdflux` (`upstream` remote).
 
 ## Architecture (non-negotiable)
 
 | Layer | Role |
 |---|---|
 | Svelte (`app/src`) | UI only |
-| Rust/Tauri (`app/src-tauri/src`) | Window, dialogs, sidecar process, provision / bundled runtime |
-| Python sidecar (`app/src-tauri/resources/sidecar`) | **All** conversion (MarkItDown), cleanup, OCR/audio workers |
+| Rust/Tauri (`app/src-tauri/src`) | Window, dialogs, sidecar, provision / bundled runtime |
+| Python sidecar (`resources/sidecar`) | **All** conversion (MarkItDown), cleanup, OCR/audio workers |
 
-Shell **never** converts; sidecar **never** owns UI. The only coupling is the NDJSON IPC (`main.py` ↔ `converter.rs` / `lib.rs`).
+Shell **never** converts; sidecar **never** owns UI. Coupling = NDJSON IPC only (`main.py` ↔ `converter.rs` / `lib.rs`).
 
 ## UI / design (non-negotiable)
 
-**Target feel:** Claude-like warmth + shadcn-style controls (soft segs, quiet edges, terracotta accent).  
-**Themes:** system / light / dark via `ThemeSwitch` + `theme.svelte.ts` (`html[data-theme]`). Default follows OS.  
-Light = warm paper (`#FAF9F5` family); dark = warm charcoal — **not** cold zinc-blue SaaS, not pure `#000`.
+**Feel:** Claude-warm charcoal/paper + terracotta accent + shadcn-style segs. Themes: system / light / dark (`theme.svelte.ts`, `ThemeSwitch`). Not cold zinc-blue SaaS.
 
-| Rule | Do | Don't |
+| Do | Don't |
+|---|---|
+| Tokens only in `tokens.css`; `btn-primary` = `--accent` (orange) | Scatter hex; black monochrome primary |
+| Lists/setup: `.panel` / `.panel-inset` / `.hairline-*` | `border-zinc-800 rounded-lg divide-y` stacks |
+| **Reader** (`ResultView` / `DocViewer`): **flat on canvas**, wide column (~72–80rem) | Full-bleed `.panel` around reader; thin ~44rem center strip |
+| Markdown: **only** `preview.css` + `.md-preview`; tables = hairline rows | Duplicate preview CSS; grid cages / mini-card tables |
+| `tr()` / `locale.svelte.ts`; runes only in `*.svelte` / `*.svelte.ts` | Plain `.ts` `$state` (blank screen); second i18n store |
+
+Canonical: `tokens.css`, `preview.css`, `theme.svelte.ts`, `locale.svelte.ts`, `ResultView.svelte`, `StagingView.svelte`.
+
+## Shipping / packaging (non-negotiable)
+
+| Platform | Artefacts | How users get it |
 |---|---|---|
-| Tokens | Palette / radius / spacing only in `tokens.css` | Scatter hex; invent a second theme store |
-| Accent | Terracotta / clay **orange**; **`btn-primary` = `--accent`** | Black/white monochrome primary; blue brand |
-| Chrome frames | Lists/setup cards: `.panel` / `.panel-inset` / `.hairline-*` | `border border-zinc-800 rounded-lg divide-y` stacks |
-| **Result / Doc reading** | **Flat on canvas** (`result-shell` / `doc-shell`) — one surface, hairline chrome only | Nest a full-bleed `.panel` card around the reader (double-card, ugly) |
-| **Reading column** | Wide: ~`72rem` (very wide ~`80rem`); use the monitor | Thin ~`40–44rem` strip with huge empty side margins |
-| Markdown body | **Only** `preview.css` + class `.md-preview` | Duplicate preview CSS in ResultView/DocViewer |
-| Tables in preview | Inline document: top/bottom hairlines, transparent bg | Full grid cages or floating “mini-card” table fills |
-| Buttons / segs | Global `btn-*`, `seg` / `seg-btn` | Per-view button recipes; hard-coded blue focus rings |
-| Utilities | Tailwind OK; `zinc-*` / `blue-*` are **remapped** to tokens | Treat `bg-zinc-950` as literal zinc |
-| Layout (flex column) | `self-center` (+ max-width) for centered blocks | `mx-auto` alone when parent is flex column |
-| i18n | `tr()` / `locale.svelte.ts` for user-visible strings | Hardcoded EN/ZH in one view only |
+| Windows x64 | `MDFlux_<ver>_x64-setup.exe` + `_portable_offline.zip` | GitHub Release |
+| macOS arm64 | `MDFlux_<ver>_aarch64.dmg` | Release **or** `brew install --cask audichuang/tap/mdflux` |
 
-**Canonical files (copy these, don’t invent parallels):**
+1. **Do not commit** `resources/runtime/python/` — only `runtime/README.md`. Build with `bundle-runtime.sh --platform windows-x64|macos-arm64` (never mix platforms in one tree).
+2. **Offline runtime is intentional** (`bootstrap.rs` prefers bundled Python). Basic package has **no** OCR/audio engines.
+3. **CI** (`.github/workflows/portable.yml`): Windows + mac jobs → one `publish-release` with **all three** assets. `main` → tag **`offline-latest`**; `vX.Y.Z` → version tag. Prefer CI over local packaging.
+4. **Homebrew is macOS cask only** (not Formula, not Windows). Live file: **`audichuang/homebrew-tap` `Casks/mdflux.rb`**. Repo `packaging/homebrew/` is a **draft** — CI `publish-homebrew` rewrites the tap on **stable `v*` tags only** (not `offline-latest`, not `v*-rc`).
+5. **Secret:** `HOMEBREW_TAP_TOKEN` (PAT → write `homebrew-tap`). No tokens in this file. Without it, packages still publish; tap job fails on tags.
+6. **Release hygiene:** `softprops` **merges** assets onto an existing tag — old filenames can linger; delete stale assets when version bumps.
+7. **Version bump** (together): `app/package.json`, `tauri.conf.json`, `Cargo.toml` (+ lock package `app`).
 
-- Tokens + chrome primitives → `app/src/lib/tokens.css`
-- Markdown preview → `app/src/lib/preview.css` (import in `+layout.svelte`)
-- Theme → `theme.svelte.ts` + early paint in `app.html` + `ThemeSwitch.svelte`
-- Locale → `locale.svelte.ts` (**must** stay `.svelte.ts`)
-- Reader layout examples → `ResultView.svelte`, `DocViewer.svelte`
-- Staging / batch chrome → `StagingView.svelte` (`panel-inset` lists)
-
-**Gotchas (real failures):**
-
-1. Svelte 5 runes only compile in `.svelte` / `.svelte.ts` — `$state` in plain `.ts` → blank screen.
-2. Reader view ≠ elevated card: wrapping Result/Doc in `.panel` recreated the “card on paper” mismatch users rejected.
-3. Prefer elevation / hairlines over ink boxes; when borders feel “stiff”, remove a layer, don’t only bump padding.
-
-## Hard constraints
-
-1. **Do not commit** `app/src-tauri/resources/runtime/python/` — build artefact. Only `runtime/README.md` is tracked.
-2. **Offline ship path is intentional**: bundled runtime; `bootstrap.rs` skips first-launch download when present. Don’t remove without discussion.
-3. **Basic offline build has no OCR/audio engines** (optional extras). Don’t assume RapidOCR / faster-whisper ship in the package.
-4. **Ship platforms:** Windows (NSIS + portable zip) + **macOS Apple Silicon DMG**. CI `portable.yml` publishes both to **`offline-latest`** (main) or **`v*`** tags. Homebrew cask updates on `v*` only (needs `HOMEBREW_TAP_TOKEN` → `audichuang/homebrew-tap`).
-5. **Runtime platform must match the package:** `bundle-runtime.sh --platform windows-x64` vs `macos-arm64` (never mix into the same tree).
+Human detail: `packaging/homebrew/README.md`, `README.md` install section.
 
 ## Commands (prefer scoped)
 
 ```bash
 cd app && npm ci && npm run check
 cd app/src-tauri && cargo check --locked
-
-# Offline Python trees (cross-fetch wheels OK)
-bash scripts/bundle-runtime.sh --platform windows-x64
-bash scripts/bundle-runtime.sh --platform macos-arm64 --force
-
-# Packages (prefer CI)
-pwsh -File scripts/make-installer.ps1 -AlsoPortable   # Windows host
-bash scripts/make-macos-dmg.sh                        # macOS arm64 host
+bash scripts/bundle-runtime.sh --platform windows-x64   # or macos-arm64 --force
+# Prefer CI "Portable build". Local:
+pwsh -File scripts/make-installer.ps1 -AlsoPortable   # Windows
+bash scripts/make-macos-dmg.sh                        # macOS arm64
 ```
-
-Prefer CI (`Portable build`) for ship packages.
 
 ## Start here (judgment, not a tree)
 
 | When changing… | Read first |
 |---|---|
-| Look / theme / chrome | `tokens.css`, `theme.svelte.ts`, `ThemeSwitch.svelte` |
-| Markdown preview / tables | `preview.css` (then ResultView / DocViewer shells only) |
-| Reader layout / column width | `ResultView.svelte`, `DocViewer.svelte` |
-| Copy / language | `locale.svelte.ts` |
-| Conversion / formats | `resources/sidecar/main.py`, `worker.py`, `capabilities.py` |
-| Offline Python / first-run | `src/bootstrap.rs` |
+| UI / theme / reader | `tokens.css`, `preview.css`, `theme.svelte.ts`, `ResultView.svelte` |
+| Conversion | `resources/sidecar/main.py`, `worker.py`, `capabilities.py` |
+| Provision / runtime path | `src/bootstrap.rs` |
 | Batch / IPC | `src/lib.rs`, `src/converter.rs` |
-| Packaging / Release / brew | `scripts/make-installer.ps1`, `make-macos-dmg.sh`, `bundle-runtime.sh`, `packaging/homebrew/Casks/mdflux.rb`, `.github/workflows/portable.yml` |
+| Release / brew | `portable.yml`, `bundle-runtime.sh`, `make-installer.ps1`, `make-macos-dmg.sh` |
 
-Structure: use `tree` / search — don’t paste directory trees here. Human docs: `CONTRIBUTING.md`, `README.md`.
+Structure: `tree` / search. Docs: `README.md`, `CONTRIBUTING.md`, `packaging/homebrew/README.md`.
 
 ## Permissions / ask first
 
 | AI may do freely | Ask before |
 |---|---|
 | Edit app code, scripts, docs; `npm run check` / `cargo check` | `git push`, force-push, amend published history |
-| Local `bundle-runtime` experiments | Push to **upstream** or open upstream PR |
-| Token / layout tweaks that stay Claude-warm + flat reader + wide column | Overwrite Release tags (`offline-latest`, `v*`) outside normal CI |
-| Local runtime / packaging experiments | Push to **homebrew-tap** without going through CI `publish-homebrew` |
-| | Broad lockfile bumps without a reason |
-| | New brand palette, or removing light/dark, or re-boxing the reader in `.panel` |
+| Local runtime / packaging experiments | Push to **upstream** `ibrahimqureshae/mdflux` |
+| Token/layout tweaks staying Claude-warm + flat reader | Manual push to **homebrew-tap** (use CI `publish-homebrew`) |
+| | Overwrite Release tags outside normal CI; broad lock bumps; new brand palette / drop light-dark / re-box reader |
 
-No secrets in this file. Runtime app data lives under the OS app-data dir, not the repo.
+No secrets/PII here. App data lives under OS app-data dir at runtime, not the repo.
