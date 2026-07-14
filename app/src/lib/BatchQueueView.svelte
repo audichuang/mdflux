@@ -56,7 +56,7 @@
 
     <!-- Overall progress bar -->
     <div
-      class="h-1 bg-zinc-900 rounded-full overflow-hidden"
+      class="h-2 bg-zinc-900 rounded-full overflow-hidden"
       role="progressbar"
       aria-valuenow={Math.round(progress * 100)}
       aria-valuemin={0}
@@ -157,7 +157,7 @@
 
           {#if item.status === 'running' && item.frac !== null}
             <div
-              class="h-1 bg-zinc-900 rounded-full overflow-hidden"
+              class="h-1.5 bg-zinc-900 rounded-full overflow-hidden"
               role="progressbar"
               aria-valuenow={Math.round((item.frac ?? 0) * 100)}
               aria-valuemin={0}
@@ -170,7 +170,7 @@
             </div>
           {:else if item.status === 'running'}
             <div
-              class="h-1 bg-zinc-900 rounded-full overflow-hidden relative"
+              class="h-1.5 bg-zinc-900 rounded-full overflow-hidden relative"
               role="progressbar"
               aria-label="Converting"
             >

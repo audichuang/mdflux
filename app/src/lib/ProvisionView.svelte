@@ -94,7 +94,7 @@
 
     {#if hasTotal && !done}
       <div
-        class="h-1.5 bg-zinc-950 rounded-full overflow-hidden"
+        class="h-2 bg-zinc-950 rounded-full overflow-hidden"
         role="progressbar"
         aria-valuenow={Math.round(frac * 100)}
         aria-valuemin={0}
@@ -107,7 +107,7 @@
       </div>
     {:else if !done}
       <div
-        class="h-1.5 bg-zinc-950 rounded-full overflow-hidden relative"
+        class="h-2 bg-zinc-950 rounded-full overflow-hidden relative"
         role="progressbar"
         aria-busy="true"
         aria-label={progress.message}
