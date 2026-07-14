@@ -1,19 +1,30 @@
-
 export type Lang = 'en' | 'zh';
 
-// Reactive state for active language, loading from localStorage if present
-let currentLang = $state<Lang>(
-  (typeof localStorage !== 'undefined' && localStorage.getItem('mdflux_lang') as Lang) || 'en'
-);
+// Svelte 5 Shared Reactive State Object
+export const locale = $state({
+  current: 'en' as Lang
+});
 
-export function getLang(): Lang {
-  return currentLang;
+// Safely load from localStorage, catching webview SecurityError
+if (typeof localStorage !== 'undefined') {
+  try {
+    const saved = localStorage.getItem('mdflux_lang');
+    if (saved === 'en' || saved === 'zh') {
+      locale.current = saved;
+    }
+  } catch {
+    // Ignore DOMException / SecurityError in sandboxed environments
+  }
 }
 
 export function setLang(lang: Lang) {
-  currentLang = lang;
+  locale.current = lang;
   if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('mdflux_lang', lang);
+    try {
+      localStorage.setItem('mdflux_lang', lang);
+    } catch {
+      // Ignore DOMException
+    }
   }
 }
 
@@ -189,7 +200,7 @@ const translations: Record<Lang, Record<string, string>> = {
 };
 
 export function tr(key: string, vars?: Record<string, string | number>): string {
-  const lang = currentLang;
+  const lang = locale.current;
   let text = translations[lang]?.[key] || translations['en']?.[key] || key;
   if (vars) {
     Object.entries(vars).forEach(([k, v]) => {

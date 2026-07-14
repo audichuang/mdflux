@@ -8,7 +8,7 @@
   import ResultView from '$lib/ResultView.svelte';
   import ModeSwitch from '$lib/ModeSwitch.svelte';
   import DiagnosticsView from '$lib/DiagnosticsView.svelte';
-  import { getLang, setLang, tr } from '$lib/locale';
+  import { locale, setLang, tr } from '$lib/locale';
   import BatchQueueView from '$lib/BatchQueueView.svelte';
   import BatchSummaryView from '$lib/BatchSummaryView.svelte';
   import DocViewer from '$lib/DocViewer.svelte';
@@ -616,7 +616,7 @@
       <div class="seg" role="group" aria-label="Language Selector">
         <button
           class="seg-btn"
-          class:active={getLang() === 'en'}
+          class:active={locale.current === 'en'}
           onclick={() => setLang('en')}
           title="English"
         >
@@ -624,7 +624,7 @@
         </button>
         <button
           class="seg-btn"
-          class:active={getLang() === 'zh'}
+          class:active={locale.current === 'zh'}
           onclick={() => setLang('zh')}
           title="繁體中文"
         >
