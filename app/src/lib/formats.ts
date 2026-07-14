@@ -4,7 +4,17 @@
 
 /** Core document formats — always available (provisioned at Stage 0). */
 export const CORE_EXTS = [
-  'pdf', 'docx', 'pptx', 'xlsx', 'xls', 'html', 'htm', 'csv', 'json', 'xml', 'epub',
+  'pdf',
+  'docx',
+  'pptx',
+  'xlsx',
+  'xls',
+  'html',
+  'htm',
+  'csv',
+  'json',
+  'xml',
+  'epub',
 ];
 
 /** Image formats — converted via the optional OCR engine. */

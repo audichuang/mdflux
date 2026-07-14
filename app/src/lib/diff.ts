@@ -27,9 +27,7 @@ export function lineDiff(a: string, b: string, cap = DEFAULT_CAP): DiffResult {
     const row = dp[i];
     const next = dp[i + 1];
     for (let j = m - 1; j >= 0; j--) {
-      row[j] = aLines[i] === bLines[j]
-        ? next[j + 1] + 1
-        : Math.max(next[j], row[j + 1]);
+      row[j] = aLines[i] === bLines[j] ? next[j + 1] + 1 : Math.max(next[j], row[j + 1]);
     }
   }
 
@@ -42,17 +40,28 @@ export function lineDiff(a: string, b: string, cap = DEFAULT_CAP): DiffResult {
   while (i < n && j < m) {
     if (aLines[i] === bLines[j]) {
       rows.push({ type: 'same', text: aLines[i] });
-      i++; j++;
+      i++;
+      j++;
     } else if (dp[i + 1][j] >= dp[i][j + 1]) {
       rows.push({ type: 'del', text: aLines[i] });
-      removed++; i++;
+      removed++;
+      i++;
     } else {
       rows.push({ type: 'add', text: bLines[j] });
-      added++; j++;
+      added++;
+      j++;
     }
   }
-  while (i < n) { rows.push({ type: 'del', text: aLines[i] }); removed++; i++; }
-  while (j < m) { rows.push({ type: 'add', text: bLines[j] }); added++; j++; }
+  while (i < n) {
+    rows.push({ type: 'del', text: aLines[i] });
+    removed++;
+    i++;
+  }
+  while (j < m) {
+    rows.push({ type: 'add', text: bLines[j] });
+    added++;
+    j++;
+  }
 
   return { kind: 'full', rows, added, removed };
 }

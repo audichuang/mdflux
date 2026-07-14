@@ -12,8 +12,6 @@
     onDismissError,
     onOpenDiagnostics,
   }: {
-    /** Called with raw dropped/picked paths (files and/or folders). The parent
-     *  expands folders and stages them — files are not converted immediately. */
     onAdd: (paths: string[]) => void;
     error?: ConvertError | null;
     onDismissError?: () => void;
@@ -34,15 +32,24 @@
       localState = 'idle';
       const paths = e.payload.paths ?? [];
       if (paths.length) onAdd(paths);
-    }).then(fn => { if (dead) fn(); else unlistenDrop = fn; });
+    }).then((fn) => {
+      if (dead) fn();
+      else unlistenDrop = fn;
+    });
 
     listen('tauri://drag-enter', () => {
       localState = 'drag-hover';
-    }).then(fn => { if (dead) fn(); else unlistenEnter = fn; });
+    }).then((fn) => {
+      if (dead) fn();
+      else unlistenEnter = fn;
+    });
 
     listen('tauri://drag-leave', () => {
       if (localState === 'drag-hover') localState = 'idle';
-    }).then(fn => { if (dead) fn(); else unlistenLeave = fn; });
+    }).then((fn) => {
+      if (dead) fn();
+      else unlistenLeave = fn;
+    });
 
     return () => {
       dead = true;
@@ -67,14 +74,18 @@
   }
 
   function onKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); browse(); }
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      browse();
+    }
   }
 </script>
 
 <div
-  class="zone"
-  class:drag-hover={dropState === 'drag-hover'}
-  class:error-state={dropState === 'error'}
+  class="flex-1 relative rounded-2xl bg-zinc-900/20 border border-zinc-800/80 hover:bg-zinc-900/50 hover:border-zinc-700/80 transition-all duration-300 cursor-pointer outline-none flex items-center justify-center overflow-hidden min-h-[320px] group {localState ===
+  'drag-hover'
+    ? 'bg-zinc-900/50 border-blue-500/50'
+    : ''} {dropState === 'error' ? 'cursor-default border-red-950 bg-red-950/5' : ''}"
   role="button"
   tabindex={0}
   aria-label="Drop files or a folder, or click to browse"
@@ -83,54 +94,76 @@
   onkeydown={onKeyDown}
 >
   <!-- Animated gradient border ring -->
-  <div class="border-ring" aria-hidden="true"></div>
+  <div
+    class="border-ring"
+    aria-hidden="true"
+    class:ring-hover={localState === 'drag-hover'}
+    class:ring-error={dropState === 'error'}
+  ></div>
 
   {#if dropState === 'error' && error}
-    <div class="inner error-inner" role="presentation" onclick={(e) => e.stopPropagation()}>
+    <div
+      class="relative w-full p-6 flex flex-col items-stretch cursor-default"
+      role="presentation"
+      onclick={(e) => e.stopPropagation()}
+    >
       <ErrorCard {error} onDismiss={onDismissError ?? (() => {})} {onOpenDiagnostics} />
     </div>
   {:else}
-    <div class="inner idle-inner">
-      <div class="drop-icon" aria-hidden="true">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M16 4v16M9 13l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M5 24h22" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".4"/>
-          <path d="M5 28h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".25"/>
+    <div class="relative flex flex-col items-center gap-3.5 p-8 text-center select-none">
+      <div
+        class="text-zinc-500 group-hover:text-blue-400 group-focus:text-blue-400 transition-colors duration-300 mb-1"
+        aria-hidden="true"
+      >
+        <svg
+          width="36"
+          height="36"
+          viewBox="0 0 32 32"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 4v16M9 13l7-7 7 7"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M5 24h22"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            opacity=".4"
+          />
+          <path
+            d="M5 28h12"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            opacity=".25"
+          />
         </svg>
       </div>
-      <p class="label">Drop files or a folder</p>
-      <p class="hint">or <span class="link">browse to choose</span></p>
-      <p class="formats">PDF · DOCX · PPTX · XLSX · EPUB · HTML · CSV · JSON · images · audio</p>
+      <p class="text-sm font-semibold text-zinc-200">Drop files or a folder here</p>
+      <p class="text-xs text-zinc-400">
+        or <span
+          class="text-blue-400 group-hover:text-blue-300 underline underline-offset-2 transition-colors"
+          >browse to choose</span
+        >
+      </p>
+      <p class="text-[10px] font-mono tracking-wider text-zinc-500 mt-2.5 uppercase">
+        PDF · DOCX · PPTX · XLSX · EPUB · HTML · CSV · JSON · images · audio
+      </p>
     </div>
   {/if}
 </div>
 
 <style>
-  .zone {
-    flex: 1;
-    position: relative;
-    border-radius: var(--radius-lg);
-    background: var(--surface-1);
-    cursor: pointer;
-    outline: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    transition: background var(--transition);
-  }
-  .zone:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset: 3px; }
-  .zone.error-state { cursor: default; }
-
-  /* Hover: mouse hover OR drag-enter both brighten the zone */
-  .zone:hover,
-  .zone.drag-hover { background: var(--surface-2); }
-
-  /* Signature element: animated gradient ring */
   .border-ring {
     position: absolute;
     inset: 0;
-    border-radius: var(--radius-lg);
+    border-radius: 1rem;
     padding: 1px;
     background: conic-gradient(
       from var(--angle, 0deg),
@@ -139,75 +172,47 @@
       transparent 70%,
       var(--accent)
     );
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    opacity: 0.35;
+    mask-composite: exclude;
+    opacity: 0.15;
     transition: opacity var(--transition);
     animation: rotate-ring 6s linear infinite;
   }
-  /* Ring brightens and speeds up on hover */
-  .zone:hover .border-ring,
-  .zone.drag-hover .border-ring { opacity: 0.85; animation-duration: 2.5s; }
-  .zone.error-state .border-ring {
-    background: conic-gradient(from var(--angle, 0deg), var(--red), transparent 40%, transparent 60%, var(--red));
-    opacity: 0.5;
+
+  :global(.group:hover) .border-ring,
+  .ring-hover {
+    opacity: 0.65;
+    animation-duration: 2.5s;
+  }
+
+  .ring-error {
+    background: conic-gradient(
+      from var(--angle, 0deg),
+      var(--red),
+      transparent 40%,
+      transparent 60%,
+      var(--red)
+    ) !important;
+    opacity: 0.35;
     animation: none;
   }
 
-  @keyframes rotate-ring { to { --angle: 360deg; } }
+  @keyframes rotate-ring {
+    to {
+      --angle: 360deg;
+    }
+  }
   @property --angle {
     syntax: '<angle>';
     inherits: false;
     initial-value: 0deg;
   }
   @media (prefers-reduced-motion: reduce) {
-    .border-ring { animation: none; }
-  }
-
-  .inner {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--sp-2);
-    padding: var(--sp-8);
-    width: 100%;
-  }
-  .error-inner {
-    padding: var(--sp-6);
-    align-items: stretch;
-    cursor: default;
-  }
-
-  .drop-icon {
-    color: var(--text-muted);
-    margin-bottom: var(--sp-2);
-    transition: color var(--transition);
-  }
-  /* Icon turns accent on hover */
-  .zone:hover .drop-icon,
-  .zone.drag-hover .drop-icon { color: var(--accent); }
-
-  .label {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-  .hint {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
-  .link {
-    color: var(--accent);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-  .formats {
-    margin-top: var(--sp-2);
-    font-size: 11px;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    letter-spacing: 0.02em;
+    .border-ring {
+      animation: none;
+    }
   }
 </style>

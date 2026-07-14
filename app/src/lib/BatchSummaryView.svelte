@@ -20,11 +20,12 @@
     cleanupChanges?: number;
   } = $props();
 
-  const done      = $derived(items.filter(i => i.status === 'done').length);
-  const failed    = $derived(items.filter(i => i.status === 'failed').length);
-  const cancelled = $derived(items.filter(i => i.status === 'cancelled').length);
-  const warned    = $derived(items.filter(i => i.status === 'done' && (i.warnings?.length ?? 0) > 0).length);
-  const total     = $derived(items.length);
+  const done = $derived(items.filter((i) => i.status === 'done').length);
+  const failed = $derived(items.filter((i) => i.status === 'failed').length);
+  const cancelled = $derived(items.filter((i) => i.status === 'cancelled').length);
+  const warned = $derived(
+    items.filter((i) => i.status === 'done' && (i.warnings?.length ?? 0) > 0).length,
+  );
   const hasFailed = $derived(failed > 0);
 
   let copied = $state(false);
@@ -33,248 +34,181 @@
 
   function copyFailures() {
     const text = items
-      .filter(i => i.status === 'failed')
-      .map(i => `${i.filename}: ${i.error?.detail ?? 'unknown error'}`)
+      .filter((i) => i.status === 'failed')
+      .map((i) => `${i.filename}: ${i.error?.detail ?? 'unknown error'}`)
       .join('\n');
-    navigator.clipboard.writeText(text).then(() => {
-      clearTimeout(copyTimer);
-      copied = true;
-      copyTimer = setTimeout(() => (copied = false), 1800);
-    }).catch(() => {
-      copied = false;
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        clearTimeout(copyTimer);
+        copied = true;
+        copyTimer = setTimeout(() => (copied = false), 1800);
+      })
+      .catch(() => {
+        copied = false;
+      });
   }
 </script>
 
-<div class="summary">
-
+<div class="w-full max-w-2xl mx-auto py-6 px-1 flex flex-col gap-5 h-full min-h-0">
   <!-- Stats row -->
-  <div class="stats">
+  <div class="flex gap-3 flex-wrap flex-shrink-0">
     {#if done > 0}
-      <span class="stat stat-done">
-        <span class="stat-num">{done}</span>
-        <span class="stat-label">converted</span>
+      <span
+        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-green-950/10"
+      >
+        <span class="text-lg font-bold font-mono text-green-400 leading-none">{done}</span>
+        <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider"
+          >converted</span
+        >
       </span>
     {/if}
     {#if failed > 0}
-      <span class="stat stat-failed">
-        <span class="stat-num">{failed}</span>
-        <span class="stat-label">failed</span>
+      <span
+        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-red-950/10"
+      >
+        <span class="text-lg font-bold font-mono text-red-400 leading-none">{failed}</span>
+        <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">failed</span>
       </span>
     {/if}
     {#if cancelled > 0}
-      <span class="stat stat-cancelled">
-        <span class="stat-num">{cancelled}</span>
-        <span class="stat-label">cancelled</span>
+      <span
+        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900/40"
+      >
+        <span class="text-lg font-bold font-mono text-zinc-400 leading-none">{cancelled}</span>
+        <span class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider"
+          >cancelled</span
+        >
       </span>
     {/if}
     {#if warned > 0}
-      <span class="stat stat-warned" title="Converted, but the file had no extractable content">
-        <span class="stat-num">{warned}</span>
-        <span class="stat-label">with notices</span>
+      <span
+        class="inline-flex items-baseline gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-amber-950/10"
+        title="Converted, but the file had no extractable content"
+      >
+        <span class="text-lg font-bold font-mono text-amber-400 leading-none">{warned}</span>
+        <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">notices</span
+        >
       </span>
     {/if}
   </div>
 
   {#if cleanupApplied && done > 0}
-    <div class="cleanup-note">
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-        <path d="M2 7.5L5.5 11L12 3.5" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <div
+      class="flex items-center gap-2 rounded-lg border border-blue-950/60 bg-blue-950/10 px-3.5 py-2.5 text-xs text-zinc-300 leading-normal flex-shrink-0"
+    >
+      <svg
+        class="text-blue-400 flex-shrink-0"
+        width="13"
+        height="13"
+        viewBox="0 0 14 14"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M2 7.5L5.5 11L12 3.5"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
       <span>
-        Cleanup applied to every converted file{cleanupChanges > 0 ? ` — ${cleanupChanges.toLocaleString()} change${cleanupChanges === 1 ? '' : 's'} in total` : ''}.
+        Cleanup applied to every converted file{cleanupChanges > 0
+          ? ` — ${cleanupChanges.toLocaleString()} change${cleanupChanges === 1 ? '' : 's'} in total`
+          : ''}.
       </span>
     </div>
   {/if}
 
   <!-- Results list -->
-  <ul class="results-list" aria-label="Conversion results">
+  <ul
+    class="flex-1 overflow-y-auto bg-zinc-950/30 border border-zinc-800 rounded-lg divide-y divide-zinc-900/50"
+    aria-label="Conversion results"
+  >
     {#each items as item (item.id)}
-      <li class="result-row"
-          class:result-done={item.status === 'done'}
-          class:result-failed={item.status === 'failed'}
-          class:result-cancelled={item.status === 'cancelled'}>
-
+      <li
+        class="flex items-start gap-3 p-3 transition-colors hover:bg-zinc-900/25 {item.status ===
+        'failed'
+          ? 'bg-red-950/5'
+          : ''} {item.status === 'cancelled' ? 'opacity-40' : ''}"
+      >
         <!-- Status dot -->
-        <span class="dot"
-          class:dot-green={item.status === 'done' && !(item.warnings?.length)}
-          class:dot-amber={item.status === 'done' && !!item.warnings?.length}
-          class:dot-red={item.status === 'failed'}
-          class:dot-muted={item.status === 'cancelled' || item.status === 'pending'}
-          aria-hidden="true">
+        <span
+          class="flex-shrink-0 w-2 h-2 rounded-full mt-2
+          {item.status === 'done' && !item.warnings?.length ? 'bg-green-500' : ''}
+          {item.status === 'done' && !!item.warnings?.length ? 'bg-amber-500' : ''}
+          {item.status === 'failed' ? 'bg-red-500' : ''}
+          {item.status === 'cancelled' || item.status === 'pending' ? 'bg-zinc-600' : ''}"
+          aria-hidden="true"
+        >
         </span>
 
         <!-- File info -->
-        <div class="result-info">
-          <span class="result-filename">{item.filename}</span>
+        <div class="flex-1 min-w-0 flex flex-col gap-1">
+          <span class="text-xs font-semibold text-zinc-200 truncate">{item.filename}</span>
           {#if item.status === 'done' && item.output_path}
-            <span class="result-detail result-out">→ {item.output_path}</span>
+            <span class="text-[10px] font-mono text-zinc-500 truncate" title={item.output_path}
+              >→ {item.output_path}</span
+            >
             {#if item.warnings?.length}
-              <span class="result-detail result-warn">⚠ {item.warnings.join(' · ')}</span>
+              <span class="text-[10px] text-amber-500 mt-0.5 leading-normal"
+                >⚠ {item.warnings.join(' · ')}</span
+              >
             {/if}
           {:else if item.status === 'failed' && item.error}
-            <span class="result-detail result-err">{item.error.title} — {item.error.detail}</span>
+            <span class="text-[10px] text-red-400 mt-0.5 leading-normal"
+              >{item.error.title} — {item.error.detail}</span
+            >
           {:else if item.status === 'cancelled'}
-            <span class="result-detail result-muted">Cancelled</span>
+            <span class="text-[10px] text-zinc-500 mt-0.5">Cancelled</span>
           {/if}
         </div>
 
         {#if item.status === 'done' && onOpen}
-          <button class="btn-accent-soft btn-sm view-btn" title="View the converted Markdown" onclick={() => onOpen?.(item)}>View</button>
+          <button
+            class="flex-shrink-0 inline-flex items-center justify-center rounded-md text-[11px] font-semibold h-6 px-2.5 border border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors self-center ml-2"
+            title="View the converted Markdown"
+            onclick={() => onOpen?.(item)}>View</button
+          >
         {/if}
-
       </li>
     {/each}
   </ul>
 
   <!-- Actions -->
-  <div class="actions">
+  <div class="flex gap-2 items-center flex-wrap flex-shrink-0">
     {#if hasFailed}
-      <button class="btn-primary" title="Re-run only the files that failed, with the same settings" onclick={onRetry}>
+      <button
+        class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-850 bg-zinc-50 hover:bg-zinc-200 text-zinc-950 cursor-pointer transition-colors"
+        title="Re-run only the files that failed, with the same settings"
+        onclick={onRetry}
+      >
         Retry {failed} failed file{failed === 1 ? '' : 's'}
       </button>
-      <button class="btn-secondary" title="Copy the list of failed files and their errors" onclick={copyFailures}>
+      <button
+        class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-850 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
+        title="Copy the list of failed files and their errors"
+        onclick={copyFailures}
+      >
         {copied ? 'Copied!' : 'Copy failures'}
       </button>
     {/if}
     {#if done > 0 && onOpenFolder}
-      <button class="btn-secondary" title="Reveal the converted files in your file manager" onclick={onOpenFolder}>
+      <button
+        class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-850 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
+        title="Reveal the converted files in your file manager"
+        onclick={onOpenFolder}
+      >
         Open folder
       </button>
     {/if}
-    <button class="btn-secondary" title="Clear this summary and start a new conversion" onclick={onClose}>
+    <button
+      class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-850 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors"
+      title="Clear this summary and start a new conversion"
+      onclick={onClose}
+    >
       Convert more files
     </button>
   </div>
-
 </div>
-
-<style>
-  .summary {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-    min-height: 0;
-  }
-
-  /* Stats */
-  .stats {
-    display: flex;
-    gap: var(--sp-3);
-    flex-shrink: 0;
-  }
-  .cleanup-note {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-2);
-    flex-shrink: 0;
-    font-size: 12px;
-    color: var(--text-secondary);
-    background: color-mix(in srgb, var(--accent) 7%, transparent);
-    border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
-    border-radius: var(--radius-sm);
-    padding: var(--sp-2) var(--sp-3);
-  }
-  .stat {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-    padding: var(--sp-2) var(--sp-3);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-  }
-  .stat-num {
-    font-size: 20px;
-    font-weight: 700;
-    font-family: var(--font-mono);
-    line-height: 1;
-  }
-  .stat-label {
-    font-size: 11px;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  .stat-done    { background: color-mix(in srgb, var(--green) 8%, transparent); }
-  .stat-done .stat-num    { color: var(--green); }
-  .stat-failed  { background: color-mix(in srgb, var(--red) 8%, transparent); }
-  .stat-failed .stat-num  { color: var(--red); }
-  .stat-cancelled { background: color-mix(in srgb, var(--text-muted) 8%, transparent); }
-  .stat-cancelled .stat-num { color: var(--text-muted); }
-  .stat-warned { background: color-mix(in srgb, var(--amber) 8%, transparent); }
-  .stat-warned .stat-num { color: var(--amber); }
-
-  /* Results list */
-  .results-list {
-    flex: 1;
-    overflow-y: auto;
-    list-style: none;
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    contain: content;
-  }
-
-  .result-row {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--sp-2);
-    padding: var(--sp-2) var(--sp-3);
-    border-bottom: 1px solid var(--border);
-  }
-  .result-row:last-child { border-bottom: none; }
-  .result-failed  { background: color-mix(in srgb, var(--red) 4%, transparent); }
-  .result-cancelled { opacity: 0.45; }
-
-  .dot {
-    flex-shrink: 0;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    margin-top: 4px;
-  }
-  .dot-green { background: var(--green); }
-  .dot-amber { background: var(--amber); }
-  .dot-red   { background: var(--red); }
-  .dot-muted { background: var(--text-muted); }
-
-  .result-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .result-filename {
-    font-size: 12px;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .result-detail {
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-family: var(--font-mono);
-  }
-  .result-out  { color: var(--text-muted); }
-  .result-err  { color: var(--red); }
-  .result-warn { color: var(--amber); font-family: var(--font-ui); white-space: normal; }
-  .result-muted { color: var(--text-muted); font-family: var(--font-ui); }
-
-  /* The View button styling is the global .btn-accent-soft/.btn-sm; only its placement
-     in the result row is local. */
-  .view-btn { align-self: center; flex-shrink: 0; }
-
-  /* Action buttons (.btn-primary / .btn-secondary / .btn-accent-soft / .btn-sm) and the
-     row container come from tokens.css. */
-  .actions {
-    display: flex;
-    gap: var(--sp-2);
-    flex-shrink: 0;
-    flex-wrap: wrap;
-  }
-</style>

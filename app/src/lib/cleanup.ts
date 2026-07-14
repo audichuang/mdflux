@@ -10,11 +10,36 @@ export interface CleanupRuleDef {
 }
 
 export const CLEANUP_RULES: CleanupRuleDef[] = [
-  { key: 'strip_cid',       label: 'Remove (cid:N) markers', hint: 'Strips PDF glyph artifacts like (cid:12)',                pdfOnly: true  },
-  { key: 'dedup_lines',     label: 'Remove duplicate lines', hint: 'Drops repeated headers, footers, and page numbers',      pdfOnly: true  },
-  { key: 'repair_lines',    label: 'Rejoin broken lines',    hint: 'Reconnects sentences split across lines or columns',     pdfOnly: true  },
-  { key: 'collapse_blanks', label: 'Collapse blank runs',    hint: 'Normalises long runs of empty lines',                    pdfOnly: false },
-  { key: 'detect_headings', label: 'Detect headings',        hint: 'Promotes clear heading lines to Markdown (conservative)', pdfOnly: false },
+  {
+    key: 'strip_cid',
+    label: 'Remove (cid:N) markers',
+    hint: 'Strips PDF glyph artifacts like (cid:12)',
+    pdfOnly: true,
+  },
+  {
+    key: 'dedup_lines',
+    label: 'Remove duplicate lines',
+    hint: 'Drops repeated headers, footers, and page numbers',
+    pdfOnly: true,
+  },
+  {
+    key: 'repair_lines',
+    label: 'Rejoin broken lines',
+    hint: 'Reconnects sentences split across lines or columns',
+    pdfOnly: true,
+  },
+  {
+    key: 'collapse_blanks',
+    label: 'Collapse blank runs',
+    hint: 'Normalises long runs of empty lines',
+    pdfOnly: false,
+  },
+  {
+    key: 'detect_headings',
+    label: 'Detect headings',
+    hint: 'Promotes clear heading lines to Markdown (conservative)',
+    pdfOnly: false,
+  },
 ];
 
 /**
@@ -51,7 +76,7 @@ export interface CleanupResult {
 /** Total changes across applied rules — used for headline counts. */
 export function totalChanges(summary: CleanupSummary | null): number {
   if (!summary) return 0;
-  return summary.rules.filter(r => r.applied).reduce((n, r) => n + r.changes, 0);
+  return summary.rules.filter((r) => r.applied).reduce((n, r) => n + r.changes, 0);
 }
 
 // ── Cleanup method + shared UI state ────────────────────────────────────────

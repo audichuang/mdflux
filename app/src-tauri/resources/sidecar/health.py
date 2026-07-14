@@ -4,7 +4,7 @@ The EXTRAS map is derived from capabilities._CORE_FORMATS so the two cannot drif
 (see the Stage 3 review: health had an 'outlook' entry that capabilities didn't).
 """
 import sys
-import importlib
+import importlib.util
 
 import capabilities as _caps
 
@@ -25,16 +25,22 @@ def check() -> dict:
     }
 
     try:
-        import markitdown
-        result["markitdown_version"] = getattr(markitdown, "__version__", "installed")
-    except ImportError:
-        pass
+        import importlib.metadata as md
+        result["markitdown_version"] = md.version("markitdown")
+    except Exception:
+        try:
+            import markitdown
+            result["markitdown_version"] = getattr(markitdown, "__version__", "installed")
+        except ImportError:
+            pass
 
     for name, module in _extras_map().items():
         try:
-            importlib.import_module(module)
-            result["extras"][name] = True
-        except ImportError:
+            # Use find_spec to verify presence without importing the module
+            installed = importlib.util.find_spec(module) is not None
+            result["extras"][name] = installed
+        except Exception:
             result["extras"][name] = False
 
     return result
+

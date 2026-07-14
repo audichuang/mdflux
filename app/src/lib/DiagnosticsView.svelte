@@ -27,7 +27,7 @@
     };
     formats: FormatEntry[];
     optional: {
-      ocr:   { status: string; engine: string; size_hint: string; note: string };
+      ocr: { status: string; engine: string; size_hint: string; note: string };
       audio: { status: string; engine: string; size_hint: string; note: string };
     };
   }
@@ -66,10 +66,10 @@
     extract_images: boolean;
     audio_model: string;
     // Stage 7 — output management
-    output_rule: string;       // 'next_to_source' | 'fixed_folder' | 'mirror_tree'
-    output_folder: string;     // default folder for fixed_folder / mirror_tree
-    naming_template: string;   // tokens: {stem} {ext} {date}
-    naming_case: string;       // 'keep' | 'lower' | 'slug'
+    output_rule: string; // 'next_to_source' | 'fixed_folder' | 'mirror_tree'
+    output_folder: string; // default folder for fixed_folder / mirror_tree
+    naming_template: string; // tokens: {stem} {ext} {date}
+    naming_case: string; // 'keep' | 'lower' | 'slug'
     open_after_convert: boolean;
   }
 
@@ -98,35 +98,42 @@
 
   // Editable copies of config fields (committed on Check/Test).
   // untrack: intentionally capturing initial prop value only.
-  let localBaseUrl    = $state(untrack(() => config.local_base_url));
-  let apiType         = $state(untrack(() => config.api_type));
-  let apiBaseUrl      = $state(untrack(() => config.api_base_url));
-  let apiKey          = $state(untrack(() => config.api_key));
-  let cleanupModel    = $state(untrack(() => config.cleanup_model));
+  let localBaseUrl = $state(untrack(() => config.local_base_url));
+  let apiType = $state(untrack(() => config.api_type));
+  let apiBaseUrl = $state(untrack(() => config.api_base_url));
+  let apiKey = $state(untrack(() => config.api_key));
+  let cleanupModel = $state(untrack(() => config.cleanup_model));
   let conversionModel = $state(untrack(() => config.conversion_model ?? ''));
 
   // Stage 7 — output management. Template is edited locally for a live preview,
   // committed on change; rule/case/folder/toggle read config directly (reactive).
-  let namingTemplate  = $state(untrack(() => config.naming_template ?? '{stem}'));
+  let namingTemplate = $state(untrack(() => config.naming_template ?? '{stem}'));
   const namePreview = $derived(
-    buildOutputFilename('Annual Report.pdf', namingTemplate, (config.naming_case ?? 'keep') as NamingCase),
+    buildOutputFilename(
+      'Annual Report.pdf',
+      namingTemplate,
+      (config.naming_case ?? 'keep') as NamingCase,
+    ),
   );
 
   // Stage 6: optional engine install state
-  let ocrState   = $state<EngineState>({ status: 'not_installed' });
+  let ocrState = $state<EngineState>({ status: 'not_installed' });
   let audioState = $state<EngineState>({ status: 'not_installed' });
   let installing = $state<string | null>(null);
   let installMsg = $state('');
-  let installPct = $state(0);
   let unlistenInstall: (() => void) | null = null;
 
   // Models offered in the cleanup-model dropdown: the currently-saved one plus
   // whatever the latest provider check returned.
   const modelOptions = $derived.by(() => {
-    const set = new Set<string>();
-    if (cleanupModel) set.add(cleanupModel);
-    for (const m of providerResult?.models ?? []) set.add(m);
-    return [...set];
+    const arr: string[] = [];
+    if (cleanupModel) arr.push(cleanupModel);
+    for (const m of providerResult?.models ?? []) {
+      if (!arr.includes(m)) {
+        arr.push(m);
+      }
+    }
+    return arr;
   });
 
   // Local edits are committed on Check/Test; no continuous sync needed.
@@ -139,24 +146,32 @@
 
     // Load engine states from provision file (includes installing/failed states).
     const [ocr, audio] = await Promise.all([
-      invoke<EngineState>('optional_engine_status', { engine: 'ocr' }).catch(() => ({ status: 'not_installed' })),
-      invoke<EngineState>('optional_engine_status', { engine: 'audio' }).catch(() => ({ status: 'not_installed' })),
+      invoke<EngineState>('optional_engine_status', { engine: 'ocr' }).catch(() => ({
+        status: 'not_installed',
+      })),
+      invoke<EngineState>('optional_engine_status', { engine: 'audio' }).catch(() => ({
+        status: 'not_installed',
+      })),
     ]);
     if (dead) return;
-    ocrState   = ocr   as EngineState;
+    ocrState = ocr as EngineState;
     audioState = audio as EngineState;
 
     listen<EngineInstallProgress>('engine:install-progress', ({ payload }) => {
       installMsg = payload.message;
-      installPct = payload.pct;
       if (payload.step === 'installed') {
-        if (payload.engine === 'ocr')   ocrState   = { status: 'installed' };
-        else                             audioState = { status: 'installed' };
+        if (payload.engine === 'ocr') ocrState = { status: 'installed' };
+        else audioState = { status: 'installed' };
       }
-    }).then(fn => { if (dead) fn(); else unlistenInstall = fn; });
+    }).then((fn) => {
+      if (dead) fn();
+      else unlistenInstall = fn;
+    });
   });
 
-  onDestroy(() => { unlistenInstall?.(); });
+  onDestroy(() => {
+    unlistenInstall?.();
+  });
 
   // ── Capabilities ───────────────────────────────────────────────────────────
 
@@ -238,22 +253,20 @@
   async function installEngine(engine: string) {
     installing = engine;
     installMsg = 'Starting installation…';
-    installPct = 0;
-    if (engine === 'ocr')   ocrState   = { status: 'installing' };
-    else                     audioState = { status: 'installing' };
+    if (engine === 'ocr') ocrState = { status: 'installing' };
+    else audioState = { status: 'installing' };
     try {
       await invoke('install_engine', { engine });
-      if (engine === 'ocr')   ocrState   = { status: 'installed' };
-      else                     audioState = { status: 'installed' };
+      if (engine === 'ocr') ocrState = { status: 'installed' };
+      else audioState = { status: 'installed' };
       loadCaps(); // refresh format table to show new OCR/audio rows as available
     } catch (e) {
       const err = String(e);
-      if (engine === 'ocr')   ocrState   = { status: 'failed', error: err };
-      else                     audioState = { status: 'failed', error: err };
+      if (engine === 'ocr') ocrState = { status: 'failed', error: err };
+      else audioState = { status: 'failed', error: err };
     } finally {
       installing = null;
       installMsg = '';
-      installPct = 0;
     }
   }
 
@@ -317,12 +330,17 @@
 </script>
 
 <div class="diag-wrap">
-
   <!-- Header -->
   <div class="diag-header">
     <button class="back-btn" onclick={onBack} aria-label="Back to main view">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-        <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+        <path
+          d="M9 2L4 7l5 5"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
       Back
     </button>
@@ -334,15 +352,27 @@
       aria-label="Refresh capabilities"
       title="Refresh"
     >
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" class:spinning={capsLoading}>
-        <path d="M12 7A5 5 0 1 1 7 2a5 5 0 0 1 3.54 1.46L12 2v4H8l1.59-1.59A3 3 0 1 0 10 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        aria-hidden="true"
+        class:spinning={capsLoading}
+      >
+        <path
+          d="M12 7A5 5 0 1 1 7 2a5 5 0 0 1 3.54 1.46L12 2v4H8l1.59-1.59A3 3 0 1 0 10 7"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
   </div>
 
   <!-- Scrollable body -->
   <div class="diag-body">
-
     {#if capsLoading}
       <div class="loading-state">
         <div class="spinner-sm" aria-label="Loading"></div>
@@ -354,7 +384,6 @@
         <button class="retry-btn" onclick={loadCaps}>Retry</button>
       </div>
     {:else if caps}
-
       <!-- Runtime section -->
       <section class="section">
         <h2 class="section-title">Runtime</h2>
@@ -373,7 +402,9 @@
           </div>
           <div class="runtime-item span2">
             <span class="runtime-label">Venv</span>
-            <span class="runtime-value mono ellipsis" title={caps.runtime.venv_path}>{caps.runtime.venv_path}</span>
+            <span class="runtime-value mono ellipsis" title={caps.runtime.venv_path}
+              >{caps.runtime.venv_path}</span
+            >
           </div>
         </div>
       </section>
@@ -383,17 +414,16 @@
         <h2 class="section-title">Format support</h2>
         <div class="cap-list">
           {#each caps.formats as fmt}
-            <div
-              id="fmt-{fmt.key}"
-              class="cap-row"
-              class:highlighted={highlight === fmt.key}
-            >
+            <div id="fmt-{fmt.key}" class="cap-row" class:highlighted={highlight === fmt.key}>
               <span class="dot dot-{dotColor(fmt.status)}" aria-hidden="true"></span>
               <span class="cap-label">{fmt.label}</span>
               <span class="cap-exts">{fmt.extensions.join(' · ')}</span>
               <span class="cap-badge badge-{dotColor(fmt.status)}">{badgeLabel(fmt.status)}</span>
               {#if detailText(fmt)}
-                <span class="cap-detail" class:cap-detail-red={fmt.status === 'missing' || fmt.status === 'broken'}>
+                <span
+                  class="cap-detail"
+                  class:cap-detail-red={fmt.status === 'missing' || fmt.status === 'broken'}
+                >
                   {detailText(fmt)}
                 </span>
               {/if}
@@ -408,7 +438,14 @@
         <div class="cap-list">
           <!-- OCR row -->
           <div class="cap-row cap-row-wrap">
-            <span class="dot dot-{ocrState.status === 'installed' ? 'green' : ocrState.status === 'failed' ? 'red' : 'amber'}" aria-hidden="true"></span>
+            <span
+              class="dot dot-{ocrState.status === 'installed'
+                ? 'green'
+                : ocrState.status === 'failed'
+                  ? 'red'
+                  : 'amber'}"
+              aria-hidden="true"
+            ></span>
             <span class="cap-label">OCR · Images &amp; scanned PDFs</span>
             <span class="cap-exts">{caps.optional.ocr.engine}</span>
             {#if ocrState.status === 'installed'}
@@ -419,7 +456,11 @@
               <span class="cap-badge badge-red">Failed</span>
             {:else}
               <span class="cap-badge badge-amber">Not installed</span>
-              <button class="install-btn" onclick={() => installEngine('ocr')} disabled={installing !== null}>
+              <button
+                class="install-btn"
+                onclick={() => installEngine('ocr')}
+                disabled={installing !== null}
+              >
                 Install <span class="install-size">· {caps.optional.ocr.size_hint}</span>
               </button>
             {/if}
@@ -431,7 +472,11 @@
             {:else if ocrState.status === 'failed' && ocrState.error}
               <div class="install-error">
                 <span>{ocrState.error.split('\n')[0]}</span>
-                <button class="install-btn" onclick={() => installEngine('ocr')} disabled={installing !== null}>Retry</button>
+                <button
+                  class="install-btn"
+                  onclick={() => installEngine('ocr')}
+                  disabled={installing !== null}>Retry</button
+                >
               </div>
             {:else}
               <span class="cap-detail">{caps.optional.ocr.note}</span>
@@ -440,7 +485,14 @@
 
           <!-- Audio row -->
           <div class="cap-row cap-row-wrap">
-            <span class="dot dot-{audioState.status === 'installed' ? 'green' : audioState.status === 'failed' ? 'red' : 'amber'}" aria-hidden="true"></span>
+            <span
+              class="dot dot-{audioState.status === 'installed'
+                ? 'green'
+                : audioState.status === 'failed'
+                  ? 'red'
+                  : 'amber'}"
+              aria-hidden="true"
+            ></span>
             <span class="cap-label">Audio transcription</span>
             <span class="cap-exts">{caps.optional.audio.engine}</span>
             {#if audioState.status === 'installed'}
@@ -451,7 +503,11 @@
               <span class="cap-badge badge-red">Failed</span>
             {:else}
               <span class="cap-badge badge-amber">Not installed</span>
-              <button class="install-btn" onclick={() => installEngine('audio')} disabled={installing !== null}>
+              <button
+                class="install-btn"
+                onclick={() => installEngine('audio')}
+                disabled={installing !== null}
+              >
                 Install <span class="install-size">· {caps.optional.audio.size_hint}</span>
               </button>
             {/if}
@@ -463,16 +519,22 @@
             {:else if audioState.status === 'failed' && audioState.error}
               <div class="install-error">
                 <span>{audioState.error.split('\n')[0]}</span>
-                <button class="install-btn" onclick={() => installEngine('audio')} disabled={installing !== null}>Retry</button>
+                <button
+                  class="install-btn"
+                  onclick={() => installEngine('audio')}
+                  disabled={installing !== null}>Retry</button
+                >
               </div>
             {:else}
               <span class="cap-detail">{caps.optional.audio.note}</span>
             {/if}
           </div>
         </div>
-        <p class="optional-note">Installed via uv pip into the app's isolated Python environment. Internet required. No system packages needed.</p>
+        <p class="optional-note">
+          Installed via uv pip into the app's isolated Python environment. Internet required. No
+          system packages needed.
+        </p>
       </section>
-
     {/if}
 
     <!-- Output management (Stage 7) — always shown -->
@@ -483,34 +545,83 @@
       <div class="provider-fields">
         <span class="field-label">Where to save (batch)</span>
         <div class="seg" role="group" aria-label="Output location rule">
-          <button class="seg-btn" class:active={config.output_rule === 'next_to_source'} aria-pressed={config.output_rule === 'next_to_source'}
-            title="Write each .md beside its source file" onclick={() => saveOutputRule('next_to_source')}>Next to source</button>
-          <button class="seg-btn" class:active={config.output_rule === 'fixed_folder'} aria-pressed={config.output_rule === 'fixed_folder'}
-            title="Write all .md files into one chosen folder" onclick={() => saveOutputRule('fixed_folder')}>One folder</button>
-          <button class="seg-btn" class:active={config.output_rule === 'mirror_tree'} aria-pressed={config.output_rule === 'mirror_tree'}
-            title="Recreate the source folder structure under a chosen root" onclick={() => saveOutputRule('mirror_tree')}>Mirror folders</button>
+          <button
+            class="seg-btn"
+            class:active={config.output_rule === 'next_to_source'}
+            aria-pressed={config.output_rule === 'next_to_source'}
+            title="Write each .md beside its source file"
+            onclick={() => saveOutputRule('next_to_source')}>Next to source</button
+          >
+          <button
+            class="seg-btn"
+            class:active={config.output_rule === 'fixed_folder'}
+            aria-pressed={config.output_rule === 'fixed_folder'}
+            title="Write all .md files into one chosen folder"
+            onclick={() => saveOutputRule('fixed_folder')}>One folder</button
+          >
+          <button
+            class="seg-btn"
+            class:active={config.output_rule === 'mirror_tree'}
+            aria-pressed={config.output_rule === 'mirror_tree'}
+            title="Recreate the source folder structure under a chosen root"
+            onclick={() => saveOutputRule('mirror_tree')}>Mirror folders</button
+          >
         </div>
 
         {#if config.output_rule !== 'next_to_source'}
           <div class="folder-row">
-            <svg class="folder-icon" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M1.5 4.5A1 1 0 0 1 2.5 3.5h3.086a1 1 0 0 1 .707.293l.914.914H13.5a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" stroke="currentColor" stroke-width="1.25" fill="none"/>
+            <svg
+              class="folder-icon"
+              width="15"
+              height="15"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M1.5 4.5A1 1 0 0 1 2.5 3.5h3.086a1 1 0 0 1 .707.293l.914.914H13.5a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z"
+                stroke="currentColor"
+                stroke-width="1.25"
+                fill="none"
+              />
             </svg>
-            <span class="folder-value" class:folder-unset={!config.output_folder} title={config.output_folder || 'No folder chosen yet'}>
+            <span
+              class="folder-value"
+              class:folder-unset={!config.output_folder}
+              title={config.output_folder || 'No folder chosen yet'}
+            >
               {config.output_folder || 'No folder chosen — choose one'}
             </span>
             {#if config.output_folder}
-              <button class="mini-x" title="Clear" aria-label="Clear folder" onclick={clearOutputFolder}>
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <button
+                class="mini-x"
+                title="Clear"
+                aria-label="Clear folder"
+                onclick={clearOutputFolder}
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"
+                  ><path
+                    d="M2 2l6 6M8 2l-6 6"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  /></svg
+                >
               </button>
             {/if}
-            <button class="change-btn" onclick={chooseOutputFolder}>{config.output_folder ? 'Change…' : 'Choose folder…'}</button>
+            <button class="change-btn" onclick={chooseOutputFolder}
+              >{config.output_folder ? 'Change…' : 'Choose folder…'}</button
+            >
           </div>
           {#if config.output_rule === 'mirror_tree'}
-            <p class="field-hint">Sub-folders of the dropped folder are recreated under this root.</p>
+            <p class="field-hint">
+              Sub-folders of the dropped folder are recreated under this root.
+            </p>
           {/if}
         {/if}
-        <p class="field-hint">Single files are saved with a Save dialog; this rule applies to batch conversions.</p>
+        <p class="field-hint">
+          Single files are saved with a Save dialog; this rule applies to batch conversions.
+        </p>
       </div>
 
       <!-- Naming convention -->
@@ -523,29 +634,69 @@
           onchange={saveNamingTemplate}
           spellcheck="false"
           autocomplete="off"
-          placeholder="{'{stem}'}"
+          placeholder={'{stem}'}
         />
         <div class="preset-row">
-          <button class="preset" title="The source file name" onclick={() => applyTemplatePreset('{stem}')}>{'{stem}'}</button>
-          <button class="preset" title="Name plus original format" onclick={() => applyTemplatePreset('{stem}_{ext}')}>{'{stem}_{ext}'}</button>
-          <button class="preset" title="Name plus today's date" onclick={() => applyTemplatePreset('{stem}-{date}')}>{'{stem}-{date}'}</button>
+          <button
+            class="preset"
+            title="The source file name"
+            onclick={() => applyTemplatePreset('{stem}')}>{'{stem}'}</button
+          >
+          <button
+            class="preset"
+            title="Name plus original format"
+            onclick={() => applyTemplatePreset('{stem}_{ext}')}>{'{stem}_{ext}'}</button
+          >
+          <button
+            class="preset"
+            title="Name plus today's date"
+            onclick={() => applyTemplatePreset('{stem}-{date}')}>{'{stem}-{date}'}</button
+          >
         </div>
-        <p class="field-hint">Tokens: <code>{'{stem}'}</code> name · <code>{'{ext}'}</code> format · <code>{'{date}'}</code> today. <code>.md</code> is added automatically.</p>
+        <p class="field-hint">
+          Tokens: <code>{'{stem}'}</code> name · <code>{'{ext}'}</code> format ·
+          <code>{'{date}'}</code>
+          today. <code>.md</code> is added automatically.
+        </p>
 
         <span class="field-label">Letter case</span>
         <div class="seg" role="group" aria-label="Filename case">
-          <button class="seg-btn" class:active={config.naming_case === 'keep'} aria-pressed={config.naming_case === 'keep'} title="Leave the name as-is" onclick={() => saveNamingCase('keep')}>Keep</button>
-          <button class="seg-btn" class:active={config.naming_case === 'lower'} aria-pressed={config.naming_case === 'lower'} title="Lowercase the name" onclick={() => saveNamingCase('lower')}>lowercase</button>
-          <button class="seg-btn" class:active={config.naming_case === 'slug'} aria-pressed={config.naming_case === 'slug'} title="Lowercase and replace spaces/symbols with hyphens" onclick={() => saveNamingCase('slug')}>slug-case</button>
+          <button
+            class="seg-btn"
+            class:active={config.naming_case === 'keep'}
+            aria-pressed={config.naming_case === 'keep'}
+            title="Leave the name as-is"
+            onclick={() => saveNamingCase('keep')}>Keep</button
+          >
+          <button
+            class="seg-btn"
+            class:active={config.naming_case === 'lower'}
+            aria-pressed={config.naming_case === 'lower'}
+            title="Lowercase the name"
+            onclick={() => saveNamingCase('lower')}>lowercase</button
+          >
+          <button
+            class="seg-btn"
+            class:active={config.naming_case === 'slug'}
+            aria-pressed={config.naming_case === 'slug'}
+            title="Lowercase and replace spaces/symbols with hyphens"
+            onclick={() => saveNamingCase('slug')}>slug-case</button
+          >
         </div>
 
-        <p class="name-preview"><span class="np-from">Annual Report.pdf</span> <span class="np-arrow" aria-hidden="true">→</span> <span class="np-to">{namePreview}</span></p>
+        <p class="name-preview">
+          <span class="np-from">Annual Report.pdf</span>
+          <span class="np-arrow" aria-hidden="true">→</span>
+          <span class="np-to">{namePreview}</span>
+        </p>
       </div>
 
       <!-- Open folder after a batch -->
       <div class="provider-fields cleanup-model-block">
         <div class="toggle-row">
-          <label class="toggle-label" for="open-after">Open the output folder when a batch finishes</label>
+          <label class="toggle-label" for="open-after"
+            >Open the output folder when a batch finishes</label
+          >
           <button
             id="open-after"
             role="switch"
@@ -567,7 +718,7 @@
 
       <!-- Mode tabs -->
       <div class="mode-tabs" role="group" aria-label="LLM mode">
-        {#each [['off','Off'],['local','Local'],['api','API']] as [m, label]}
+        {#each [['off', 'Off'], ['local', 'Local'], ['api', 'API']] as [m, label]}
           <button
             class="mode-tab"
             class:active={config.llm_mode === m}
@@ -580,8 +731,9 @@
       </div>
 
       {#if config.llm_mode === 'off'}
-        <p class="provider-note">No intelligence features active. Conversions use MarkItDown only.</p>
-
+        <p class="provider-note">
+          No intelligence features active. Conversions use MarkItDown only.
+        </p>
       {:else if config.llm_mode === 'local'}
         <div class="provider-fields">
           <label class="field-label" for="local-url">Server URL</label>
@@ -594,23 +746,39 @@
               spellcheck="false"
               autocomplete="off"
             />
-            <button class="check-btn" title="Test the connection and list available models" onclick={runProviderCheck} disabled={providerChecking}>
+            <button
+              class="check-btn"
+              title="Test the connection and list available models"
+              onclick={runProviderCheck}
+              disabled={providerChecking}
+            >
               {providerChecking ? 'Checking…' : 'Check'}
             </button>
           </div>
-          <p class="field-hint">Works with Ollama, LM Studio, Jan, and any OpenAI-compatible local server</p>
+          <p class="field-hint">
+            Works with Ollama, LM Studio, Jan, and any OpenAI-compatible local server
+          </p>
           {#if providerResult}
-            <div class="provider-result" class:result-ok={providerResult.usable} class:result-fail={!providerResult.usable}>
-              <span class="dot dot-{providerResult.usable ? 'green' : 'red'}" aria-hidden="true"></span>
+            <div
+              class="provider-result"
+              class:result-ok={providerResult.usable}
+              class:result-fail={!providerResult.usable}
+            >
+              <span class="dot dot-{providerResult.usable ? 'green' : 'red'}" aria-hidden="true"
+              ></span>
               <span>{providerResult.detail}</span>
             </div>
           {/if}
         </div>
-
       {:else}
         <div class="provider-fields">
           <label class="field-label" for="api-type">Type</label>
-          <select id="api-type" class="field-select" value={apiType} onchange={(e) => saveApiType((e.target as HTMLSelectElement).value)}>
+          <select
+            id="api-type"
+            class="field-select"
+            value={apiType}
+            onchange={(e) => saveApiType((e.target as HTMLSelectElement).value)}
+          >
             <option value="openai_compat">OpenAI-compatible</option>
             <option value="anthropic">Anthropic</option>
           </select>
@@ -625,7 +793,9 @@
               spellcheck="false"
               autocomplete="off"
             />
-            <p class="field-hint">Works with OpenAI, Groq, Together, Mistral, Fireworks, and any OpenAI-compatible API</p>
+            <p class="field-hint">
+              Works with OpenAI, Groq, Together, Mistral, Fireworks, and any OpenAI-compatible API
+            </p>
           {:else}
             <p class="field-hint">Connects to api.anthropic.com — keys begin with sk-ant-</p>
           {/if}
@@ -640,15 +810,27 @@
               placeholder="Paste your key here"
               autocomplete="off"
             />
-            <button class="check-btn" title="Test the API key and list available models" onclick={runProviderCheck} disabled={providerChecking}>
+            <button
+              class="check-btn"
+              title="Test the API key and list available models"
+              onclick={runProviderCheck}
+              disabled={providerChecking}
+            >
               {providerChecking ? 'Testing…' : 'Test'}
             </button>
           </div>
-          <p class="field-hint">Key stored in your app data folder and sent only to the endpoint above</p>
+          <p class="field-hint">
+            Key stored in your app data folder and sent only to the endpoint above
+          </p>
 
           {#if providerResult}
-            <div class="provider-result" class:result-ok={providerResult.usable} class:result-fail={!providerResult.usable}>
-              <span class="dot dot-{providerResult.usable ? 'green' : 'red'}" aria-hidden="true"></span>
+            <div
+              class="provider-result"
+              class:result-ok={providerResult.usable}
+              class:result-fail={!providerResult.usable}
+            >
+              <span class="dot dot-{providerResult.usable ? 'green' : 'red'}" aria-hidden="true"
+              ></span>
               <span>{providerResult.detail}</span>
             </div>
           {/if}
@@ -671,18 +853,26 @@
             {/each}
           </select>
           {#if modelOptions.length === 0}
-            <p class="field-hint">Run a check above to list models. Until then, AI cleanup auto-picks the first available model.</p>
+            <p class="field-hint">
+              Run a check above to list models. Until then, AI cleanup auto-picks the first
+              available model.
+            </p>
           {:else}
             <p class="field-hint">Used for the optional AI cleanup pass on extracted Markdown.</p>
           {/if}
           {#if config.llm_mode === 'local'}
-            <p class="field-hint rec-hint">Recommended: <b>llama3.1:8b</b> or larger. Small models (under ~7B) tend to summarize instead of clean.</p>
+            <p class="field-hint rec-hint">
+              Recommended: <b>llama3.1:8b</b> or larger. Small models (under ~7B) tend to summarize instead
+              of clean.
+            </p>
           {/if}
         </div>
 
         <div class="provider-fields cleanup-model-block">
           <div class="toggle-row">
-            <label class="toggle-label" for="llm-conversion">LLM image description during conversion</label>
+            <label class="toggle-label" for="llm-conversion"
+              >LLM image description during conversion</label
+            >
             <button
               id="llm-conversion"
               role="switch"
@@ -695,7 +885,9 @@
               <span class="toggle-thumb"></span>
             </button>
           </div>
-          <p class="field-hint">Adds image descriptions to the converted Markdown. May increase cost for API providers.</p>
+          <p class="field-hint">
+            Adds image descriptions to the converted Markdown. May increase cost for API providers.
+          </p>
 
           {#if config.llm_conversion}
             <label class="field-label" for="conversion-model">Conversion model</label>
@@ -711,12 +903,14 @@
                 <option value={m}>{m}</option>
               {/each}
             </select>
-            <p class="field-hint">Uses the same provider as AI cleanup. A vision-capable model works best for image description.</p>
+            <p class="field-hint">
+              Uses the same provider as AI cleanup. A vision-capable model works best for image
+              description.
+            </p>
           {/if}
         </div>
       {/if}
     </section>
-
   </div>
 </div>
 
@@ -751,10 +945,18 @@
     cursor: pointer;
     padding: 6px 12px;
     border-radius: var(--radius-sm);
-    transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+    transition:
+      color var(--transition-fast),
+      background var(--transition-fast),
+      border-color var(--transition-fast);
   }
-  .back-btn:hover { background: var(--surface-3); border-color: #565660; }
-  .back-btn:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); }
+  .back-btn:hover {
+    background: var(--surface-3);
+    border-color: #565660;
+  }
+  .back-btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  }
   .diag-title {
     font-size: 14px;
     font-weight: 600;
@@ -772,14 +974,36 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+    transition:
+      color var(--transition-fast),
+      background var(--transition-fast),
+      border-color var(--transition-fast);
   }
-  .refresh-btn:hover { color: var(--text-primary); background: var(--surface-3); border-color: #565660; }
-  .refresh-btn:disabled { opacity: 0.4; cursor: default; }
-  .refresh-btn:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); }
-  .spinning { animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .spinning { animation: none; } }
+  .refresh-btn:hover {
+    color: var(--text-primary);
+    background: var(--surface-3);
+    border-color: #565660;
+  }
+  .refresh-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .refresh-btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  .spinning {
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spinning {
+      animation: none;
+    }
+  }
 
   /* Body */
   .diag-body {
@@ -809,7 +1033,11 @@
     flex-shrink: 0;
     animation: spin 0.7s linear infinite;
   }
-  @media (prefers-reduced-motion: reduce) { .spinner-sm { animation: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner-sm {
+      animation: none;
+    }
+  }
   .load-error {
     display: flex;
     align-items: center;
@@ -831,12 +1059,21 @@
     padding: 5px var(--sp-3);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: background var(--transition-fast), border-color var(--transition-fast);
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast);
   }
-  .retry-btn:hover { background: var(--surface-3); border-color: #565660; }
+  .retry-btn:hover {
+    background: var(--surface-3);
+    border-color: #565660;
+  }
 
   /* Section */
-  .section { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
   .section-title {
     font-size: 11px;
     font-weight: 600;
@@ -862,7 +1099,9 @@
     gap: 2px;
     padding: var(--sp-2) var(--sp-3);
   }
-  .runtime-item.span2 { grid-column: span 2; }
+  .runtime-item.span2 {
+    grid-column: span 2;
+  }
   .runtime-label {
     font-size: 10px;
     text-transform: uppercase;
@@ -898,16 +1137,26 @@
     border-bottom: 1px solid var(--border);
     transition: background var(--transition-fast);
   }
-  .cap-row:last-child { border-bottom: none; }
+  .cap-row:last-child {
+    border-bottom: none;
+  }
   .cap-row.highlighted {
     background: color-mix(in srgb, var(--accent) 8%, var(--surface-1));
     animation: pulse-row 1.2s ease-out;
   }
   @keyframes pulse-row {
-    0%   { background: color-mix(in srgb, var(--accent) 20%, var(--surface-1)); }
-    100% { background: color-mix(in srgb, var(--accent) 8%,  var(--surface-1)); }
+    0% {
+      background: color-mix(in srgb, var(--accent) 20%, var(--surface-1));
+    }
+    100% {
+      background: color-mix(in srgb, var(--accent) 8%, var(--surface-1));
+    }
   }
-  @media (prefers-reduced-motion: reduce) { .cap-row.highlighted { animation: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .cap-row.highlighted {
+      animation: none;
+    }
+  }
 
   .dot {
     width: 6px;
@@ -915,12 +1164,28 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
-  .dot-green { background: var(--green); }
-  .dot-amber { background: var(--amber); }
-  .dot-red   { background: var(--red); }
+  .dot-green {
+    background: var(--green);
+  }
+  .dot-amber {
+    background: var(--amber);
+  }
+  .dot-red {
+    background: var(--red);
+  }
 
-  .cap-label { font-size: 12px; color: var(--text-primary); flex: 1; min-width: 0; }
-  .cap-exts  { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); white-space: nowrap; }
+  .cap-label {
+    font-size: 12px;
+    color: var(--text-primary);
+    flex: 1;
+    min-width: 0;
+  }
+  .cap-exts {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+  }
   .cap-badge {
     font-size: 10px;
     font-weight: 500;
@@ -928,9 +1193,18 @@
     border-radius: 99px;
     white-space: nowrap;
   }
-  .badge-green { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green); }
-  .badge-amber { background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber); }
-  .badge-red   { background: color-mix(in srgb, var(--red)   15%, transparent); color: var(--red); }
+  .badge-green {
+    background: color-mix(in srgb, var(--green) 15%, transparent);
+    color: var(--green);
+  }
+  .badge-amber {
+    background: color-mix(in srgb, var(--amber) 15%, transparent);
+    color: var(--amber);
+  }
+  .badge-red {
+    background: color-mix(in srgb, var(--red) 15%, transparent);
+    color: var(--red);
+  }
   .cap-detail {
     font-size: 11px;
     color: var(--text-muted);
@@ -940,32 +1214,40 @@
     text-overflow: ellipsis;
     max-width: 180px;
   }
-  .cap-detail-red { color: var(--red); font-family: var(--font-ui); }
+  .cap-detail-red {
+    color: var(--red);
+    font-family: var(--font-ui);
+  }
 
   /* LLM provider section */
   .mode-tabs {
-    display: flex;
-    background: var(--surface-1);
-    border: 1px solid var(--border-strong);
+    display: inline-flex;
+    background: #09090b;
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 3px;
     gap: 3px;
     align-self: flex-start;
   }
   .mode-tab {
-    padding: 6px 16px;
-    font-size: 12.5px;
-    font-weight: 600;
+    padding: 4px 13px;
+    font-size: 11.5px;
+    font-weight: 500;
     font-family: var(--font-ui);
-    border: none;
-    border-radius: 5px;
+    border: 1px solid transparent;
+    border-radius: 4px;
     background: transparent;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     cursor: pointer;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: all var(--transition-fast);
   }
-  .mode-tab:hover:not(.active) { color: var(--text-primary); background: var(--surface-2); }
-  .mode-tab.active { background: var(--accent); color: #fff; }
+  .mode-tab:hover:not(.active) { color: var(--text-secondary); }
+  .mode-tab.active {
+    background: var(--surface-1);
+    border-color: var(--border);
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
   .mode-tab:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset: 1px; }
 
   .provider-note {
@@ -980,7 +1262,7 @@
     gap: var(--sp-2);
   }
   .field-label {
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 500;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -1000,10 +1282,12 @@
     font-family: var(--font-mono);
     color: var(--text-primary);
     outline: none;
-    transition: border-color var(--transition-fast);
+    transition: all var(--transition-fast);
   }
-  .field-input:focus { border-color: var(--accent); }
-  .field-input::placeholder { color: var(--text-muted); }
+  .field-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); }
+  .field-input::placeholder {
+    color: var(--text-muted);
+  }
   .field-select {
     background: var(--surface-1);
     border: 1px solid var(--border);
@@ -1016,7 +1300,9 @@
     cursor: pointer;
     align-self: flex-start;
   }
-  .field-select:focus { border-color: var(--accent); }
+  .field-select:focus {
+    border-color: var(--accent);
+  }
   .field-hint {
     font-size: 11px;
     color: var(--text-muted);
@@ -1035,9 +1321,17 @@
     white-space: nowrap;
     transition: background var(--transition-fast);
   }
-  .check-btn:hover { background: var(--accent-hover); }
-  .check-btn:disabled { opacity: 0.45; cursor: default; }
-  .check-btn:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset: 2px; }
+  .check-btn:hover {
+    background: var(--accent-hover);
+  }
+  .check-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .check-btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+    outline-offset: 2px;
+  }
 
   .provider-result {
     display: flex;
@@ -1047,58 +1341,185 @@
     border-radius: var(--radius-sm);
     font-size: 12px;
   }
-  .result-ok   { background: color-mix(in srgb, var(--green) 10%, var(--surface-1)); color: var(--text-primary); }
-  .result-fail { background: color-mix(in srgb, var(--red)   10%, var(--surface-1)); color: var(--text-primary); }
+  .result-ok {
+    background: color-mix(in srgb, var(--green) 10%, var(--surface-1));
+    color: var(--text-primary);
+  }
+  .result-fail {
+    background: color-mix(in srgb, var(--red) 10%, var(--surface-1));
+    color: var(--text-primary);
+  }
 
   .cleanup-model-block {
     margin-top: var(--sp-3);
     padding-top: var(--sp-3);
     border-top: 1px solid var(--border);
   }
-  .rec-hint b { color: var(--text-secondary); }
+  .rec-hint b {
+    color: var(--text-secondary);
+  }
 
   /* Stage 7 — output management */
-  .folder-row { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-sm); }
-  .folder-icon { flex-shrink: 0; color: var(--accent); }
-  .folder-value { flex: 1; min-width: 0; font-size: 12px; color: var(--text-primary); font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .folder-unset { color: var(--text-muted); font-family: var(--font-ui); font-style: italic; }
-  .mini-x { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; border: none; background: var(--surface-2); color: var(--text-muted); cursor: pointer; }
-  .mini-x:hover { color: var(--text-primary); background: var(--border); }
-  .change-btn { flex-shrink: 0; padding: 6px 13px; font-size: 12px; font-weight: 600; font-family: var(--font-ui); color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); border-radius: var(--radius-sm); cursor: pointer; transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast); }
-  .change-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-  .preset-row { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
-  .preset { font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px 9px; cursor: pointer; transition: color var(--transition-fast), border-color var(--transition-fast); }
-  .preset:hover { color: var(--text-primary); border-color: var(--border-strong); }
-  .preset:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); }
-  .field-hint code { font-family: var(--font-mono); font-size: 10.5px; background: var(--surface-2); padding: 0 4px; border-radius: 3px; color: var(--text-secondary); }
-
-  .name-preview { display: flex; align-items: center; gap: var(--sp-2); font-size: 12px; font-family: var(--font-mono); margin-top: var(--sp-1); padding: var(--sp-2) var(--sp-3); background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-sm); }
-  .np-from { color: var(--text-muted); }
-  .np-arrow { color: var(--text-muted); }
-  .np-to { color: var(--accent); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  /* Optional engine install UI */
-  .cap-row-wrap { flex-wrap: wrap; gap: var(--sp-2) var(--sp-2); }
-  .install-btn {
+  .folder-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3);
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .folder-icon {
+    flex-shrink: 0;
+    color: var(--accent);
+  }
+  .folder-value {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .folder-unset {
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-style: italic;
+  }
+  .mini-x {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: none;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .mini-x:hover {
+    color: var(--text-primary);
+    background: var(--border);
+  }
+  .change-btn {
+    flex-shrink: 0;
     padding: 6px 13px;
     font-size: 12px;
     font-weight: 600;
     font-family: var(--font-ui);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      color var(--transition-fast),
+      border-color var(--transition-fast);
+  }
+  .change-btn:hover {
     background: var(--accent);
     color: #fff;
-    border: 1px solid var(--accent-edge);
+    border-color: var(--accent);
+  }
+
+  .preset-row {
+    display: flex;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+  }
+  .preset {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 3px 9px;
+    cursor: pointer;
+    transition:
+      color var(--transition-fast),
+      border-color var(--transition-fast);
+  }
+  .preset:hover {
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  .preset:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  .field-hint code {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    background: var(--surface-2);
+    padding: 0 4px;
+    border-radius: 3px;
+    color: var(--text-secondary);
+  }
+
+  .name-preview {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    margin-top: var(--sp-1);
+    padding: var(--sp-2) var(--sp-3);
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .np-from {
+    color: var(--text-muted);
+  }
+  .np-arrow {
+    color: var(--text-muted);
+  }
+  .np-to {
+    color: var(--accent);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Optional engine install UI */
+  .cap-row-wrap {
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-2);
+  }
+  .install-btn {
+    padding: 5px 12px;
+    font-size: 11.5px;
+    font-weight: 500;
+    font-family: var(--font-ui);
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     cursor: pointer;
     white-space: nowrap;
-    transition: background var(--transition-fast);
+    transition: all var(--transition-fast);
     display: inline-flex;
     align-items: center;
     gap: 5px;
   }
-  .install-btn:hover { background: var(--accent-hover); }
-  .install-btn:disabled { opacity: 0.45; cursor: default; }
-  .install-size { opacity: 0.75; font-weight: 400; }
+  .install-btn:hover:not(:disabled) {
+    background: var(--surface-1);
+    border-color: var(--border-strong);
+  }
+  .install-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .install-size {
+    opacity: 0.75;
+    font-weight: 400;
+  }
   .install-progress-wrap {
     width: 100%;
     display: flex;
@@ -1128,11 +1549,20 @@
     animation: install-indet 1.1s ease-in-out infinite;
   }
   @keyframes install-indet {
-    0%   { left: -35%; }
-    100% { left: 100%; }
+    0% {
+      left: -35%;
+    }
+    100% {
+      left: 100%;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
-    .install-indet { animation: none; left: 0; width: 100%; opacity: 0.45; }
+    .install-indet {
+      animation: none;
+      left: 0;
+      width: 100%;
+      opacity: 0.45;
+    }
   }
   .install-progress-msg {
     font-size: 11px;
@@ -1168,26 +1598,34 @@
   }
   .toggle-btn {
     position: relative;
-    width: 34px;
-    height: 18px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
+    width: 36px;
+    height: 20px;
+    background: #27272a;
+    border: 1px solid transparent;
     border-radius: 99px;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background var(--transition-fast), border-color var(--transition-fast);
+    transition: background var(--transition-fast);
   }
-  .toggle-btn.toggle-on { background: var(--accent); border-color: var(--accent); }
+  .toggle-btn.toggle-on {
+    background: var(--accent);
+  }
   .toggle-thumb {
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     background: #fff;
     border-radius: 50%;
     transition: transform var(--transition-fast);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
-  .toggle-btn.toggle-on .toggle-thumb { transform: translateX(16px); }
-  .toggle-btn:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset: 2px; }
+  .toggle-btn.toggle-on .toggle-thumb {
+    transform: translateX(16px);
+  }
+  .toggle-btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+    outline-offset: 2px;
+  }
 </style>

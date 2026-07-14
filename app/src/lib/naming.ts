@@ -29,7 +29,6 @@ function slugify(s: string): string {
 
 function sanitize(s: string): string {
   return s
-    // eslint-disable-next-line no-control-regex
     .replace(/[\\/:*?"<>|\x00-\x1f]/g, '-')
     .trim()
     .replace(/\.+$/, '')
@@ -66,8 +65,11 @@ export function buildOutputFilename(path: string, template: string, naming: Nami
 /** Human label for an output rule. */
 export function ruleLabel(rule: OutputRule): string {
   switch (rule) {
-    case 'fixed_folder': return 'A chosen folder';
-    case 'mirror_tree':  return 'Mirror source folders';
-    default:             return 'Next to each source file';
+    case 'fixed_folder':
+      return 'A chosen folder';
+    case 'mirror_tree':
+      return 'Mirror source folders';
+    default:
+      return 'Next to each source file';
   }
 }
