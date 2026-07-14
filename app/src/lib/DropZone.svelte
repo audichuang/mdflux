@@ -103,7 +103,7 @@
 
   {#if dropState === 'error' && error}
     <div
-      class="relative w-full p-6 flex flex-col items-stretch cursor-default"
+      class="relative w-full max-w-lg p-6 flex flex-col items-stretch cursor-default"
       role="presentation"
       onclick={(e) => e.stopPropagation()}
     >

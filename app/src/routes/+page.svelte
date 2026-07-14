@@ -966,6 +966,9 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-self: center;
+    width: 100%;
+    max-width: 500px;
     gap: var(--sp-6);
   }
   .error-msg {

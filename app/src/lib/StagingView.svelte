@@ -152,7 +152,9 @@
   }
 </script>
 
-<div class="w-full max-w-2xl self-center py-6 px-1 flex flex-col gap-6 h-full min-h-0 overflow-y-auto">
+<div
+  class="w-full max-w-2xl self-center py-6 px-1 flex flex-col gap-6 h-full min-h-0 overflow-y-auto"
+>
   <!-- Header -->
   <div class="flex items-baseline justify-between border-b border-zinc-800 pb-4">
     <div class="flex items-baseline gap-2">
