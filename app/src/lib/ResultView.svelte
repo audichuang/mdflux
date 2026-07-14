@@ -471,7 +471,7 @@
           Before cleanup
         </div>
         <div
-          class="flex-1 min-w-0 overflow-y-auto px-6 py-5 min-h-0 bg-zinc-950/30 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          class="flex-1 min-w-0 overflow-y-auto px-6 py-5 min-h-0 bg-zinc-950 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           bind:this={splitSrcEl}
           onscroll={() => syncScroll('src')}
           tabindex="0"
@@ -479,7 +479,7 @@
           aria-label="Before cleanup"
         >
           <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-          <div class="preview" onclick={onPreviewClick}>{@html beforeHtml}</div>
+          <div class="preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>{@html beforeHtml}</div>
         </div>
       </div>
       <div class="flex-1 min-w-0 flex flex-col min-h-0">
@@ -497,20 +497,20 @@
           aria-label="After cleanup"
         >
           <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-          <div class="preview" onclick={onPreviewClick}>{@html afterHtml}</div>
+          <div class="preview" style="max-width: 768px; margin: 0 auto;" onclick={onPreviewClick}>{@html afterHtml}</div>
         </div>
       </div>
     </div>
   {:else}
     <div
-      class="flex-1 overflow-y-auto px-6 py-6 min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-zinc-950/20"
+      class="flex-1 overflow-y-auto px-6 py-6 min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-zinc-950"
       tabindex="0"
       role="region"
       aria-label="Markdown result"
     >
       {#if cleanup.viewMode === 'changes' && diff}
         {#if diff.kind === 'summary'}
-          <div class="text-sm text-zinc-300 flex flex-col gap-2 max-w-[760px] mx-auto">
+          <div class="text-sm text-zinc-300 flex flex-col gap-2" style="max-width: 768px; margin: 0 auto;">
             <p>{diff.note}</p>
             <p class="font-mono text-xs">
               <span class="text-green-400">+{diff.added.toLocaleString()}</span>
@@ -518,7 +518,7 @@
             </p>
           </div>
         {:else}
-          <div class="font-mono text-xs leading-relaxed select-text max-w-[760px] mx-auto">
+          <div class="font-mono text-xs leading-relaxed select-text" style="max-width: 768px; margin: 0 auto;">
             {#each diff.rows as row}
               <div
                 class="flex gap-2 px-1 rounded-sm {row.type === 'add'
@@ -540,14 +540,16 @@
       {:else if cleanup.viewMode === 'preview'}
         <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
         <div
-          class="preview text-zinc-300 text-sm leading-relaxed max-w-[760px] mx-auto"
+          class="preview text-zinc-300 text-sm leading-relaxed"
+          style="max-width: 768px; margin: 0 auto;"
           onclick={onPreviewClick}
         >
           {@html previewHtml}
         </div>
       {:else}
         <pre
-          class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0 max-w-[760px] mx-auto">{activeMarkdown}</pre>
+          class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0"
+          style="max-width: 768px; margin: 0 auto;">{activeMarkdown}</pre>
       {/if}
     </div>
   {/if}

@@ -95,14 +95,16 @@
     {#if view === 'preview'}
       <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
       <div
-        class="preview text-zinc-300 text-sm leading-relaxed max-w-[760px] mx-auto"
+        class="preview text-zinc-300 text-sm leading-relaxed"
+        style="max-width: 768px; margin: 0 auto;"
         onclick={onPreviewClick}
       >
         {@html previewHtml}
       </div>
     {:else}
       <pre
-        class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0 max-w-[760px] mx-auto">{markdown}</pre>
+        class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0"
+        style="max-width: 768px; margin: 0 auto;">{markdown}</pre>
     {/if}
   </div>
 </div>

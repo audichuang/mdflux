@@ -51,12 +51,12 @@
 /* ── Palette ──────────────────────────────────────────────────────────────── */
 :root {
   /* MDFlux brand palette — warm Claude charcoal surfaces + terracotta clay accent. */
-  --canvas: #151514; /* warm charcoal window background */
-  --surface-1: #20201d; /* panels and cards (depth card surface) */
-  --surface-2: #2a2a26; /* elevated: hover, result bg, secondary buttons */
-  --surface-3: #373732; /* button active / active tabs */
-  --border: #282825; /* clean warm-border lines */
-  --border-strong: #3d3d37; /* button borders, emphasis edges */
+  --canvas: #1e1e1c; /* warm charcoal content canvas background (softer, like Claude) */
+  --surface-1: #141412; /* dark charcoal layout panels and headers (depth separator) */
+  --surface-2: #282825; /* elevated: hover, cards, secondary buttons */
+  --surface-3: #353530; /* button active / active tabs */
+  --border: #2c2c29; /* clean warm-border lines */
+  --border-strong: #3d3d38; /* button borders, emphasis edges */
   --text-primary: #f9f9f7; /* headings, labels (warm milk white) */
   --text-secondary: #c8c8bd; /* metadata, secondary (warm gray-beige) */
   --text-muted: #85857c; /* hints, placeholders (warm gray-500) */
