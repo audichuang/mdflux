@@ -44,7 +44,8 @@
       "resources/sidecar/*",
       "resources/sidecar/requirements.lock",
       "resources/sidecar/requirements-ocr.lock",
-      "resources/sidecar/requirements-audio.lock"
+      "resources/sidecar/requirements-audio.lock",
+      "resources/runtime/**/*"
     ],
     "windows": {
       "nsis": {

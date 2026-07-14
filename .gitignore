@@ -26,6 +26,11 @@ fixtures/
 # ── Tauri generated ───────────────────────────────────────────────────────
 app/src-tauri/gen/
 
+# ── Offline portable Python runtime (built by scripts/bundle-runtime.*) ───
+# Keep the README so the folder exists; ignore the large Python tree.
+app/src-tauri/resources/runtime/**
+!app/src-tauri/resources/runtime/README.md
+
 # ── App-internal design note ──────────────────────────────────────────────
 app/ipc-contract-v1.md
 

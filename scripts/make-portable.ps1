@@ -1,16 +1,48 @@
 # Build MDFlux and package it as a portable, extract-and-run zip (no installer).
-# The zip contains app.exe + resources/ (the Python sidecar). On first launch the app
-# downloads uv + Python + deps to %APPDATA% — same online-provisioning model as the installer.
 #
-# Usage:  pwsh -File scripts\make-portable.ps1            # build + zip
-#         pwsh -File scripts\make-portable.ps1 -NoBuild   # zip the existing release build
+# Offline mode (default): ships a full Windows Python runtime + core packages
+# inside the zip so first launch needs no internet and no provision download.
+# OCR / audio engines are NOT bundled (optional, still installable only after a
+# classic online provision — not the portable offline path).
+#
+# Usage:  pwsh -File scripts\make-portable.ps1
+#         pwsh -File scripts\make-portable.ps1 -NoBuild      # zip existing release build
+#         pwsh -File scripts\make-portable.ps1 -SkipRuntime  # online-provision model (small zip)
+#         pwsh -File scripts\make-portable.ps1 -ForceRuntime # rebuild the offline runtime
 
-param([switch]$NoBuild)
+param(
+    [switch]$NoBuild,
+    [switch]$SkipRuntime,
+    [switch]$ForceRuntime
+)
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $rel  = Join-Path $root "app\src-tauri\target\release"
 $dist = Join-Path $root "dist"
+$runtime = Join-Path $root "app\src-tauri\resources\runtime"
+
+if (-not $SkipRuntime) {
+    $bundlePs1 = Join-Path $PSScriptRoot "bundle-runtime.ps1"
+    $bundleSh  = Join-Path $PSScriptRoot "bundle-runtime.sh"
+    $args = @()
+    if ($ForceRuntime) { $args += "-Force" }
+    if (Test-Path $bundlePs1) {
+        & $bundlePs1 @args
+    } elseif (Get-Command bash -ErrorAction SilentlyContinue) {
+        $shArgs = @()
+        if ($ForceRuntime) { $shArgs += "--force" }
+        & bash $bundleSh @shArgs
+        if ($LASTEXITCODE -ne 0) { throw "bundle-runtime.sh failed" }
+    } else {
+        throw "Need scripts/bundle-runtime.ps1 or bash + bundle-runtime.sh to build the offline runtime."
+    }
+    if (-not (Test-Path (Join-Path $runtime "python\python.exe"))) {
+        throw "Offline runtime missing at $runtime after bundle step."
+    }
+} else {
+    Write-Host "SkipRuntime: zip will rely on first-launch online provision."
+}
 
 if (-not $NoBuild) {
     # --no-bundle: compile app.exe + stage resources, but DO NOT build an installer.
@@ -28,7 +60,8 @@ $conf = Get-Content (Join-Path $root "app\src-tauri\tauri.conf.json") -Raw | Con
 $version = $conf.version
 
 New-Item -ItemType Directory -Force -Path $dist | Out-Null
-$zip = Join-Path $dist "MDFlux_${version}_portable.zip"
+$suffix = if ($SkipRuntime) { "portable" } else { "portable_offline" }
+$zip = Join-Path $dist "MDFlux_${version}_${suffix}.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 
 # Stage the payload so the shipped executable is MDFlux.exe (the build output is app.exe
@@ -38,6 +71,20 @@ if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
 Copy-Item $exe (Join-Path $stage "MDFlux.exe")
 Copy-Item $res -Destination $stage -Recurse
+
+# Safety net: if tauri did not stage the runtime (e.g. resource glob missed),
+# copy it next to the other resources so the offline path still works.
+$stageRuntimePy = Join-Path $stage "resources\runtime\python\python.exe"
+if (-not $SkipRuntime -and -not (Test-Path $stageRuntimePy)) {
+    Write-Host "Runtime not in release resources — copying from $runtime"
+    $destRt = Join-Path $stage "resources\runtime"
+    New-Item -ItemType Directory -Force -Path (Split-Path $destRt) | Out-Null
+    Copy-Item $runtime -Destination $destRt -Recurse
+}
+
+if (-not $SkipRuntime -and -not (Test-Path $stageRuntimePy) -and -not (Test-Path (Join-Path $stage "resources\runtime\python\python.exe"))) {
+    throw "Staged zip is missing the offline Python runtime."
+}
 
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
 Remove-Item $stage -Recurse -Force

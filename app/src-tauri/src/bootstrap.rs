@@ -12,7 +12,11 @@ mod platform {
     pub const UV_SHA256: &str = "3e8203e6434b45427f20824419f8d8d53f970a76d94ccdcad07f8498fa01a9d0";
     pub const UV_ARCHIVE: &str = "uv.zip";
     pub const UV_BIN: &str = "uv.exe";
+    /// AppData-provisioned venv layout (created by `uv venv` on first launch).
     pub const PYTHON_BIN: &str = "Scripts/python.exe";
+    /// Offline-bundled runtime layout (`resources/runtime/python/` from
+    /// python-build-standalone install_only + site-packages).
+    pub const BUNDLED_PYTHON_BIN: &str = "python/python.exe";
     pub const UV_LABEL: &str = "uv 0.5.11 — Python package manager (Windows x64)";
 }
 
@@ -23,6 +27,7 @@ mod platform {
     pub const UV_ARCHIVE: &str = "uv.tar.gz";
     pub const UV_BIN: &str = "uv";
     pub const PYTHON_BIN: &str = "bin/python";
+    pub const BUNDLED_PYTHON_BIN: &str = "python/bin/python";
     pub const UV_LABEL: &str = "uv 0.5.11 — Python package manager (macOS arm64)";
 }
 
@@ -33,7 +38,21 @@ mod platform {
     pub const UV_ARCHIVE: &str = "uv.tar.gz";
     pub const UV_BIN: &str = "uv";
     pub const PYTHON_BIN: &str = "bin/python";
+    pub const BUNDLED_PYTHON_BIN: &str = "python/bin/python";
     pub const UV_LABEL: &str = "uv 0.5.11 — Python package manager (macOS x64)";
+}
+
+// Compile stub for non-Windows/macOS hosts (e.g. Linux `cargo check`). Not a
+// supported runtime target — MDFlux ships Windows portable builds.
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
+mod platform {
+    pub const UV_URL: &str = "";
+    pub const UV_SHA256: &str = "";
+    pub const UV_ARCHIVE: &str = "uv.tar.gz";
+    pub const UV_BIN: &str = "uv";
+    pub const PYTHON_BIN: &str = "bin/python";
+    pub const BUNDLED_PYTHON_BIN: &str = "python/bin/python";
+    pub const UV_LABEL: &str = "uv (unsupported host)";
 }
 
 // ── State helpers ──────────────────────────────────────────────────────────
@@ -97,7 +116,39 @@ pub fn app_data_dir(app: &AppHandle) -> PathBuf {
     app.path().app_data_dir().expect("app data dir unavailable")
 }
 
+/// Root of the offline-bundled Python runtime next to the app resources, if present.
+/// Layout: `resources/runtime/python/python.exe` (Windows) produced by
+/// `scripts/bundle-runtime.sh` / `.ps1`.
+fn runtime_dir(app: &AppHandle) -> Option<PathBuf> {
+    let resource_dir = app.path().resource_dir().ok()?;
+    let dir = resource_dir.join("resources").join("runtime");
+    if dir.is_dir() {
+        Some(dir)
+    } else {
+        None
+    }
+}
+
+/// Path to a pre-shipped Python interpreter that needs no first-launch download.
+pub fn bundled_python(app: &AppHandle) -> Option<PathBuf> {
+    let dir = runtime_dir(app)?;
+    let py = dir.join(platform::BUNDLED_PYTHON_BIN);
+    if py.is_file() {
+        Some(py)
+    } else {
+        None
+    }
+}
+
+pub fn uses_bundled_runtime(app: &AppHandle) -> bool {
+    bundled_python(app).is_some()
+}
+
 pub fn is_provisioned(app: &AppHandle) -> bool {
+    // Offline portable builds ship a complete Python tree — skip the download flow.
+    if uses_bundled_runtime(app) {
+        return true;
+    }
     let path = app_data_dir(app).join(".provision-state.json");
     fs::read_to_string(path)
         .ok()
@@ -259,6 +310,12 @@ pub async fn install_optional_engine(
 // ── Public API ─────────────────────────────────────────────────────────────
 
 pub async fn provision(app: AppHandle, force: bool) -> Result<(), String> {
+    // Offline portable zip already contains Python + core packages. Nothing to download.
+    if uses_bundled_runtime(&app) {
+        emit(&app, "done", "Ready (bundled runtime).", 1.0);
+        return Ok(());
+    }
+
     let data_dir = app_data_dir(&app);
     let bin_dir = data_dir.join("bin");
     let venv_dir = data_dir.join("venv");
@@ -324,6 +381,9 @@ pub async fn provision(app: AppHandle, force: bool) -> Result<(), String> {
 }
 
 pub fn python_path(app: &AppHandle) -> PathBuf {
+    if let Some(bundled) = bundled_python(app) {
+        return bundled;
+    }
     app_data_dir(app)
         .join("venv")
         .join(platform::PYTHON_BIN)
