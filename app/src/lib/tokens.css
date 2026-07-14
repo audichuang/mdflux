@@ -83,8 +83,10 @@
   --surface-1: #141412; /* dark chrome / panels */
   --surface-2: #282825; /* elevated: hover, cards, secondary buttons */
   --surface-3: #353530; /* button active / active tabs */
-  --border: #2c2c29;
-  --border-strong: #3d3d38;
+  /* Soft edges — prefer elevation over hard boxes */
+  --border: rgba(249, 249, 247, 0.08);
+  --border-strong: rgba(249, 249, 247, 0.14);
+  --divider: rgba(249, 249, 247, 0.06);
   --text-primary: #f9f9f7; /* warm milk white */
   --text-secondary: #c8c8bd;
   --text-muted: #85857c;
@@ -97,7 +99,8 @@
   --red: #e57373;
   --amber: #ffb74d;
   --seg-track: rgba(0, 0, 0, 0.3);
-  --seg-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --seg-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --panel-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 28px rgba(0, 0, 0, 0.28);
   --on-accent: #ffffff;
 }
 
@@ -106,10 +109,12 @@
   color-scheme: light;
   --canvas: #faf9f5; /* warm paper background (Claude light) */
   --surface-1: #ffffff; /* elevated cards / panels */
-  --surface-2: #f0efe9; /* hover, secondary fills */
-  --surface-3: #e5e4dd; /* active / pressed */
-  --border: #e8e6e0;
-  --border-strong: #d4d2ca;
+  --surface-2: #f3f1ea; /* hover, secondary fills */
+  --surface-3: #eae7df; /* active / pressed */
+  /* Hairline borders — avoid stiff ink boxes */
+  --border: rgba(20, 20, 19, 0.08);
+  --border-strong: rgba(20, 20, 19, 0.14);
+  --divider: rgba(20, 20, 19, 0.06);
   --text-primary: #141413; /* warm near-black (Claude light fg) */
   --text-secondary: #5c5b56;
   --text-muted: #8a8983;
@@ -121,8 +126,9 @@
   --green: #3d8f4a;
   --red: #c75050;
   --amber: #b87a12;
-  --seg-track: rgba(20, 20, 19, 0.06);
-  --seg-shadow: 0 1px 2px rgba(20, 20, 19, 0.08);
+  --seg-track: rgba(20, 20, 19, 0.05);
+  --seg-shadow: 0 1px 2px rgba(20, 20, 19, 0.06);
+  --panel-shadow: 0 1px 2px rgba(20, 20, 19, 0.04), 0 10px 32px rgba(20, 20, 19, 0.06);
   --on-accent: #ffffff;
 }
 
@@ -244,12 +250,13 @@ body {
 }
 
 .btn-secondary {
-  background: transparent;
+  background: var(--surface-1);
   color: var(--text-primary);
   border-color: var(--border);
+  box-shadow: var(--seg-shadow);
 }
 .btn-secondary:hover:not(:disabled) {
-  background: var(--surface-1);
+  background: var(--surface-2);
   border-color: var(--border-strong);
 }
 
@@ -287,18 +294,18 @@ body {
 .seg {
   display: inline-flex;
   background: var(--seg-track);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 2.5px;
+  border: 1px solid transparent; /* track only — no hard chrome frame */
+  border-radius: 999px;
+  padding: 3px;
   gap: 2px;
 }
 .seg-btn {
-  padding: 4px 12px;
+  padding: 5px 12px;
   font-size: 11px;
   font-weight: 500;
   font-family: var(--font-ui);
   border: 1px solid transparent;
-  border-radius: calc(var(--radius-sm) - 2px); /* concentric inner rounding (8px) */
+  border-radius: 999px;
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
@@ -306,16 +313,37 @@ body {
 }
 .seg-btn:hover:not(:disabled):not(.active) {
   color: var(--text-secondary);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
 }
 .seg-btn.active {
   background: var(--surface-1);
-  border-color: var(--border-strong);
+  border-color: transparent;
   color: var(--text-primary);
   box-shadow: var(--seg-shadow);
 }
 
 :root[data-theme='dark'] .seg-btn.active {
   background: var(--surface-2);
+}
+
+/* Soft panel — elevation instead of ink-box frames */
+.panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--panel-shadow);
+  overflow: hidden;
+}
+.panel-inset {
+  background: var(--surface-2);
+  border: none;
+  border-radius: var(--radius);
+}
+.hairline-b {
+  border-bottom: 1px solid var(--divider);
+}
+.hairline-t {
+  border-top: 1px solid var(--divider);
 }
 .seg-btn:disabled {
   opacity: 0.4;

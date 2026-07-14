@@ -840,7 +840,7 @@
     align-items: center;
     gap: var(--sp-3);
     padding: var(--sp-6) 0 var(--sp-4);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--divider, var(--border));
     margin-bottom: var(--sp-4);
     flex-shrink: 0;
   }

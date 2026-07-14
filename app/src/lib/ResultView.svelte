@@ -275,12 +275,10 @@
   }
 </script>
 
-<div
-  class="flex-1 flex flex-col min-h-0 bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden"
->
+<div class="panel flex-1 flex flex-col min-h-0 bg-zinc-950">
   <!-- Header: filename + view toggle -->
   <div
-    class="flex items-center justify-between gap-3 px-4 py-2 border-b border-zinc-800 bg-zinc-900/50 flex-shrink-0"
+    class="flex items-center justify-between gap-3 px-4 py-2.5 hairline-b bg-zinc-900/30 flex-shrink-0"
   >
     <div class="flex items-center gap-2 min-w-0 text-zinc-400" title={sourceStem}>
       <svg width="14" height="14" viewBox="0 0 15 15" fill="none" aria-hidden="true">
@@ -322,7 +320,7 @@
   </div>
 
   <!-- Cleanup bar -->
-  <div class="flex-shrink-0 flex flex-col gap-2.5 px-4 py-3 border-b border-zinc-800 bg-zinc-950">
+  <div class="flex-shrink-0 flex flex-col gap-2.5 px-4 py-3 hairline-b bg-zinc-950">
     <div class="flex items-center gap-3">
       <span class="text-xs font-semibold tracking-wider text-zinc-500 uppercase"
         >{tr('clean_up')}</span
@@ -372,10 +370,10 @@
             >
           {/if}
         </p>
-        <div class="flex flex-col gap-1 p-2 bg-zinc-900/30 border border-zinc-850 rounded-lg">
+        <div class="panel-inset flex flex-col gap-0.5 p-1.5">
           {#each CLEANUP_RULES as rule}
             <label
-              class="flex items-start gap-3 p-2.5 rounded-md hover:bg-zinc-900/40 transition-colors cursor-pointer"
+              class="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-900/35 transition-colors cursor-pointer"
               title="{rule.hint}. {cleanup.rules[rule.key] ? 'On' : 'Off'} — click to toggle."
             >
               <input
@@ -394,7 +392,7 @@
                 <span
                   class="flex-shrink-0 align-self-center text-[10px] font-mono font-semibold text-blue-400 bg-blue-950/45 px-2 py-0.5 rounded-full min-w-[22px] text-center {c ===
                   0
-                    ? 'text-zinc-500 bg-zinc-900 border border-zinc-800'
+                    ? 'text-zinc-500 bg-zinc-900/60'
                     : ''}"
                   title="{c.toLocaleString()} {c === 1 ? 'edit' : 'edits'} this rule made"
                   >{c.toLocaleString()}</span
@@ -406,9 +404,7 @@
       </div>
     {:else if cleanup.method === 'ai'}
       {#if running}
-        <div
-          class="flex items-center justify-between gap-3 p-2 border border-zinc-800 rounded-lg bg-zinc-900/20"
-        >
+        <div class="flex items-center justify-between gap-3 p-3 panel-inset">
           <p class="text-xs text-zinc-400 flex items-center gap-2">
             <span
               class="inline-block w-3.5 h-3.5 border-2 border-zinc-700 border-t-blue-500 rounded-full animate-spin"
@@ -416,7 +412,7 @@
             Cleaning with AI… large documents on a local model can take a few minutes.
           </p>
           <button
-            class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-3.5 border border-zinc-800 bg-red-950/20 hover:bg-red-950/45 text-red-450 hover:text-red-300 cursor-pointer transition-colors"
+            class="btn-danger btn-sm"
             onclick={cancelAi}
             disabled={cancelRequested}
             title="Stop the AI cleanup and keep the original text"
@@ -425,7 +421,7 @@
           </button>
         </div>
       {:else if cleanup.aiCleaned === null}
-        <div class="flex flex-col gap-2.5 p-3 border border-zinc-850 rounded-lg bg-zinc-900/25">
+        <div class="flex flex-col gap-2.5 p-3 panel-inset">
           <p class="text-xs text-zinc-400">
             Cleans the document with your {llmMode === 'api'
               ? 'configured API model'
@@ -433,13 +429,13 @@
           </p>
           {#if llmMode === 'api'}
             <p
-              class="text-[11px] text-amber-400 bg-amber-950/25 border border-amber-900/30 rounded p-2"
+              class="text-[11px] text-amber-400 bg-amber-950/25 rounded-xl px-3 py-2"
             >
               ⚠ This sends the document text to your configured API provider.
             </p>
           {/if}
           <button
-            class="inline-flex items-center justify-center rounded-md text-xs font-semibold h-8 px-4 border border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 cursor-pointer transition-colors w-fit"
+            class="btn-secondary btn-sm w-fit"
             title="Send the document to your AI model and clean it up"
             onclick={runAi}>Run AI cleanup</button
           >
@@ -466,10 +462,10 @@
 
   <!-- Content -->
   {#if cleanup.viewMode === 'split' && hasChanges}
-    <div class="flex-1 flex min-h-0 divide-x divide-zinc-800 flex-col md:flex-row">
+    <div class="flex-1 flex min-h-0 divide-x divide-[var(--divider)] flex-col md:flex-row">
       <div class="flex-1 min-w-0 flex flex-col min-h-0">
         <div
-          class="flex-shrink-0 px-6 py-1.5 text-[9px] font-semibold text-zinc-550 uppercase tracking-wider bg-zinc-900/60 border-b border-zinc-800"
+          class="flex-shrink-0 px-6 py-1.5 text-[9px] font-semibold text-zinc-550 uppercase tracking-wider bg-zinc-900/40 hairline-b"
         >
           Before cleanup
         </div>
@@ -489,7 +485,7 @@
       </div>
       <div class="flex-1 min-w-0 flex flex-col min-h-0">
         <div
-          class="flex-shrink-0 px-6 py-1.5 text-[9px] font-semibold text-zinc-550 uppercase tracking-wider bg-zinc-900/60 border-b border-zinc-800"
+          class="flex-shrink-0 px-6 py-1.5 text-[9px] font-semibold text-zinc-550 uppercase tracking-wider bg-zinc-900/40 hairline-b"
         >
           After cleanup
         </div>
@@ -569,10 +565,10 @@
 
   <!-- Bottom bar -->
   <div
-    class="flex items-center justify-between gap-3 px-4 py-3 border-t border-zinc-800 bg-zinc-900/50 flex-shrink-0"
+    class="flex items-center justify-between gap-3 px-4 py-3 hairline-t bg-zinc-900/30 flex-shrink-0"
   >
     <span
-      class="inline-flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 bg-zinc-900 border border-zinc-850 px-2.5 py-1 rounded-full"
+      class="inline-flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 bg-zinc-900/50 px-2.5 py-1 rounded-full"
       title="Source format · {converterPath}"
     >
       {tr('from_format', { format: detectedFormat })}{#if warnings.length}<span
@@ -658,7 +654,7 @@
     }}
   >
     <div
-      class="bg-zinc-900 border border-zinc-800 rounded-lg p-5 w-[340px] flex flex-col gap-3 shadow-xl max-w-full outline-none"
+      class="panel bg-zinc-900 p-5 w-[340px] flex flex-col gap-3 max-w-full outline-none"
       bind:this={modalEl}
       onclick={(e) => e.stopPropagation()}
       onkeydown={onModalKeydown}
@@ -693,7 +689,7 @@
     letter-spacing: -0.02em;
     margin: 0 0 12px;
     padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--divider);
   }
   .preview :global(h2) {
     font-size: 20px;
@@ -738,12 +734,12 @@
   .preview :global(blockquote) {
     margin: 0 0 12px;
     padding: 4px 16px;
-    border-left: 3px solid var(--border);
+    border-left: 3px solid color-mix(in srgb, var(--accent) 35%, var(--divider));
     color: var(--text-secondary);
   }
   .preview :global(hr) {
     border: none;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--divider);
     margin: 20px 0;
   }
   .preview :global(code) {
@@ -751,13 +747,13 @@
     font-size: 0.88em;
     background: var(--surface-2);
     padding: 1px 5px;
-    border-radius: 4px;
+    border-radius: 6px;
   }
   .preview :global(pre) {
     background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 12px;
+    border: none;
+    border-radius: var(--radius);
+    padding: 14px 16px;
     overflow-x: auto;
     margin: 0 0 12px;
   }
@@ -765,22 +761,38 @@
     background: none;
     padding: 0;
   }
+  /* Soft tables — row dividers only, no full grid cages */
   .preview :global(table) {
-    border-collapse: collapse;
-    margin: 0 0 12px;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0 0 16px;
     font-size: 13px;
-    display: block;
-    overflow-x: auto;
+    width: 100%;
+    display: table;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--surface-2) 55%, transparent);
   }
   .preview :global(th),
   .preview :global(td) {
-    border: 1px solid var(--border);
-    padding: 5px 10px;
+    border: none;
+    border-bottom: 1px solid var(--divider);
+    padding: 10px 14px;
     text-align: left;
+    vertical-align: top;
+  }
+  .preview :global(tr:last-child th),
+  .preview :global(tr:last-child td) {
+    border-bottom: none;
   }
   .preview :global(th) {
-    background: var(--surface-2);
+    background: color-mix(in srgb, var(--surface-2) 80%, transparent);
     font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+  .preview :global(tbody tr:hover td) {
+    background: color-mix(in srgb, var(--accent) 4%, transparent);
   }
   .preview :global(img) {
     max-width: 100%;

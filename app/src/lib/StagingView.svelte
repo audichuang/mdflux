@@ -157,7 +157,7 @@
   class="w-full max-w-2xl self-center py-6 px-1 flex flex-col gap-6 h-full min-h-0 overflow-y-auto"
 >
   <!-- Header -->
-  <div class="flex items-baseline justify-between border-b border-zinc-800 pb-4">
+  <div class="flex items-baseline justify-between hairline-b pb-4">
     <div class="flex items-baseline gap-2">
       <span class="text-3xl font-bold font-mono tracking-tight text-zinc-50">{files.length}</span>
       <span class="text-sm font-medium text-zinc-400"
@@ -173,16 +173,16 @@
 
   <!-- File list (drop more anywhere on this view) -->
   <div
-    class="flex flex-col gap-2 p-3 border border-zinc-800 rounded-xl bg-zinc-950/30 min-h-[120px] max-h-[300px] overflow-y-auto transition-colors duration-200 {dragHover
-      ? 'border-accent bg-accent-dim'
+    class="panel-inset flex flex-col gap-1.5 p-2 min-h-[120px] max-h-[300px] overflow-y-auto transition-colors duration-200 {dragHover
+      ? 'bg-accent-dim ring-2 ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]'
       : ''}"
   >
     {#each files as f (f.path)}
       <div
-        class="flex items-center gap-3 p-2.5 bg-zinc-900/30 border border-zinc-800/40 rounded-lg hover:bg-zinc-900/60 hover:border-zinc-800 transition-all group"
+        class="flex items-center gap-3 px-2.5 py-2 rounded-xl hover:bg-zinc-900/50 transition-all group"
       >
         <span
-          class="flex-shrink-0 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md border border-zinc-800 bg-zinc-950 text-zinc-400 group-hover:text-accent group-hover:border-accent-edge min-w-[48px] text-center uppercase tracking-wider transition-colors"
+          class="flex-shrink-0 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-zinc-950 text-zinc-400 group-hover:text-accent min-w-[48px] text-center uppercase tracking-wider transition-colors"
           >{f.ext || 'FILE'}</span
         >
         <span class="flex-1 min-w-0 text-sm font-medium text-zinc-300 truncate" title={f.path}
@@ -190,7 +190,7 @@
         >
         <span class="flex-shrink-0 text-xs font-mono text-zinc-500">{fmtSize(f.size)}</span>
         <button
-          class="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-zinc-800 hover:bg-zinc-950 text-zinc-500 hover:text-red-400 transition-all cursor-pointer"
+          class="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-transparent hover:bg-zinc-950 text-zinc-500 hover:text-red-400 transition-all cursor-pointer"
           title="Remove {f.name}"
           aria-label="Remove {f.name}"
           onclick={() => onRemove(f.path)}
