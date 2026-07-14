@@ -43,7 +43,7 @@ mod platform {
 }
 
 // Compile stub for non-Windows/macOS hosts (e.g. Linux `cargo check`). Not a
-// supported runtime target — MDFlux ships Windows portable builds.
+// supported runtime target — ship Windows + macOS arm64 offline packages.
 #[cfg(not(any(target_os = "windows", target_os = "macos")))]
 mod platform {
     pub const UV_URL: &str = "";
