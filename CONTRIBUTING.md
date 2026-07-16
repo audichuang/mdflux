@@ -67,9 +67,20 @@ pwsh -File scripts/make-installer.ps1 -AlsoPortable
 ## Checks before a PR
 
 ```bash
+cd app && npm run test           # Vitest (UI pure modules) + Python cleanup unit tests
 cd app && npm run check          # svelte-check (0 errors expected)
+cd app && npm run lint           # ESLint
+cd app && npm run build          # Vite production build
 cd app/src-tauri && cargo check  # Rust
 ```
+
+### Test layout
+
+| Suite | Command | Covers |
+|---|---|---|
+| `npm run test:unit` | Vitest + jsdom | `naming`, `formats`, `cleanup`, `diff`, `mdpreview`, `locale` |
+| `npm run test:sidecar` | `python3 -m unittest` | Sidecar `cleanup.py` deterministic rules |
+| `npm run test` | both of the above | Full unit gate |
 
 ## Pull requests
 

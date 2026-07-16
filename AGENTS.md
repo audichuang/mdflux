@@ -49,13 +49,15 @@ Detail: `packaging/homebrew/README.md`, `README.md` install section.
 ## Commands (prefer scoped)
 
 ```bash
-cd app && npm ci && npm run check
+cd app && npm ci && npm run test && npm run check
 cd app/src-tauri && cargo check --locked
 bash scripts/bundle-runtime.sh --platform windows-x64   # or macos-arm64 --force
 # Prefer CI "Portable build". Local:
 pwsh -File scripts/make-installer.ps1 -AlsoPortable   # Windows host
 bash scripts/make-macos-dmg.sh                        # macOS arm64 host
 ```
+
+**Tests:** `npm run test` = Vitest (`src/lib/*.test.ts`) + Python `unittest` for sidecar `cleanup.py`.
 
 ## Start here (judgment, not a tree)
 
