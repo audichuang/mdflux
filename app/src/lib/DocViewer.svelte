@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { invoke } from '@tauri-apps/api/core';
   import { renderMarkdown } from './mdpreview';
   import { onDestroy } from 'svelte';
   import { tr } from './locale.svelte';
@@ -6,10 +7,12 @@
   let {
     name,
     markdown,
+    path = '',
     onBack,
   }: {
     name: string;
     markdown: string;
+    path?: string;
     onBack: () => void;
   } = $props();
 
@@ -18,6 +21,7 @@
 
   let copyFlash = $state<'idle' | 'copied' | 'failed'>('idle');
   let copyTimer: ReturnType<typeof setTimeout>;
+  let revealError = $state<string | null>(null);
   onDestroy(() => clearTimeout(copyTimer));
 
   async function copy() {
@@ -29,6 +33,16 @@
     } catch {
       copyFlash = 'failed';
       copyTimer = setTimeout(() => (copyFlash = 'idle'), 1800);
+    }
+  }
+
+  async function reveal() {
+    if (!path) return;
+    revealError = null;
+    try {
+      await invoke('open_folder', { path });
+    } catch (e) {
+      revealError = tr('reveal_failed', { error: String(e) });
     }
   }
 
@@ -71,16 +85,30 @@
       >
     </div>
 
+    {#if path}
+      <button class="btn-secondary btn-sm" onclick={reveal} title={tr('reveal_in_folder')}>
+        {tr('reveal_in_folder')}
+      </button>
+    {/if}
+
     <button class="btn-secondary btn-sm" onclick={copy} title={tr('copy')}>
-      {copyFlash === 'copied' ? tr('copied') : copyFlash === 'failed' ? 'Failed' : tr('copy')}
+      {copyFlash === 'copied'
+        ? tr('copied')
+        : copyFlash === 'failed'
+          ? tr('failed_short')
+          : tr('copy')}
     </button>
   </div>
 
+  {#if revealError}
+    <p class="text-xs text-err px-5 py-2 flex-shrink-0" role="alert">{revealError}</p>
+  {/if}
+
   <div
-    class="doc-scroll flex-1 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+    class="doc-scroll flex-1 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--accent)_60%,transparent)]"
     tabindex="0"
     role="region"
-    aria-label="Document"
+    aria-label={tr('document')}
   >
     {#if view === 'preview'}
       <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
@@ -89,9 +117,7 @@
       </div>
     {:else}
       <pre
-        class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0 doc-col"
-        >{markdown}</pre
-      >
+        class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0 doc-col">{markdown}</pre>
     {/if}
   </div>
 </div>
@@ -109,6 +135,9 @@
     max-width: min(72rem, 100%);
     margin: 0 auto;
     width: 100%;
+  }
+  .text-err {
+    color: var(--red);
   }
 
   @media (min-width: 1600px) {

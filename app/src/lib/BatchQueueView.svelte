@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { ConvertError } from './ErrorCard.svelte';
+  import { tr } from './locale.svelte';
 
   export interface BatchItemState {
     id: string;
@@ -33,78 +34,81 @@
   const progress = $derived(total > 0 ? finished / total : 0);
   const isCancelling = $derived(phase === 'cancelling');
 
-  const STATUS_LABELS: Record<string, string> = {
-    pending: 'Queued',
-    running: 'Converting…',
-    done: 'Done',
-    failed: 'Failed',
-    cancelled: 'Cancelled',
+  // Static status→i18n-key map (tr() resolves live per locale at the call site).
+  const STATUS_KEYS: Record<string, string> = {
+    pending: 'queued',
+    running: 'converting',
+    done: 'done',
+    failed: 'failed',
+    cancelled: 'cancelled',
   };
+  function statusLabel(status: string): string {
+    return tr(STATUS_KEYS[status] ?? status);
+  }
 </script>
 
 <div class="w-full max-w-2xl self-center py-6 px-1 flex flex-col gap-5 h-full min-h-0">
   <!-- Header -->
   <div class="flex flex-col gap-3 hairline-b pb-4 flex-shrink-0">
     <div class="flex items-baseline justify-between">
-      <span class="text-sm font-semibold text-zinc-200"
-        >Converting {total} file{total === 1 ? '' : 's'}</span
-      >
-      <span class="text-xs font-mono text-zinc-400"
-        >{done} done{failed > 0 ? ` · ${failed} failed` : ''}</span
-      >
+      <span class="text-sm font-semibold text-zinc-200">
+        {total === 1
+          ? tr('converting_n', { count: total })
+          : tr('converting_n_plural', { count: total })}
+      </span>
+      <span class="text-xs font-mono text-zinc-400">
+        {tr('done_count', { count: done })}{failed > 0
+          ? ` · ${tr('failed_count', { count: failed })}`
+          : ''}
+      </span>
     </div>
 
-    <!-- Overall progress bar -->
     <div
       class="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden"
       role="progressbar"
       aria-valuenow={Math.round(progress * 100)}
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-label="Overall batch progress"
+      aria-label={tr('overall_progress')}
     >
       <div
-        class="h-full bg-blue-500 rounded-full transition-all duration-300"
+        class="h-full progress-fill rounded-full transition-all duration-300"
         style="width: {progress * 100}%"
       ></div>
     </div>
 
-    <!-- Cancel -->
     <button
       class="self-end btn-danger btn-sm"
       onclick={onCancel}
       disabled={isCancelling}
-      aria-label={isCancelling ? 'Cancelling…' : 'Cancel batch'}
-      title="Stop the whole batch. Files already finished are kept."
+      aria-label={isCancelling ? tr('cancelling') : tr('cancel_batch')}
+      title={tr('stop_batch_hint')}
     >
-      {isCancelling ? 'Cancelling…' : 'Cancel'}
+      {isCancelling ? tr('cancelling') : tr('cancel')}
     </button>
   </div>
 
-  <!-- File list -->
   <ul
     class="panel-inset flex-1 overflow-y-auto divide-y divide-[var(--divider)]"
-    aria-label="Conversion queue"
+    aria-label={tr('conversion_queue')}
   >
-    {#each items as item (item.id)}
+    {#each items as item (item.id || item.path)}
       <li
-        class="flex items-start gap-3 p-3 transition-colors hover:bg-zinc-900/30 {item.status ===
-        'failed'
-          ? 'bg-red-950/5'
+        class="flex items-start gap-3 p-3 transition-colors row-hover {item.status === 'failed'
+          ? 'row-failed'
           : ''} {item.status === 'cancelled' ? 'opacity-40' : ''}"
       >
-        <!-- Status icon -->
         <span
           class="flex-shrink-0 w-4 h-4 mt-0.5 flex items-center justify-center"
           aria-hidden="true"
         >
           {#if item.status === 'done'}
-            <svg class="text-green-400" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <svg class="icon-ok" width="14" height="14" viewBox="0 0 14 14" fill="none">
               <circle
                 cx="7"
                 cy="7"
                 r="6"
-                fill="rgba(34, 197, 94, 0.15)"
+                fill="color-mix(in srgb, var(--green) 15%, transparent)"
                 stroke="currentColor"
                 stroke-width="1"
               />
@@ -117,12 +121,12 @@
               />
             </svg>
           {:else if item.status === 'failed'}
-            <svg class="text-red-400" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <svg class="icon-err" width="14" height="14" viewBox="0 0 14 14" fill="none">
               <circle
                 cx="7"
                 cy="7"
                 r="6"
-                fill="rgba(239, 68, 68, 0.15)"
+                fill="color-mix(in srgb, var(--red) 15%, transparent)"
                 stroke="currentColor"
                 stroke-width="1"
               />
@@ -139,19 +143,15 @@
               <path d="M5 7h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
             </svg>
           {:else if item.status === 'running'}
-            <span
-              class="w-3.5 h-3.5 border-1.5 border-zinc-800 border-t-blue-500 rounded-full animate-spin"
-              aria-label="Converting"
-            ></span>
+            <span class="spinner" aria-label={tr('converting')}></span>
           {:else}
-            <svg class="text-zinc-850" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <svg class="text-zinc-500" width="14" height="14" viewBox="0 0 14 14" fill="none">
               <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" />
               <circle cx="7" cy="7" r="2" fill="currentColor" />
             </svg>
           {/if}
         </span>
 
-        <!-- Filename + status -->
         <div class="flex-1 min-w-0 flex flex-col gap-1.5">
           <span class="text-xs font-semibold text-zinc-200 truncate">{item.filename}</span>
 
@@ -164,7 +164,7 @@
               aria-valuemax={100}
             >
               <div
-                class="h-full bg-blue-500 rounded-full transition-all duration-300"
+                class="h-full progress-fill rounded-full transition-all duration-300"
                 style="width: {(item.frac ?? 0) * 100}%"
               ></div>
             </div>
@@ -172,28 +172,24 @@
             <div
               class="h-1.5 bg-[var(--surface-2)] rounded-full overflow-hidden relative"
               role="progressbar"
-              aria-label="Converting"
+              aria-label={tr('converting')}
             >
-              <div
-                class="shimmer-fill absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent bg-[size:200%_100%] animate-[shimmer_1.4s_infinite]"
-              ></div>
+              <div class="shimmer-fill absolute inset-0"></div>
             </div>
           {:else if item.status === 'failed' && item.error}
-            <span class="text-[10px] text-red-400 truncate"
+            <span class="text-[10px] text-err truncate"
               >{item.error.title} — {item.error.detail}</span
             >
           {:else}
-            <span class="text-[10px] text-zinc-500"
-              >{STATUS_LABELS[item.status] ?? item.status}</span
-            >
+            <span class="text-[10px] text-zinc-500">{statusLabel(item.status)}</span>
           {/if}
         </div>
 
         {#if item.status === 'done' && onOpen}
           <button
             class="btn-secondary btn-sm flex-shrink-0 self-center ml-2"
-            title="View the converted Markdown"
-            onclick={() => onOpen?.(item)}>View</button
+            title={tr('view_md')}
+            onclick={() => onOpen?.(item)}>{tr('view_btn')}</button
           >
         {/if}
       </li>
@@ -202,6 +198,45 @@
 </div>
 
 <style>
+  .progress-fill {
+    background: var(--accent);
+  }
+  .icon-ok {
+    color: var(--green);
+  }
+  .icon-err,
+  .text-err {
+    color: var(--red);
+  }
+  .row-hover:hover {
+    background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+  }
+  .row-failed {
+    background: color-mix(in srgb, var(--red) 5%, transparent);
+  }
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  .shimmer-fill {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--accent) 55%, transparent),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
   @keyframes shimmer {
     to {
       background-position: -200% 0;
@@ -211,6 +246,10 @@
     .shimmer-fill {
       animation: none;
       background: var(--border);
+    }
+    .spinner {
+      animation: none;
+      opacity: 0.5;
     }
   }
 </style>

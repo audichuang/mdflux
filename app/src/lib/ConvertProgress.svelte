@@ -1,17 +1,21 @@
 <script lang="ts">
+  import { tr } from './locale.svelte';
+
   let {
     stage = 'converting',
+    sourceName = '',
     onCancel,
   }: {
     stage?: string;
+    sourceName?: string;
     onCancel: () => void;
   } = $props();
 
-  const STAGE_LABELS: Record<string, string> = {
-    downloading: 'Downloading from the cloud…',
-    preflight: 'Checking file…',
-    extracting: 'Extracting content…',
-    formatting: 'Finishing up…',
+  const STAGE_KEYS: Record<string, string> = {
+    downloading: 'stage_downloading',
+    preflight: 'stage_preflight',
+    extracting: 'stage_extracting',
+    formatting: 'stage_formatting',
   };
 
   let cancelPending = $state(false);
@@ -20,34 +24,42 @@
     cancelPending = true;
     onCancel();
   }
+
+  const stageLabel = $derived(tr(STAGE_KEYS[stage] ?? 'stage_converting'));
 </script>
 
 <div class="flex-1 flex flex-col items-center justify-center gap-5">
+  {#if sourceName}
+    <p class="text-xs font-mono text-zinc-500 max-w-[min(420px,90vw)] truncate" title={sourceName}>
+      {sourceName}
+    </p>
+  {/if}
   <p class="text-sm font-semibold text-zinc-300 min-h-[1.4em]">
-    {STAGE_LABELS[stage] ?? 'Converting…'}
+    {stageLabel}
   </p>
 
   <div
     class="w-full max-w-[280px] h-2 bg-[var(--surface-2)] rounded-full overflow-hidden"
     role="progressbar"
-    aria-label="Conversion in progress"
+    aria-label={tr('conversion_progress')}
     aria-busy="true"
   >
-    <div class="fill h-full bg-blue-500 rounded-full"></div>
+    <div class="fill h-full rounded-full"></div>
   </div>
 
   <button
     class="btn-secondary btn-sm"
     onclick={handleCancel}
     disabled={cancelPending}
-    aria-label="Cancel conversion"
+    aria-label={tr('cancel_conversion')}
   >
-    {cancelPending ? 'Cancelling…' : 'Cancel'}
+    {cancelPending ? tr('cancelling') : tr('cancel')}
   </button>
 </div>
 
 <style>
   .fill {
+    background: var(--accent);
     transform-origin: left center;
     animation: indeterminate 1.6s ease-in-out infinite;
   }

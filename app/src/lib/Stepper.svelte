@@ -64,11 +64,7 @@
             <span class="num">{i + 1}</span>
           {/if}
         </span>
-        <span
-          class="line right"
-          class:on={i < current}
-          class:hide={i === steps.length - 1}
-        ></span>
+        <span class="line right" class:on={i < current} class:hide={i === steps.length - 1}></span>
       </div>
       <div class="labels">
         <span class="title">{step.title}</span>

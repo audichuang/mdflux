@@ -3,7 +3,6 @@
   import type { CleanupMethod } from './cleanup';
   import type { OutputRule } from './naming';
 
-  // Svelte module exports stay identical
   export interface FileInfo {
     path: string;
     name: string;
@@ -84,6 +83,10 @@
   );
   const llmAvailable = $derived(llmMode === 'local' || llmMode === 'api');
   const heavyCount = $derived(files.filter((f) => isHeavyExt(f.ext)).length);
+  const needsFolder = $derived(
+    isBatch && setup.outputRule !== 'next_to_source' && !setup.outputFolder,
+  );
+  const canConvert = $derived(files.length > 0 && !needsFolder);
 
   let dragHover = $state(false);
 
@@ -149,6 +152,7 @@
   }
 
   function convert() {
+    if (!canConvert) return;
     onConvert(setup.outputFolder, setup.outputRule, { method: setup.method, rules: setup.rules });
   }
 </script>
@@ -167,11 +171,11 @@
     <button
       class="text-sm font-medium text-zinc-400 hover:text-zinc-100 underline underline-offset-4 cursor-pointer transition-colors"
       onclick={onClear}
-      title="Remove all staged files">{tr('clear_all')}</button
+      title={tr('clear_all')}>{tr('clear_all')}</button
     >
   </div>
 
-  <!-- File list (drop more anywhere on this view) -->
+  <!-- File list -->
   <div
     class="panel-inset flex flex-col gap-1.5 p-2 min-h-[120px] max-h-[300px] overflow-y-auto transition-colors duration-200 {dragHover
       ? 'bg-accent-dim ring-2 ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]'
@@ -179,10 +183,10 @@
   >
     {#each files as f (f.path)}
       <div
-        class="flex items-center gap-3 px-2.5 py-2 rounded-xl hover:bg-zinc-900/50 transition-all group"
+        class="flex items-center gap-3 px-2.5 py-2 rounded-xl hover:bg-[color-mix(in_srgb,var(--text-primary)_4%,transparent)] transition-all group"
       >
         <span
-          class="flex-shrink-0 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-zinc-950 text-zinc-400 group-hover:text-accent min-w-[48px] text-center uppercase tracking-wider transition-colors"
+          class="flex-shrink-0 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-[var(--canvas)] text-zinc-400 group-hover:text-[var(--accent)] min-w-[48px] text-center uppercase tracking-wider transition-colors"
           >{f.ext || 'FILE'}</span
         >
         <span class="flex-1 min-w-0 text-sm font-medium text-zinc-300 truncate" title={f.path}
@@ -190,9 +194,9 @@
         >
         <span class="flex-shrink-0 text-xs font-mono text-zinc-500">{fmtSize(f.size)}</span>
         <button
-          class="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-transparent hover:bg-zinc-950 text-zinc-500 hover:text-red-400 transition-all cursor-pointer"
-          title="Remove {f.name}"
-          aria-label="Remove {f.name}"
+          class="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-transparent hover:bg-[var(--canvas)] text-zinc-500 hover:text-[var(--red)] transition-all cursor-pointer"
+          title={tr('remove_file', { name: f.name })}
+          aria-label={tr('remove_file', { name: f.name })}
           onclick={() => onRemove(f.path)}
         >
           <svg width="12" height="12" viewBox="0 0 11 11" fill="none" aria-hidden="true">
@@ -215,29 +219,33 @@
     <button class="btn-secondary btn-sm" onclick={browseFolder}>{tr('choose_folder')}</button>
   </div>
 
+  {#if !isBatch}
+    <p class="text-xs text-zinc-500 leading-relaxed">{tr('single_cleanup_hint')}</p>
+  {/if}
+
   {#if isBatch}
-    <!-- Output destination (batch only; a single file is saved from the result view) -->
+    <!-- Output destination (batch only) -->
     <div class="flex flex-col gap-3 hairline-t pt-5">
       <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase"
         >{tr('save_output_to')}</span
       >
-      <div class="seg" role="group" aria-label="Output location">
+      <div class="seg" role="group" aria-label={tr('output_location')}>
         <button
           class="seg-btn"
           class:active={setup.outputRule === 'next_to_source'}
-          title="Each .md is saved beside its source file"
+          title={tr('tip_next_to_source')}
           onclick={() => setRule('next_to_source')}>{tr('next_to_source')}</button
         >
         <button
           class="seg-btn"
           class:active={setup.outputRule === 'fixed_folder'}
-          title="All .md files go into one chosen folder"
+          title={tr('tip_one_folder')}
           onclick={() => setRule('fixed_folder')}>{tr('one_folder')}</button
         >
         <button
           class="seg-btn"
           class:active={setup.outputRule === 'mirror_tree'}
-          title="Recreate the source folder structure under a chosen root"
+          title={tr('tip_mirror')}
           onclick={() => setRule('mirror_tree')}>{tr('mirror_folders')}</button
         >
       </div>
@@ -269,9 +277,9 @@
           </span>
           {#if setup.outputFolder}
             <button
-              class="flex items-center justify-center w-5 h-5 rounded-full hover:bg-zinc-850 text-zinc-500 hover:text-zinc-200 cursor-pointer"
-              title="Clear"
-              aria-label="Clear folder"
+              class="flex items-center justify-center w-5 h-5 rounded-full hover:bg-[var(--surface-3)] text-zinc-500 hover:text-zinc-200 cursor-pointer"
+              title={tr('clear_folder')}
+              aria-label={tr('clear_folder')}
               onclick={() => (setup.outputFolder = null)}
             >
               <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
@@ -286,61 +294,62 @@
           {/if}
           <button
             class="btn-secondary btn-sm"
-            title="Pick the folder to save into"
+            title={tr('pick_output_folder')}
             onclick={chooseFolder}>{setup.outputFolder ? tr('change') : tr('choose_folder')}</button
           >
         </div>
+        {#if needsFolder}
+          <p class="text-xs text-[var(--amber)] leading-normal">{tr('need_folder')}</p>
+        {/if}
         {#if setup.outputRule === 'mirror_tree'}
-          <span class="text-xs text-zinc-500 leading-normal"
-            >Sub-folders of the dropped folder are recreated under this root.</span
-          >
+          <span class="text-xs text-zinc-500 leading-normal">{tr('mirror_tree_hint')}</span>
         {/if}
       {/if}
 
       {#if namePreview}
         <div class="flex items-center gap-2 text-xs text-zinc-400">
-          <span class="font-semibold tracking-wider text-[10px] text-zinc-500 uppercase">Named</span
+          <span class="font-semibold tracking-wider text-[10px] text-zinc-500 uppercase"
+            >{tr('named_as')}</span
           >
+          <span class="text-zinc-500">{tr('name_example')}</span>
           <span class="font-mono text-zinc-300 font-semibold truncate max-w-[320px]"
             >{namePreview}</span
           >
           {#if onOpenDiagnostics}
             <button
-              class="text-[11px] text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors cursor-pointer bg-transparent border-none p-0"
-              title="Change the naming convention in Diagnostics"
-              onclick={onOpenDiagnostics}>Change…</button
+              class="text-[11px] text-[var(--accent)] hover:text-[var(--accent-hover)] underline underline-offset-2 transition-colors cursor-pointer bg-transparent border-none p-0"
+              title={tr('file_name')}
+              onclick={onOpenDiagnostics}>{tr('change_naming')}</button
             >
           {/if}
         </div>
       {/if}
     </div>
 
-    <!-- Cleanup method (batch applies one choice to every file) -->
+    <!-- Cleanup method (batch) -->
     <div class="flex flex-col gap-3 hairline-t pt-5">
       <div class="flex items-center gap-3 justify-between">
         <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase"
           >{tr('clean_up')}</span
         >
-        <div class="seg" role="group" aria-label="Cleanup method">
+        <div class="seg" role="group" aria-label={tr('cleanup_method')}>
           <button
             class="seg-btn"
             class:active={setup.method === 'none'}
-            title="Convert files as-is, no cleanup"
+            title={tr('tip_cleanup_off')}
             onclick={() => selectMethod('none')}>{tr('off')}</button
           >
           <button
             class="seg-btn"
             class:active={setup.method === 'rules'}
-            title="Clean every file with fast, offline rules"
+            title={tr('tip_cleanup_rules')}
             onclick={() => selectMethod('rules')}>{tr('rule_based')}</button
           >
           <button
             class="seg-btn"
             class:active={setup.method === 'ai'}
             disabled={!llmAvailable}
-            title={llmAvailable
-              ? 'Clean every file with your configured AI model'
-              : 'Switch to Local or API mode to enable AI cleanup'}
+            title={llmAvailable ? tr('tip_cleanup_ai') : tr('tip_cleanup_ai_disabled')}
             onclick={() => selectMethod('ai')}>{tr('ai')}</button
           >
         </div>
@@ -350,25 +359,30 @@
         <div class="panel-inset flex flex-col gap-0.5 p-1.5">
           {#each CLEANUP_RULES as rule}
             <label
-              class="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-900/35 transition-colors cursor-pointer"
-              title="{rule.hint}. {setup.rules[rule.key] ? 'On' : 'Off'} — click to toggle."
+              class="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-[color-mix(in_srgb,var(--text-primary)_3%,transparent)] transition-colors cursor-pointer"
+              title={tr('rule_toggle_hint', {
+                hint: tr(rule.hintKey),
+                state: setup.rules[rule.key] ? tr('rule_on') : tr('rule_off'),
+              })}
             >
               <input
                 type="checkbox"
-                class="mt-1 accent-blue-500 rounded border-zinc-700 bg-zinc-900 text-blue-500 focus:ring-0 cursor-pointer"
+                class="mt-1 accent-[var(--accent)] rounded border-zinc-700 bg-zinc-900 cursor-pointer"
                 bind:checked={setup.rules[rule.key]}
               />
               <div class="flex flex-col gap-0.5">
-                <span class="text-xs font-medium text-zinc-200">{rule.label}</span>
-                <span class="text-[10px] text-zinc-500">{rule.hint}</span>
+                <span class="text-xs font-medium text-zinc-200">{tr(rule.labelKey)}</span>
+                <span class="text-[10px] text-zinc-500">{tr(rule.hintKey)}</span>
               </div>
             </label>
           {/each}
         </div>
       {:else if setup.method === 'ai' && llmMode === 'api'}
-        <p class="text-xs text-amber-400 bg-amber-950/20 rounded-xl px-3 py-3 leading-relaxed">
-          ⚠ AI cleanup sends the text of all {files.length} files to your configured API provider — cost
-          and privacy implications, once per file.
+        <p
+          class="text-xs text-[var(--amber)] rounded-xl px-3 py-3 leading-relaxed"
+          style="background: color-mix(in srgb, var(--amber) 12%, transparent)"
+        >
+          {tr('batch_ai_warn', { count: files.length })}
         </p>
       {/if}
     </div>
@@ -376,10 +390,11 @@
 
   {#if heavyCount > 0}
     <div
-      class="flex items-start gap-3 rounded-xl bg-blue-950/15 px-4 py-3.5 text-xs text-blue-400 leading-normal"
+      class="flex items-start gap-3 rounded-xl px-4 py-3.5 text-xs leading-normal"
+      style="background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent)"
     >
       <svg
-        class="flex-shrink-0 mt-0.5 text-blue-400"
+        class="flex-shrink-0 mt-0.5"
         width="14"
         height="14"
         viewBox="0 0 16 16"
@@ -403,7 +418,12 @@
     </div>
   {/if}
 
-  <button class="btn-primary btn-cta" onclick={convert}>
+  <button
+    class="btn-primary btn-cta"
+    onclick={convert}
+    disabled={!canConvert}
+    title={needsFolder ? tr('need_folder') : tr('convert_btn')}
+  >
     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path
         d="M10 2.5l1.6 4.1 4.4.3-3.4 2.8 1.1 4.3L10 11.8 6.3 14l1.1-4.3L4 6.9l4.4-.3L10 2.5z"

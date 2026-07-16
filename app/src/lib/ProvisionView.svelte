@@ -15,14 +15,15 @@
 
 <script lang="ts">
   import Stepper, { type Step } from '$lib/Stepper.svelte';
+  import { tr } from './locale.svelte';
 
   let { progress }: { progress: ProvisionProgress } = $props();
 
-  const STEPS: Step[] = [
-    { title: 'Setup tools', description: 'Download uv' },
-    { title: 'Python 3.12', description: 'Runtime' },
-    { title: 'Packages', description: 'Converters' },
-  ];
+  const STEPS = $derived<Step[]>([
+    { title: tr('step_tools'), description: tr('step_tools_desc') },
+    { title: tr('step_python'), description: tr('step_python_desc') },
+    { title: tr('step_packages'), description: tr('step_packages_desc') },
+  ]);
 
   // Map the backend step key onto the stepper index.
   const STEP_INDEX: Record<string, number> = {
@@ -40,13 +41,11 @@
   let hasTotal = $derived(!!detail && typeof detail.total === 'number' && detail.total! > 0);
   let frac = $derived(hasTotal ? Math.min(1, detail!.received / detail!.total!) : 0);
 
-  // What ships in the "Packages" step — shown so the user sees exactly what's
-  // being installed, not just a spinner.
-  const PACKAGES = [
-    { name: 'markitdown', note: 'core document converter' },
-    { name: 'PDF · Word · PowerPoint · Excel', note: 'format support' },
-    { name: 'openai', note: 'AI cleanup client' },
-  ];
+  const PACKAGES = $derived([
+    { name: tr('pkg_markitdown'), note: tr('pkg_markitdown_note') },
+    { name: tr('pkg_formats'), note: tr('pkg_formats_note') },
+    { name: tr('pkg_openai'), note: tr('pkg_openai_note') },
+  ]);
 
   function formatBytes(n: number): string {
     if (n < 1024) return `${n} B`;
@@ -76,14 +75,16 @@
   class="flex-1 flex flex-col items-center justify-center gap-6 w-full max-w-[500px] self-center py-8"
 >
   <header class="text-center select-none">
-    <h1 class="text-lg font-bold text-zinc-50">Setting up MDFlux</h1>
-    <p class="text-xs text-zinc-400 mt-1">One-time setup of the local conversion engine.</p>
+    <h1 class="text-lg font-bold text-zinc-50">{tr('setup_title')}</h1>
+    <p class="text-xs text-zinc-400 mt-1">{tr('setup_subtitle')}</p>
   </header>
 
   <Stepper steps={STEPS} {current} {done} />
 
   <div class="panel w-full p-5 flex flex-col gap-3.5 select-text" aria-live="polite">
-    <p class="text-xs font-semibold text-zinc-200">{done ? 'Setup complete.' : progress.message}</p>
+    <p class="text-xs font-semibold text-zinc-200">
+      {done ? tr('setup_complete') : progress.message}
+    </p>
 
     {#if detail && !done}
       <p class="text-[10px] font-mono text-zinc-400 break-all leading-normal">{detail.label}</p>
@@ -98,7 +99,7 @@
         aria-valuemax={100}
       >
         <div
-          class="h-full bg-blue-500 rounded-full transition-all duration-150"
+          class="h-full progress-fill rounded-full transition-all duration-150"
           style="width: {frac * 100}%"
         ></div>
       </div>
@@ -110,7 +111,7 @@
         aria-label={progress.message}
       >
         <div
-          class="shimmer-fill animate-indeterminate absolute h-full w-[45%] bg-blue-500 rounded-full"
+          class="shimmer-fill animate-indeterminate absolute h-full w-[45%] progress-fill rounded-full"
         ></div>
       </div>
     {/if}
@@ -119,7 +120,7 @@
       <div class="flex items-center gap-4 text-[10px] text-zinc-400 font-mono select-none">
         {#if sizeText}<span>{sizeText}</span>{/if}
         {#if hasTotal}<span>{Math.round(frac * 100)}%</span>{/if}
-        {#if speedText}<span class="text-blue-400 font-semibold ml-auto">↓ {speedText}</span>{/if}
+        {#if speedText}<span class="speed-text font-semibold ml-auto">↓ {speedText}</span>{/if}
       </div>
     {/if}
 
@@ -135,10 +136,16 @@
     {/if}
   </div>
 
-  <p class="text-[11px] text-zinc-500 select-none">Internet required · this runs once</p>
+  <p class="text-[11px] text-zinc-500 select-none">{tr('setup_footer')}</p>
 </div>
 
 <style>
+  .progress-fill {
+    background: var(--accent);
+  }
+  .speed-text {
+    color: var(--accent);
+  }
   .animate-indeterminate {
     animation: indeterminate 1.5s ease-in-out infinite;
   }

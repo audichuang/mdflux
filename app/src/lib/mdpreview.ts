@@ -20,8 +20,35 @@ if (typeof DOMPurify.addHook === 'function') {
   });
 }
 
+// Small LRU cache — split view renders before+after; toggling tabs reuses results.
+// Keyed by the full source string: collision-free, and holding a dozen preview-sized
+// docs is cheap. (A lossy fingerprint key would risk returning stale HTML.)
+const CACHE_MAX = 12;
+const cache = new Map<string, string>();
+
 export function renderMarkdown(md: string): string {
-  const html = marked.parse(md ?? '', { async: false }) as string;
+  const raw = md ?? '';
+  const hit = cache.get(raw);
+  if (hit !== undefined) {
+    // Refresh LRU order
+    cache.delete(raw);
+    cache.set(raw, hit);
+    return hit;
+  }
+
+  const html = marked.parse(raw, { async: false }) as string;
   if (typeof DOMPurify.sanitize !== 'function') return ''; // SSR guard
-  return DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
+  const result = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
+
+  if (cache.size >= CACHE_MAX) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+  }
+  cache.set(raw, result);
+  return result;
+}
+
+/** Drop cached HTML (e.g. after language change is not needed; for tests). */
+export function clearMarkdownCache(): void {
+  cache.clear();
 }

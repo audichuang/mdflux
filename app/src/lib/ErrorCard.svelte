@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { tr } from './locale.svelte';
+
   export interface ConvertError {
     code: string;
     title: string;
@@ -22,7 +24,7 @@
   <div class="head">
     <span class="icon" aria-hidden="true">✕</span>
     <span class="title">{error.title}</span>
-    <button class="dismiss" onclick={onDismiss} aria-label="Dismiss error">✕</button>
+    <button class="dismiss" onclick={onDismiss} aria-label={tr('dismiss_error')}>✕</button>
   </div>
   <p class="detail">{error.detail}</p>
   <div class="actions">
@@ -32,7 +34,7 @@
         class="btn-secondary btn-sm"
         onclick={() => onOpenDiagnostics!(error.diagnostics_key!)}
       >
-        View in Diagnostics →
+        {tr('view_diagnostics')}
       </button>
     {/if}
   </div>

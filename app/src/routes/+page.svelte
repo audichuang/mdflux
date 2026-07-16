@@ -109,7 +109,7 @@
   let batchCleanup = $state<ConvertCleanup | null>(null);
   let batchCleanupApplied = $state(false);
   let batchCleanupChanges = $state(0);
-  let viewing = $state<{ name: string; markdown: string } | null>(null);
+  let viewing = $state<{ name: string; markdown: string; path: string } | null>(null);
 
   const EXTRA_LABELS: Record<string, string> = {
     pdf: 'PDF',
@@ -125,6 +125,39 @@
   onMount(() => {
     const unlisteners: Array<() => void> = [];
     let dead = false;
+
+    // Global shortcuts: Cmd/Ctrl+O open files; Esc back from sub-views
+    function onGlobalKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        if (view === 'diagnostics') {
+          e.preventDefault();
+          closeDiagnostics();
+          return;
+        }
+        if (viewing) {
+          e.preventDefault();
+          viewing = null;
+          return;
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'o') {
+        if (
+          phase !== 'ready' ||
+          converting ||
+          batchPhase === 'running' ||
+          batchPhase === 'cancelling'
+        )
+          return;
+        if (view === 'diagnostics' || viewing || result) return;
+        e.preventDefault();
+        // Staging or drop zone: open system file picker via staging add / drop browse
+        void invoke<string | null>('pick_file').then((path) => {
+          if (path) void addFiles([path]);
+        });
+      }
+    }
+    window.addEventListener('keydown', onGlobalKey);
+    unlisteners.push(() => window.removeEventListener('keydown', onGlobalKey));
 
     listen<ProgressPayload>('provision:progress', ({ payload }) => {
       progress = {
@@ -319,6 +352,7 @@
     converting = true;
     convStage = 'preflight';
     resultSourcePath = path;
+    resultStem = fileStem(path);
 
     try {
       const resp = await invoke<{
@@ -594,7 +628,7 @@
     if (item.status !== 'done' || !item.output_path) return;
     try {
       const md = await invoke<string>('read_text_file', { path: item.output_path });
-      viewing = { name: item.filename, markdown: md };
+      viewing = { name: item.filename, markdown: md, path: item.output_path ?? '' };
     } catch (e) {
       showBanner(`Could not open file: ${e}. The output may have been moved or deleted.`);
     }
@@ -608,15 +642,23 @@
   <header>
     <span class="wordmark">MDFlux</span>
     {#if phase === 'ready'}
-      <span class="badge" class:green={allGreen()} class:amber={!allGreen()}>
+      <button
+        type="button"
+        class="badge badge-btn"
+        class:green={allGreen()}
+        class:amber={!allGreen()}
+        onclick={() => (allGreen() ? null : openDiagnostics())}
+        title={allGreen() ? tr('ready') : tr('diagnostics_hint')}
+        disabled={allGreen()}
+      >
         {allGreen() ? tr('ready') : tr('partial')}
-      </span>
+      </button>
     {/if}
     <div class="header-right">
       <ThemeSwitch />
 
       <!-- Language Picker -->
-      <div class="seg" role="group" aria-label="Language Selector">
+      <div class="seg" role="group" aria-label={tr('language')}>
         <button
           class="seg-btn"
           class:active={locale.current === 'en'}
@@ -645,7 +687,7 @@
           class:diag-active={view === 'diagnostics'}
           onclick={() => (view === 'diagnostics' ? closeDiagnostics() : openDiagnostics())}
           aria-label={tr('diagnostics')}
-          title={tr('diagnostics')}
+          title={tr('diagnostics_hint')}
           aria-pressed={view === 'diagnostics'}
         >
           <svg
@@ -676,7 +718,7 @@
     {#if errorBanner}
       <div class="error-banner" role="alert" transition:fade={{ duration: 200 }}>
         {errorBanner}
-        <button class="banner-close" onclick={() => (errorBanner = null)} aria-label="Dismiss"
+        <button class="banner-close" onclick={() => (errorBanner = null)} aria-label={tr('dismiss')}
           >×</button
         >
       </div>
@@ -697,10 +739,16 @@
         onConfigChange={updateConfig}
       />
     {:else if phase === 'ready' && viewing}
-      <DocViewer name={viewing.name} markdown={viewing.markdown} onBack={() => (viewing = null)} />
+      <DocViewer
+        name={viewing.name}
+        markdown={viewing.markdown}
+        path={viewing.path}
+        onBack={() => (viewing = null)}
+      />
     {:else if phase === 'ready' && batchItems !== null && (batchPhase === 'done' || batchPhase === 'cancelled')}
       <BatchSummaryView
         items={batchItems}
+        phase={batchPhase}
         onRetry={retryFailed}
         onClose={closeBatch}
         onOpen={openBatchItem}
@@ -734,7 +782,11 @@
         cleanup={cleanupState}
       />
     {:else if phase === 'ready' && converting}
-      <ConvertProgress stage={convStage} onCancel={cancelConversion} />
+      <ConvertProgress
+        stage={convStage}
+        sourceName={resultStem !== 'output' ? resultStem : fileStem(resultSourcePath)}
+        onCancel={cancelConversion}
+      />
     {:else if phase === 'ready' && staged.length > 0}
       <StagingView
         files={staged}
@@ -752,7 +804,9 @@
       />
     {:else if phase === 'ready'}
       {#if cancelledFlash}
-        <p class="cancelled-notice" transition:fade={{ duration: 300 }}>Conversion cancelled</p>
+        <p class="cancelled-notice" transition:fade={{ duration: 300 }}>
+          {tr('conversion_cancelled')}
+        </p>
       {/if}
       <DropZone
         onAdd={addFiles}
@@ -774,7 +828,7 @@
   {#if phase === 'ready' && health && view === 'main' && batchItems === null && staged.length === 0 && !result && !converting}
     <details class="health-footer">
       <summary>
-        <span>Dependency health</span>
+        <span>{tr('dependency_health')}</span>
         <span class="health-dots" aria-hidden="true">
           <span class="hdot hdot-green" title="Python {health.python_version}"></span>
           <span
@@ -795,16 +849,16 @@
         {#if !allGreen()}<span class="warn-badge">{tr('issues_found')}</span>{/if}
       </summary>
       <div class="health-grid">
-        {@render HealthRow({ label: 'Python', value: health.python_version, ok: true })}
+        {@render HealthRow({ label: tr('label_python'), value: health.python_version, ok: true })}
         {@render HealthRow({
-          label: 'MarkItDown',
-          value: health.markitdown_version ?? 'not installed',
+          label: tr('label_markitdown'),
+          value: health.markitdown_version ?? tr('badge_not_installed'),
           ok: !!health.markitdown_version,
         })}
         {#each Object.entries(EXTRA_LABELS) as [key, label]}
           {@render HealthRow({
             label,
-            value: health.extras[key] ? 'installed' : 'missing',
+            value: health.extras[key] ? tr('badge_installed') : tr('badge_not_installed'),
             ok: health.extras[key] ?? false,
           })}
         {/each}
@@ -865,6 +919,20 @@
   .badge.amber {
     background: color-mix(in srgb, var(--amber) 15%, transparent);
     color: var(--amber);
+  }
+  .badge-btn {
+    border: none;
+    font-family: inherit;
+    line-height: inherit;
+  }
+  .badge-btn:not(:disabled) {
+    cursor: pointer;
+  }
+  .badge-btn:disabled {
+    cursor: default;
+  }
+  .badge-btn:not(:disabled):hover {
+    filter: brightness(1.08);
   }
   .header-right {
     margin-left: auto;

@@ -6,7 +6,7 @@
   import type { DiffResult } from './diff';
   import { renderMarkdown } from './mdpreview';
   import { buildOutputFilename, type NamingCase } from './naming';
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { tr } from './locale.svelte';
 
   let {
@@ -76,6 +76,7 @@
   const afterHtml = $derived(cleanup.viewMode === 'split' ? renderMarkdown(activeMarkdown) : '');
 
   let saved = $state(false);
+  let rulesError = $state<string | null>(null);
 
   let splitSrcEl = $state<HTMLElement | null>(null);
   let splitPrevEl = $state<HTMLElement | null>(null);
@@ -102,12 +103,20 @@
     cleanup.viewMode = v;
   }
 
+  // Auto-expand details when switching to rules/ai so first interaction is clear;
+  // collapse when back to none to give preview space.
   async function selectMethod(m: CleanupMethod) {
     if (cleanup.method === m) return;
     cleanup.method = m;
     saved = false;
-    if (m === 'none' && (cleanup.viewMode === 'split' || cleanup.viewMode === 'changes')) {
-      cleanup.viewMode = 'preview';
+    rulesError = null;
+    if (m === 'none') {
+      if (cleanup.viewMode === 'split' || cleanup.viewMode === 'changes') {
+        cleanup.viewMode = 'preview';
+      }
+      cleanup.showAdvanced = false;
+    } else {
+      cleanup.showAdvanced = true;
     }
     if (m !== 'none' && !cleanupSeen) onSeenCleanup?.();
     if (m === 'rules' && cleanup.rulesCleaned === null) await runRules();
@@ -116,6 +125,7 @@
   async function runRules() {
     cleanup.running = true;
     saved = false;
+    rulesError = null;
     try {
       const res = await invoke<CleanupResult>('cleanup_markdown', {
         markdown,
@@ -128,12 +138,14 @@
     } catch {
       cleanup.rulesCleaned = markdown;
       cleanup.rulesSummary = null;
+      rulesError = tr('cleanup_failed_silent');
     } finally {
       cleanup.running = false;
     }
   }
 
   let cancelRequested = $state(false);
+  let rulesDebounce: ReturnType<typeof setTimeout> | null = null;
 
   async function runAi() {
     cleanup.running = true;
@@ -153,11 +165,11 @@
       if (cancelRequested) {
         cleanup.aiCleaned = null;
         cleanup.aiApplied = false;
-        cleanup.aiNotice = 'AI cleanup cancelled — kept the original text.';
+        cleanup.aiNotice = tr('ai_cancelled');
       } else {
         cleanup.aiCleaned = markdown;
         cleanup.aiApplied = false;
-        cleanup.aiNotice = `AI cleanup failed: ${e}`;
+        cleanup.aiNotice = tr('ai_failed', { error: String(e) });
       }
     } finally {
       cleanup.running = false;
@@ -174,17 +186,24 @@
     }
   }
 
-  async function toggleRule(key: string) {
+  function toggleRule(key: string) {
     cleanup.rules = { ...cleanup.rules, [key]: !cleanup.rules[key] };
     saved = false;
-    await runRules();
+    if (rulesDebounce) clearTimeout(rulesDebounce);
+    rulesDebounce = setTimeout(() => {
+      rulesDebounce = null;
+      runRules();
+    }, 280);
   }
 
   let copyStatus = $state<'copy' | 'copied' | 'failed'>('copy');
   let copyTimeout: ReturnType<typeof setTimeout>;
   let confirming = $state(false);
 
-  onDestroy(() => clearTimeout(copyTimeout));
+  onDestroy(() => {
+    clearTimeout(copyTimeout);
+    if (rulesDebounce) clearTimeout(rulesDebounce);
+  });
 
   async function copyMarkdown() {
     try {
@@ -211,7 +230,7 @@
       if (ok) saved = true;
       return ok;
     } catch (e) {
-      saveError = `Could not save: ${e}`;
+      saveError = tr('save_failed', { error: String(e) });
       return false;
     }
   }
@@ -273,11 +292,37 @@
     const a = (e.target as HTMLElement)?.closest('a');
     if (a) e.preventDefault();
   }
+
+  // Cmd/Ctrl+S to save while viewing result
+  onMount(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        if (!confirming) saveMarkdown();
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
+  const summaryLine = $derived.by(() => {
+    if (running) return tr('cleaning');
+    if (cleanup.method === 'rules' && cleanup.rulesSummary) {
+      if (ruleChanges === 0) return tr('no_changes_needed');
+      return ruleChanges === 1
+        ? tr('changes_total', { count: ruleChanges.toLocaleString() })
+        : tr('changes_total_plural', { count: ruleChanges.toLocaleString() });
+    }
+    if (cleanup.method === 'ai' && cleanup.aiApplied) return tr('ai_applied');
+    return '';
+  });
 </script>
 
 <div class="result-shell flex-1 flex flex-col min-h-0">
   <!-- Header: filename + view toggle -->
-  <div class="result-chrome flex items-center justify-between gap-3 px-5 py-3 hairline-b flex-shrink-0">
+  <div
+    class="result-chrome flex items-center justify-between gap-3 px-5 py-3 hairline-b flex-shrink-0"
+  >
     <div class="flex items-center gap-2 min-w-0 text-zinc-400" title={sourceStem}>
       <svg width="14" height="14" viewBox="0 0 15 15" fill="none" aria-hidden="true">
         <path
@@ -291,7 +336,7 @@
       <span class="text-xs font-semibold text-zinc-300 truncate">{sourceStem}</span>
     </div>
 
-    <div class="seg" role="group" aria-label="View mode">
+    <div class="seg" role="group" aria-label={tr('view_mode')}>
       <button
         class="seg-btn"
         class:active={cleanup.viewMode === 'preview'}
@@ -317,23 +362,23 @@
     </div>
   </div>
 
-  <!-- Cleanup bar -->
-  <div class="result-chrome flex-shrink-0 flex flex-col gap-2.5 px-5 py-3.5 hairline-b">
-    <div class="flex items-center gap-3">
+  <!-- Compact cleanup chrome -->
+  <div class="result-chrome flex-shrink-0 flex flex-col gap-2 px-5 py-2.5 hairline-b">
+    <div class="flex items-center gap-3 flex-wrap">
       <span class="text-xs font-semibold tracking-wider text-zinc-500 uppercase"
         >{tr('clean_up')}</span
       >
-      <div class="seg" role="group" aria-label="Cleanup method">
+      <div class="seg" role="group" aria-label={tr('cleanup_method')}>
         <button
           class="seg-btn"
           class:active={cleanup.method === 'none'}
-          title="Show the raw conversion, unchanged"
+          title={tr('tip_raw')}
           onclick={() => selectMethod('none')}>{tr('off')}</button
         >
         <button
           class="seg-btn"
           class:active={cleanup.method === 'rules'}
-          title="Clean up using fast, offline rules"
+          title={tr('tip_rules')}
           onclick={() => selectMethod('rules')}>{tr('rule_based')}</button
         >
         <button
@@ -341,117 +386,128 @@
           class:active={cleanup.method === 'ai'}
           onclick={() => selectMethod('ai')}
           disabled={!llmAvailable}
-          title={llmAvailable
-            ? 'Clean up with your configured AI model'
-            : 'Switch to Local or API mode to enable AI cleanup'}>{tr('ai')}</button
+          title={llmAvailable ? tr('tip_ai') : tr('tip_ai_off')}>{tr('ai')}</button
         >
       </div>
+
+      {#if summaryLine}
+        <span class="text-[11px] text-zinc-500 truncate max-w-[240px]">{summaryLine}</span>
+      {/if}
+
       {#if !cleanupSeen && cleanup.method === 'none'}
-        <span
-          class="text-[9px] font-bold text-white bg-blue-500 px-2 py-0.5 rounded-full tracking-wider uppercase animate-pulse"
-          >New</span
+        <span class="new-badge">{tr('badge_new')}</span>
+      {/if}
+
+      {#if cleanup.method !== 'none'}
+        <button
+          class="btn-tertiary btn-sm ml-auto"
+          onclick={() => (cleanup.showAdvanced = !cleanup.showAdvanced)}
+          aria-expanded={cleanup.showAdvanced}
+          title={cleanup.showAdvanced ? tr('cleanup_collapse') : tr('cleanup_expand')}
         >
+          {cleanup.showAdvanced ? tr('cleanup_collapse') : tr('cleanup_expand')}
+        </button>
       {/if}
     </div>
 
-    {#if cleanup.method === 'rules'}
+    {#if cleanup.showAdvanced && cleanup.method === 'rules'}
       <div class="flex flex-col gap-2">
         <p class="text-xs text-zinc-400">
-          Fast, offline rules — nothing leaves your machine. Toggle any rule to re-run.
+          {tr('rules_intro')}
           {#if running}
-            <span class="text-zinc-500 ml-1">Cleaning…</span>
+            <span class="text-zinc-500 ml-1">{tr('cleaning')}</span>
           {:else if cleanup.rulesSummary}
-            <span class="text-zinc-500 ml-1" title="Total edits across all enabled rules"
-              >{ruleChanges === 0
-                ? 'No changes needed.'
-                : `${ruleChanges.toLocaleString()} change${ruleChanges === 1 ? '' : 's'} total.`}</span
-            >
+            <span class="text-zinc-500 ml-1" title={summaryLine}>
+              {summaryLine}
+            </span>
           {/if}
         </p>
-        <div class="panel-inset flex flex-col gap-0.5 p-1.5">
+        {#if rulesError}
+          <p class="text-xs text-[var(--amber)]" role="status">{rulesError}</p>
+        {/if}
+        <div class="panel-inset flex flex-col gap-0.5 p-1.5 max-h-[220px] overflow-y-auto">
           {#each CLEANUP_RULES as rule}
             <label
-              class="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-900/35 transition-colors cursor-pointer"
-              title="{rule.hint}. {cleanup.rules[rule.key] ? 'On' : 'Off'} — click to toggle."
+              class="flex items-start gap-3 px-3 py-2 rounded-xl hover:bg-[color-mix(in_srgb,var(--text-primary)_3%,transparent)] transition-colors cursor-pointer"
+              title={tr('rule_toggle_hint', {
+                hint: tr(rule.hintKey),
+                state: cleanup.rules[rule.key] ? tr('rule_on') : tr('rule_off'),
+              })}
             >
               <input
                 type="checkbox"
-                class="mt-1 accent-blue-500 rounded border-zinc-700 bg-zinc-900 text-blue-500 focus:ring-0 cursor-pointer"
+                class="mt-1 accent-[var(--accent)] rounded cursor-pointer"
                 checked={cleanup.rules[rule.key]}
                 onchange={() => toggleRule(rule.key)}
                 disabled={running}
               />
               <div class="flex-1 flex flex-col gap-0.5">
-                <span class="text-xs font-medium text-zinc-200">{rule.label}</span>
-                <span class="text-[10px] text-zinc-500">{rule.hint}</span>
+                <span class="text-xs font-medium text-zinc-200">{tr(rule.labelKey)}</span>
+                <span class="text-[10px] text-zinc-500">{tr(rule.hintKey)}</span>
               </div>
               {#if cleanup.rulesSummary && cleanup.rules[rule.key]}
                 {@const c = ruleCounts[rule.key] ?? 0}
                 <span
-                  class="flex-shrink-0 align-self-center text-[10px] font-mono font-semibold text-blue-400 bg-blue-950/45 px-2 py-0.5 rounded-full min-w-[22px] text-center {c ===
+                  class="count-pill flex-shrink-0 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full min-w-[22px] text-center {c ===
                   0
-                    ? 'text-zinc-500 bg-zinc-900/60'
+                    ? 'count-zero'
                     : ''}"
-                  title="{c.toLocaleString()} {c === 1 ? 'edit' : 'edits'} this rule made"
-                  >{c.toLocaleString()}</span
+                  title={c === 1
+                    ? tr('edits_one', { count: c.toLocaleString() })
+                    : tr('edits_many', { count: c.toLocaleString() })}>{c.toLocaleString()}</span
                 >
               {/if}
             </label>
           {/each}
         </div>
       </div>
-    {:else if cleanup.method === 'ai'}
+    {:else if cleanup.showAdvanced && cleanup.method === 'ai'}
       {#if running}
         <div class="flex items-center justify-between gap-3 p-3 panel-inset">
           <p class="text-xs text-zinc-400 flex items-center gap-2">
-            <span
-              class="inline-block w-3.5 h-3.5 border-2 border-zinc-700 border-t-blue-500 rounded-full animate-spin"
-            ></span>
-            Cleaning with AI… large documents on a local model can take a few minutes.
+            <span class="spin" aria-hidden="true"></span>
+            {tr('ai_cleaning')}
           </p>
           <button
             class="btn-danger btn-sm"
             onclick={cancelAi}
             disabled={cancelRequested}
-            title="Stop the AI cleanup and keep the original text"
+            title={tr('cancel')}
           >
-            {cancelRequested ? 'Cancelling…' : 'Cancel'}
+            {cancelRequested ? tr('cancelling') : tr('cancel')}
           </button>
         </div>
       {:else if cleanup.aiCleaned === null}
         <div class="flex flex-col gap-2.5 p-3 panel-inset">
           <p class="text-xs text-zinc-400">
-            Cleans the document with your {llmMode === 'api'
-              ? 'configured API model'
-              : 'local model'}, in one pass. Your raw result is kept.
+            {llmMode === 'api' ? tr('ai_intro_api') : tr('ai_intro_local')}
           </p>
           {#if llmMode === 'api'}
             <p
-              class="text-[11px] text-amber-400 bg-amber-950/25 rounded-xl px-3 py-2"
+              class="text-[11px] text-[var(--amber)] rounded-xl px-3 py-2"
+              style="background: color-mix(in srgb, var(--amber) 12%, transparent)"
             >
-              ⚠ This sends the document text to your configured API provider.
+              {tr('ai_api_warn')}
             </p>
           {/if}
-          <button
-            class="btn-secondary btn-sm w-fit"
-            title="Send the document to your AI model and clean it up"
-            onclick={runAi}>Run AI cleanup</button
+          <button class="btn-secondary btn-sm w-fit" title={tr('run_ai_cleanup')} onclick={runAi}
+            >{tr('run_ai_cleanup')}</button
           >
         </div>
       {:else}
         <div class="flex flex-col gap-1">
           <p class="text-xs text-zinc-400 flex items-center gap-2">
             {#if cleanup.aiApplied}
-              <span class="text-green-400 font-semibold">✓ AI cleanup applied.</span>
+              <span class="text-[var(--green)] font-semibold">{tr('ai_applied')}</span>
             {/if}
             <button
-              class="text-blue-400 hover:text-blue-300 underline underline-offset-2 bg-transparent border-none p-0 cursor-pointer text-xs"
-              title="Run the AI cleanup again on the original text"
-              onclick={runAi}>Run again</button
+              class="text-[var(--accent)] hover:text-[var(--accent-hover)] underline underline-offset-2 bg-transparent border-none p-0 cursor-pointer text-xs"
+              title={tr('run_again')}
+              onclick={runAi}>{tr('run_again')}</button
             >
           </p>
           {#if cleanup.aiNotice}
-            <p class="text-xs text-amber-400 mt-1">{cleanup.aiNotice}</p>
+            <p class="text-xs text-[var(--amber)] mt-1">{cleanup.aiNotice}</p>
           {/if}
         </div>
       {/if}
@@ -460,20 +516,22 @@
 
   <!-- Content -->
   {#if cleanup.viewMode === 'split' && hasChanges}
-    <div class="result-body flex-1 flex min-h-0 divide-x divide-[var(--divider)] flex-col md:flex-row">
+    <div
+      class="result-body flex-1 flex min-h-0 divide-x divide-[var(--divider)] flex-col md:flex-row"
+    >
       <div class="flex-1 min-w-0 flex flex-col min-h-0">
         <div
           class="flex-shrink-0 px-6 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hairline-b"
         >
-          Before cleanup
+          {tr('before_cleanup')}
         </div>
         <div
-          class="result-scroll flex-1 min-w-0 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          class="result-scroll flex-1 min-w-0 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--accent)_60%,transparent)]"
           bind:this={splitSrcEl}
           onscroll={() => syncScroll('src')}
           tabindex="0"
           role="region"
-          aria-label="Before cleanup"
+          aria-label={tr('before_cleanup')}
         >
           <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
           <div class="md-preview result-col" onclick={onPreviewClick}>
@@ -485,15 +543,15 @@
         <div
           class="flex-shrink-0 px-6 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hairline-b"
         >
-          After cleanup
+          {tr('after_cleanup')}
         </div>
         <div
-          class="result-scroll flex-1 min-w-0 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          class="result-scroll flex-1 min-w-0 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--accent)_60%,transparent)]"
           bind:this={splitPrevEl}
           onscroll={() => syncScroll('prev')}
           tabindex="0"
           role="region"
-          aria-label="After cleanup"
+          aria-label={tr('after_cleanup')}
         >
           <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
           <div class="md-preview result-col" onclick={onPreviewClick}>
@@ -504,18 +562,19 @@
     </div>
   {:else}
     <div
-      class="result-scroll flex-1 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      class="result-scroll flex-1 overflow-y-auto min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--accent)_60%,transparent)]"
       tabindex="0"
       role="region"
-      aria-label="Markdown result"
+      aria-label={tr('markdown_result')}
     >
       {#if cleanup.viewMode === 'changes' && diff}
         {#if diff.kind === 'summary'}
           <div class="text-sm text-zinc-300 flex flex-col gap-2 result-col">
             <p>{diff.note}</p>
             <p class="font-mono text-xs">
-              <span class="text-green-400">+{diff.added.toLocaleString()}</span>
-              <span class="text-red-400">−{diff.removed.toLocaleString()}</span> lines
+              <span class="text-[var(--green)]">+{diff.added.toLocaleString()}</span>
+              <span class="text-[var(--red)]">−{diff.removed.toLocaleString()}</span>
+              {tr('lines_diff')}
             </p>
           </div>
         {:else}
@@ -523,9 +582,9 @@
             {#each diff.rows as row}
               <div
                 class="flex gap-2 px-1 rounded-sm {row.type === 'add'
-                  ? 'bg-green-950/20 text-green-405'
+                  ? 'diff-add'
                   : row.type === 'del'
-                    ? 'bg-red-950/20 text-red-405'
+                    ? 'diff-del'
                     : 'text-zinc-400'}"
               >
                 <span
@@ -545,86 +604,48 @@
         </div>
       {:else}
         <pre
-          class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0 result-col"
-          >{activeMarkdown}</pre
-        >
+          class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0 result-col">{activeMarkdown}</pre>
       {/if}
     </div>
   {/if}
 
   <!-- Bottom bar -->
-  <div class="result-chrome flex items-center justify-between gap-3 px-5 py-3 hairline-t flex-shrink-0">
+  <div
+    class="result-chrome flex items-center justify-between gap-3 px-5 py-3 hairline-t flex-shrink-0"
+  >
     <span
-      class="inline-flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 px-1"
+      class="inline-flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 px-1 min-w-0"
       title="Source format · {converterPath}"
     >
-      {tr('from_format', { format: detectedFormat })}{#if warnings.length}<span
-          class="text-amber-500 cursor-help"
+      <span class="truncate">{tr('from_format', { format: detectedFormat })}</span>
+      {#if warnings.length}<span
+          class="text-[var(--amber)] cursor-help flex-shrink-0"
           title={warnings.join('\n')}>⚠</span
         >{/if}
     </span>
-    <div class="flex gap-2 items-center flex-wrap">
-      {#if saveError}<p class="text-xs text-red-400 mr-2">{saveError}</p>{/if}
+    <div class="flex gap-2 items-center flex-wrap justify-end">
+      {#if saveError}<p
+          class="text-xs text-[var(--red)] mr-1 max-w-[200px] truncate"
+          title={saveError}
+        >
+          {saveError}
+        </p>{/if}
       <button
         class="btn-secondary"
-        title="Discard this result and convert a different file"
+        title={tr('tip_open_new')}
         onclick={requestOpenNew}
         bind:this={openNewBtnEl}
       >
-        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <path
-            d="M3 1.5h5L11 4.5V12a.5.5 0 0 1-.5.5h-7A.5.5 0 0 1 3 12V1.5z"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linejoin="round"
-          />
-          <path
-            d="M7 6.2v3.6M5.2 8h3.6"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linecap="round"
-          />
-        </svg>
         {tr('open_new')}
       </button>
-      <button
-        class="btn-secondary"
-        title="Copy the current Markdown to the clipboard"
-        onclick={copyMarkdown}
-      >
-        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <rect
-            x="4.5"
-            y="4.5"
-            width="7.5"
-            height="7.5"
-            rx="1.3"
-            stroke="currentColor"
-            stroke-width="1.2"
-          />
-          <path
-            d="M9.5 4.5V3a1 1 0 0 0-1-1h-5a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1H4.5"
-            stroke="currentColor"
-            stroke-width="1.2"
-          />
-        </svg>
-        {copyStatus === 'copy' ? tr('copy') : copyStatus === 'copied' ? tr('copied') : 'Failed'}
+      <button class="btn-secondary" title={tr('tip_copy')} onclick={copyMarkdown}>
+        {copyStatus === 'copy'
+          ? tr('copy')
+          : copyStatus === 'copied'
+            ? tr('copied')
+            : tr('failed_short')}
       </button>
-      <button
-        class="btn-primary"
-        title="Save the current Markdown to a .md file"
-        onclick={saveMarkdown}
-      >
-        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <path
-            d="M7 1.5v7M4 6l3 3 3-3"
-            stroke="currentColor"
-            stroke-width="1.4"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path d="M2.5 11.5h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
-        </svg>
+      <button class="btn-primary" title={tr('tip_save')} onclick={saveMarkdown}>
         {tr('save_md')}
       </button>
     </div>
@@ -641,7 +662,8 @@
     }}
   >
     <div
-      class="panel bg-zinc-900 p-5 w-[340px] flex flex-col gap-3 max-w-full outline-none"
+      class="panel p-5 w-[340px] flex flex-col gap-3 max-w-full outline-none"
+      style="background: var(--surface-1)"
       bind:this={modalEl}
       onclick={(e) => e.stopPropagation()}
       onkeydown={onModalKeydown}
@@ -670,7 +692,6 @@
 {/if}
 
 <style>
-  /* Single flat reading surface — no nested white card on canvas */
   .result-shell {
     background: transparent;
   }
@@ -679,19 +700,81 @@
   }
   .result-scroll {
     background: transparent;
-    /* Side padding only; column uses most of the available width on large screens */
     padding: 24px clamp(20px, 3vw, 40px) 40px;
   }
   .result-col {
-    /* Grow with viewport — avoid a thin strip on wide monitors; cap so prose lines stay readable */
-    max-width: min(72rem, 100%); /* ~1152px */
+    max-width: min(72rem, 100%);
     margin: 0 auto;
     width: 100%;
   }
 
   @media (min-width: 1600px) {
     .result-col {
-      max-width: min(80rem, 100%); /* ~1280px on very wide displays */
+      max-width: min(80rem, 100%);
+    }
+  }
+
+  .new-badge {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .new-badge {
+      animation: pulse-soft 2s ease-in-out infinite;
+    }
+  }
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .count-pill {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .count-zero {
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  }
+
+  .diff-add {
+    background: color-mix(in srgb, var(--green) 12%, transparent);
+    color: var(--green);
+  }
+  .diff-del {
+    background: color-mix(in srgb, var(--red) 12%, transparent);
+    color: var(--red);
+  }
+
+  .spin {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spin {
+      animation: none;
+      opacity: 0.5;
     }
   }
 </style>

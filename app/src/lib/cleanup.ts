@@ -1,10 +1,11 @@
 // Stage 5 — shared cleanup rule metadata and defaults.
 // Mirrors the sidecar's RULE_ORDER (cleanup.py). Single source of truth for the UI.
+// Labels/hints are i18n keys resolved via tr() in components.
 
 export interface CleanupRuleDef {
   key: string;
-  label: string;
-  hint: string;
+  labelKey: string;
+  hintKey: string;
   /** PDF-oriented rules default-on only when the source is a PDF (context-aware). */
   pdfOnly: boolean;
 }
@@ -12,32 +13,32 @@ export interface CleanupRuleDef {
 export const CLEANUP_RULES: CleanupRuleDef[] = [
   {
     key: 'strip_cid',
-    label: 'Remove (cid:N) markers',
-    hint: 'Strips PDF glyph artifacts like (cid:12)',
+    labelKey: 'rule_strip_cid',
+    hintKey: 'rule_strip_cid_hint',
     pdfOnly: true,
   },
   {
     key: 'dedup_lines',
-    label: 'Remove duplicate lines',
-    hint: 'Drops repeated headers, footers, and page numbers',
+    labelKey: 'rule_dedup_lines',
+    hintKey: 'rule_dedup_lines_hint',
     pdfOnly: true,
   },
   {
     key: 'repair_lines',
-    label: 'Rejoin broken lines',
-    hint: 'Reconnects sentences split across lines or columns',
+    labelKey: 'rule_repair_lines',
+    hintKey: 'rule_repair_lines_hint',
     pdfOnly: true,
   },
   {
     key: 'collapse_blanks',
-    label: 'Collapse blank runs',
-    hint: 'Normalises long runs of empty lines',
+    labelKey: 'rule_collapse_blanks',
+    hintKey: 'rule_collapse_blanks_hint',
     pdfOnly: false,
   },
   {
     key: 'detect_headings',
-    label: 'Detect headings',
-    hint: 'Promotes clear heading lines to Markdown (conservative)',
+    labelKey: 'rule_detect_headings',
+    hintKey: 'rule_detect_headings_hint',
     pdfOnly: false,
   },
 ];
@@ -97,11 +98,11 @@ export interface CleanupUIState {
   aiCleaned: string | null;
   aiApplied: boolean;
   aiNotice: string | null;
+  /** When true, rule list / AI panel details are expanded. */
   showAdvanced: boolean;
   /** How the content area renders the active markdown. */
   viewMode: ViewMode;
-  /** True while a cleanup pass is in flight. Lifted here so it survives view
-   *  changes (e.g. opening Diagnostics mid-run and returning). */
+  /** True while a cleanup pass is in flight. */
   running: boolean;
 }
 

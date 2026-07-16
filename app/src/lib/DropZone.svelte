@@ -85,15 +85,14 @@
   class="flex-1 relative rounded-[var(--radius-lg)] bg-[var(--surface-2)]/40 hover:bg-[var(--surface-2)]/70 transition-all duration-300 cursor-pointer outline-none flex items-center justify-center overflow-hidden min-h-[320px] group {localState ===
   'drag-hover'
     ? 'bg-[color-mix(in_srgb,var(--accent)_8%,var(--surface-2))]'
-    : ''} {dropState === 'error' ? 'cursor-default bg-red-950/5' : ''}"
+    : ''} {dropState === 'error' ? 'cursor-default drop-error-bg' : ''}"
   role="button"
   tabindex={0}
-  aria-label="Drop files or a folder, or click to browse"
-  title="Drop one file, several files, or a folder here — or click to pick files"
+  aria-label={tr('drop_aria')}
+  title={tr('drop_title')}
   onclick={browse}
   onkeydown={onKeyDown}
 >
-  <!-- Soft accent ring only (no double ink frame) -->
   <div
     class="border-ring"
     aria-hidden="true"
@@ -112,7 +111,7 @@
   {:else}
     <div class="relative flex flex-col items-center gap-3.5 p-8 text-center select-none">
       <div
-        class="text-zinc-500 group-hover:text-blue-400 group-focus:text-blue-400 transition-colors duration-300 mb-1"
+        class="text-zinc-500 group-hover:text-[var(--accent)] group-focus:text-[var(--accent)] transition-colors duration-300 mb-1"
         aria-hidden="true"
       >
         <svg
@@ -145,22 +144,30 @@
           />
         </svg>
       </div>
+      <p class="text-[11px] text-zinc-500 tracking-wide">{tr('drop_tagline')}</p>
       <p class="text-sm font-semibold text-zinc-200">{tr('drop_files')}</p>
       <p class="text-xs text-zinc-400">
         {tr('or')}
         <span
-          class="text-blue-400 group-hover:text-blue-300 underline underline-offset-2 transition-colors"
+          class="text-[var(--accent)] group-hover:text-[var(--accent-hover)] underline underline-offset-2 transition-colors"
           >{tr('browse_choose')}</span
         >
       </p>
       <p class="text-[10px] font-mono tracking-wider text-zinc-500 mt-2.5 uppercase">
         {tr('supported_formats')}
       </p>
+      <p class="text-[10px] text-zinc-500 mt-1 max-w-[280px] leading-relaxed">
+        {tr('drop_folder_hint')}
+      </p>
+      <p class="text-[10px] text-zinc-600 mt-0.5">{tr('shortcut_open')}</p>
     </div>
   {/if}
 </div>
 
 <style>
+  .drop-error-bg {
+    background: color-mix(in srgb, var(--red) 5%, transparent);
+  }
   .border-ring {
     position: absolute;
     inset: 0;
