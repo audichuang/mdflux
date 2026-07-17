@@ -1662,6 +1662,10 @@ fn civil_from_days(z: i64) -> (i64, u32, u32) {
     (y + if m <= 2 { 1 } else { 0 }, m, d)
 }
 
+// Source of truth for output filenames. `naming.ts` mirrors slugify / sanitize_filename /
+// build_output_name for the live UI preview; changing behavior here must be mirrored there
+// (and the vectors in naming.test.ts) or the preview diverges from what a batch actually writes.
+
 /// Lowercase, collapse any non-alphanumeric run to a single '-', trim leading/trailing '-'.
 fn slugify(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
