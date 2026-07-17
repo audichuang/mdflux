@@ -70,17 +70,19 @@ fi
 # ── Watch a workflow run for a ref; auto-rerun ONCE on a transient flake ──
 # The recurring macOS failure is setup-uv hitting GitHub's anon API rate limit
 # (see the skill's troubleshooting table) — a re-run, not a code fix.
-run_id_for() { # $1 = head branch or tag name
-  gh run list --repo "$REPO" --workflow "$WF" --limit 20 \
-    --json databaseId,headBranch,createdAt \
-    --jq "[.[] | select(.headBranch==\"$1\")] | sort_by(.createdAt) | last | .databaseId"
+# Match by commit SHA *and* ref so a push-vs-run-registration race can't grab a
+# stale green run (main and the tag share the SHA — headBranch disambiguates).
+run_id_for() { # $1 = headSha   $2 = headBranch (main | tag name)
+  gh run list --repo "$REPO" --workflow "$WF" --limit 30 \
+    --json databaseId,headSha,headBranch,createdAt \
+    --jq "[.[] | select(.headSha==\"$1\" and .headBranch==\"$2\")] | sort_by(.createdAt) | last | .databaseId"
 }
-watch_ref() { # $1 = ref name (main | vX.Y.Z)
-  local ref="$1" id tries=0
-  for _ in 1 2 3 4 5 6; do
-    id="$(run_id_for "$ref")"; [[ -n "$id" && "$id" != "null" ]] && break; sleep 5
+watch_ref() { # $1 = headSha   $2 = ref label (main | vX.Y.Z)
+  local sha="$1" ref="$2" id tries=0
+  for _ in $(seq 1 12); do
+    id="$(run_id_for "$sha" "$ref")"; [[ -n "$id" && "$id" != "null" ]] && break; sleep 5
   done
-  [[ -n "$id" && "$id" != "null" ]] || { echo "no $WF run found for $ref" >&2; return 1; }
+  [[ -n "$id" && "$id" != "null" ]] || { echo "no $WF run found for $ref @ $sha" >&2; return 1; }
   echo "watching $ref → run $id"
   while true; do
     if gh run watch "$id" --repo "$REPO" --exit-status; then
@@ -99,13 +101,14 @@ watch_ref() { # $1 = ref name (main | vX.Y.Z)
 # ── Push bump to main, gate on a green main build before tagging ──
 git add app/package.json app/src-tauri/tauri.conf.json app/src-tauri/Cargo.toml app/src-tauri/Cargo.lock
 git commit -q -m "chore: 升版 $VERSION"
+SHA="$(git rev-parse HEAD)"
 git push origin main
-watch_ref main || { echo "main build red — NOT tagging" >&2; exit 1; }
+watch_ref "$SHA" main || { echo "main build red — NOT tagging" >&2; exit 1; }
 
-# ── Tag + push → the versioned Release + Homebrew cask ──
+# ── Tag + push → the versioned Release + Homebrew cask (tag points at $SHA) ──
 git tag "$TAG"
 git push origin "$TAG"
-watch_ref "$TAG" || { echo "release build red — see 'Re-release a botched tag' in the skill" >&2; exit 1; }
+watch_ref "$SHA" "$TAG" || { echo "release build red — see 'Re-release a botched tag' in the skill" >&2; exit 1; }
 
 # ── Verify ──
 echo "── release assets (expect setup.exe + portable zip + aarch64.dmg) ──"
