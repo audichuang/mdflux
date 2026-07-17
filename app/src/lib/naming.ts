@@ -20,19 +20,26 @@ export function fileExt(path: string): string {
   return dot > 0 ? base.slice(dot + 1).toLowerCase() : '';
 }
 
+// Mirrors Rust `slugify` (lib.rs): collapses any run of non-alphanumeric chars
+// (Unicode-aware, like Rust's `char::is_alphanumeric()`) to a single '-'.
 function slugify(s: string): string {
   return s
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[^\p{Alphabetic}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '');
 }
 
+// Windows reserved device names — mirrors Rust `sanitize_filename` (lib.rs).
+const RESERVED_NAME = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i;
+
 function sanitize(s: string): string {
-  return s
+  const result = s
     .replace(/[\\/:*?"<>|\x00-\x1f]/g, '-')
     .trim()
     .replace(/\.+$/, '')
     .trim();
+  // Appending '_' avoids the OS refusing to create a reserved-name file.
+  return RESERVED_NAME.test(result) ? `${result}_` : result;
 }
 
 function todayDate(): string {

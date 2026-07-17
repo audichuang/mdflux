@@ -63,6 +63,17 @@ describe('buildOutputName / buildOutputFilename', () => {
     expect(buildOutputName('/a/x.pdf', 'a:b*c?', 'keep')).toBe('a-b-c-');
   });
 
+  // These vectors are mirrored in the Rust test `naming_template_and_case` (lib.rs) —
+  // keep both sides in sync.
+  it('slugifies Unicode (CJK) text, matching Rust is_alphanumeric', () => {
+    expect(buildOutputName('/docs/年度報告.pdf', '{stem}', 'slug')).toBe('年度報告');
+    expect(buildOutputName('/docs/My 報告 2.pdf', '{stem}', 'slug')).toBe('my-報告-2');
+  });
+
+  it('appends _ to Windows reserved device names', () => {
+    expect(buildOutputName('/a/con.pdf', '{stem}', 'keep')).toBe('con_');
+  });
+
   it('always appends .md for previews', () => {
     expect(buildOutputFilename(path, '{stem}', 'keep')).toBe('Annual Report.md');
   });

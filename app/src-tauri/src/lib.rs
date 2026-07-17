@@ -717,10 +717,11 @@ async fn cleanup_markdown(
 
 // ── Stage 4 commands ───────────────────────────────────────────────────────
 
-/// Expand a list of paths (files and/or folders) to all supported file paths.
+/// Expand a list of paths (files and/or folders) to all supported file paths, then stat
+/// each one (name, uppercase extension, byte size) for the staging list chips.
 /// Folders are walked recursively; unsupported extensions are filtered out.
 #[tauri::command]
-async fn list_files(paths: Vec<String>) -> Result<Vec<String>, String> {
+async fn list_files(paths: Vec<String>) -> Result<Vec<FileInfo>, String> {
     let supported = all_supported_exts();
     let mut result = Vec::new();
     for path in &paths {
@@ -737,7 +738,23 @@ async fn list_files(paths: Vec<String>) -> Result<Vec<String>, String> {
             }
         }
     }
-    Ok(result)
+    let out = result
+        .into_iter()
+        .map(|p| {
+            let path = std::path::Path::new(&p);
+            let name = path
+                .file_name()
+                .map(|n| n.to_string_lossy().into_owned())
+                .unwrap_or_else(|| p.clone());
+            let ext = path
+                .extension()
+                .map(|e| e.to_string_lossy().to_uppercase())
+                .unwrap_or_default();
+            let size = std::fs::metadata(&p).map(|m| m.len()).unwrap_or(0);
+            FileInfo { path: p.clone(), name, ext, size }
+        })
+        .collect();
+    Ok(out)
 }
 
 /// Metadata for a staged file: name, uppercase extension (type badge), byte size.
@@ -794,26 +811,6 @@ async fn read_text_file(
     }
 
     std::fs::read_to_string(&canonical).map_err(|e| format!("Could not read file: {e}"))
-}
-
-/// Return name/type/size for each path, for the staging list chips.
-#[tauri::command]
-async fn stat_files(paths: Vec<String>) -> Result<Vec<FileInfo>, String> {
-    let mut out = Vec::with_capacity(paths.len());
-    for p in paths {
-        let path = std::path::Path::new(&p);
-        let name = path
-            .file_name()
-            .map(|n| n.to_string_lossy().into_owned())
-            .unwrap_or_else(|| p.clone());
-        let ext = path
-            .extension()
-            .map(|e| e.to_string_lossy().to_uppercase())
-            .unwrap_or_default();
-        let size = std::fs::metadata(&p).map(|m| m.len()).unwrap_or(0);
-        out.push(FileInfo { path: p.clone(), name, ext, size });
-    }
-    Ok(out)
 }
 
 fn collect_supported(
@@ -1715,6 +1712,10 @@ fn build_output_name(p: &std::path::Path, template: &str, case: &str) -> String 
         .extension()
         .map(|e| e.to_string_lossy().to_lowercase())
         .unwrap_or_default();
+    // Empty/whitespace template defaults to {stem} — matches the TS preview
+    // default (naming.ts `buildOutputName`).
+    let trimmed = template.trim();
+    let template = if trimmed.is_empty() { "{stem}" } else { trimmed };
     let name = template
         .replace("{stem}", &stem)
         .replace("{ext}", &ext)
@@ -1927,6 +1928,20 @@ mod tests {
         assert_eq!(build_output_name(p, "{stem}", "slug"), "my-report");
         // Illegal characters in a template are sanitized to '-'.
         assert_eq!(build_output_name(p, "a/b:c", "keep"), "a-b-c");
+        // Empty template defaults to {stem} — matches the TS preview default.
+        assert_eq!(build_output_name(p, "", "keep"), "My Report");
+
+        // These vectors are mirrored in naming.test.ts (naming.ts) — keep both sides
+        // in sync.
+        // CJK slug: is_alphanumeric is Unicode-aware, so CJK text survives slugify
+        // as-is, and mixed ASCII/CJK still collapses whitespace to a single '-'.
+        let cjk = std::path::Path::new("/docs/年度報告.pdf");
+        assert_eq!(build_output_name(cjk, "{stem}", "slug"), "年度報告");
+        let mixed = std::path::Path::new("/docs/My 報告 2.pdf");
+        assert_eq!(build_output_name(mixed, "{stem}", "slug"), "my-報告-2");
+        // Windows reserved device name gets a trailing '_'.
+        let con = std::path::Path::new("/a/con.pdf");
+        assert_eq!(build_output_name(con, "{stem}", "keep"), "con_");
     }
 
     #[test]
@@ -2104,7 +2119,6 @@ pub fn run() {
             set_config,
             cleanup_markdown,
             list_files,
-            stat_files,
             read_text_file,
             pick_folder,
             open_folder,

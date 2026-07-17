@@ -430,16 +430,16 @@
 
   // ── Staging (load files, convert on button) ─────────────────────────────────
 
-  // Add raw dropped/picked paths to the staging list: expand folders, get
-  // metadata, and dedupe by path. Files are NOT converted until the user clicks.
+  // Add raw dropped/picked paths to the staging list: expand folders + stat them
+  // (one Rust call), then dedupe by path. Files are NOT converted until the user clicks.
   async function addFiles(rawPaths: string[]) {
     if (rawPaths.length === 0) return;
     dropError = null;
     try {
-      const expanded = await invoke<string[]>('list_files', { paths: rawPaths });
+      const infos = await invoke<FileInfo[]>('list_files', { paths: rawPaths });
       // Nothing supported in the selection (e.g. the user picked an unsupported type
       // via the "All files" filter) — say so instead of silently doing nothing.
-      if (expanded.length === 0) {
+      if (infos.length === 0) {
         dropError = {
           code: 'UNSUPPORTED_FORMAT',
           title: 'Unsupported file type',
@@ -450,10 +450,9 @@
         return;
       }
       const have = new Set(staged.map((f) => f.path));
-      const fresh = expanded.filter((p) => !have.has(p));
+      const fresh = infos.filter((f) => !have.has(f.path));
       if (fresh.length === 0) return; // all already staged — nothing to add
-      const infos = await invoke<FileInfo[]>('stat_files', { paths: fresh });
-      staged = [...staged, ...infos];
+      staged = [...staged, ...fresh];
     } catch (e) {
       dropError = {
         code: 'INTERNAL_ERROR',

@@ -153,10 +153,8 @@
         placeholder={'{stem}'}
       />
       <div class="preset-row">
-        <button
-          class="preset"
-          title={tr('tip_stem')}
-          onclick={() => applyTemplatePreset('{stem}')}>{'{stem}'}</button
+        <button class="preset" title={tr('tip_stem')} onclick={() => applyTemplatePreset('{stem}')}
+          >{'{stem}'}</button
         >
         <button
           class="preset"
