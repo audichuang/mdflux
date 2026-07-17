@@ -1,6 +1,8 @@
 # Build offline packages and publish a public GitHub Release.
 # - Windows: NSIS Setup.exe + portable zip
 # - macOS arm64: DMG (Homebrew cask input)
+# Releases publish on v* tags ONLY (one clean per-version release). Pushes to main
+# still build both platforms to validate, but publish nothing (no floating release).
 # On v* tags: also update audichuang/homebrew-tap Casks/mdflux.rb (needs HOMEBREW_TAP_TOKEN).
 name: Portable build
 
@@ -104,6 +106,8 @@ jobs:
   publish-release:
     name: Publish GitHub Release
     needs: [windows-offline, macos-arm64-offline]
+    # Publish ONLY on version tags — main pushes build to validate, no floating release.
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -137,13 +141,8 @@ jobs:
           version=$(python3 -c "import json; print(json.load(open('app/src-tauri/tauri.conf.json'))['version'])")
           sha="${GITHUB_SHA:0:7}"
 
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            tag="$GITHUB_REF_NAME"
-            title="MDFlux $tag — offline packages"
-          else
-            tag="offline-latest"
-            title="MDFlux $version — offline packages (Windows + macOS arm64)"
-          fi
+          tag="$GITHUB_REF_NAME"
+          title="MDFlux $tag — offline packages"
 
           {
             echo "setup_name=$(basename "$setup")"

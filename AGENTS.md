@@ -36,10 +36,10 @@ Canonical: `tokens.css`, `preview.css`, `theme.svelte.ts`, `locale.svelte.ts`, `
 
 1. **Do not commit** `app/src-tauri/resources/runtime/python/` — only `runtime/README.md`. Build: `bundle-runtime.sh --platform windows-x64|macos-arm64` (**never mix** platforms in one tree).
 2. **Offline runtime intentional** (`bootstrap.rs` prefers bundled Python). Basic package has **no** OCR/audio engines.
-3. **CI** `portable.yml`: Windows + mac → `publish-release` requires **all three** files. `main` → **`offline-latest`**; tag **`vX.Y.Z`** → version release. Prefer CI over local packaging. Local: `make-installer.ps1` uses `--bundles nsis`; `make-macos-dmg.sh` uses `--bundles dmg`.
+3. **CI** `portable.yml`: Windows + mac build both platforms. `publish-release` (needs **all three** files) runs on **`v*` tags only** → one clean per-version release; **`main` pushes build to validate but publish nothing** (no floating `offline-latest`). Prefer CI over local packaging. Local: `make-installer.ps1` uses `--bundles nsis`; `make-macos-dmg.sh` uses `--bundles dmg`.
 4. **Homebrew:** live cask is **`audichuang/homebrew-tap` `Casks/mdflux.rb`**. Repo `packaging/homebrew/` is a **draft only**. CI `publish-homebrew` runs on **stable `v*` tags only** — not `offline-latest`, not `v*-rc`. Windows is never via brew.
 5. **Secret name only:** `HOMEBREW_TAP_TOKEN` (write access to `homebrew-tap`). No token values in git. Without it, packages still publish; tap job fails on tags.
-6. **Release hygiene:** `softprops` **merges** assets onto an existing tag — old version filenames can linger; delete stale assets when bumping.
+6. **Release hygiene:** each `v*` tag = its own fresh release, so assets don't accumulate. (`softprops` **merges** onto an existing tag, so if you ever re-release the same tag, delete stale assets first.)
 7. **Version bump together:** `app/package.json`, `tauri.conf.json`, `Cargo.toml` (+ `Cargo.lock` package name `app`).
 
 **Ops gotcha:** After a new cask lands on the remote tap, local Homebrew may still miss it until `brew update` (or re-tap). “Cask unavailable / path does not exist” is usually a **stale local tap**, not a missing remote file.
