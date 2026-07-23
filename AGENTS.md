@@ -15,7 +15,7 @@ Shell **never** converts; sidecar **never** owns UI. Coupling = NDJSON IPC only 
 
 ## UI / design (non-negotiable)
 
-**Feel:** Claude-warm charcoal/paper + terracotta accent + shadcn-style segs. Themes: system / light / dark (`theme.svelte.ts`, `ThemeSwitch`). Not cold zinc-blue SaaS.
+**Feel:** Claude-warm charcoal/paper + terracotta accent + shadcn-*style* segs (aesthetic only — **never add `shadcn-svelte`/`bits-ui`**; native components + tokens). Themes: system / light / dark (`theme.svelte.ts`, `ThemeSwitch`). Not cold zinc-blue SaaS.
 
 | Do | Don't |
 |---|---|
@@ -24,6 +24,7 @@ Shell **never** converts; sidecar **never** owns UI. Coupling = NDJSON IPC only 
 | **Reader** (`ResultView` / `DocViewer`): **flat on canvas**, wide column (~72–80rem) | Full-bleed `.panel` around reader; thin ~44rem center strip |
 | Markdown: **only** `preview.css` + `.md-preview`; tables = hairline rows | Duplicate preview CSS; grid cages / mini-card tables |
 | `tr()` / `locale.svelte.ts`; runes only in `*.svelte` / `*.svelte.ts` | Plain `.ts` `$state` (blank screen); second i18n store |
+| Override a `.btn-*` / `.hairline-*` via `.btn-icon` or scoped `<style>` (both unlayered) | Tailwind utilities (`p-0`, `rounded-full`, `hover:*`, `last:border-b-0`) on them — `.btn-*` are unlayered, so `@layer utilities` **silently loses** |
 
 Canonical: `tokens.css`, `preview.css`, `theme.svelte.ts`, `locale.svelte.ts`, `ResultView.svelte`, `StagingView.svelte`.
 
