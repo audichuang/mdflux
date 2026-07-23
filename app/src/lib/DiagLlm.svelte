@@ -120,7 +120,7 @@
   <section class="section">
     <h2 class="section-title">{tr('section_llm')}</h2>
 
-    <div class="seg" role="group" aria-label={tr('intelligence')}>
+    <div class="seg mode-seg" role="group" aria-label={tr('intelligence')}>
       {#each [['off', 'mode_off'], ['local', 'mode_local'], ['api', 'mode_api']] as [m, key]}
         <button
           class="seg-btn"
@@ -148,7 +148,7 @@
             autocomplete="off"
           />
           <button
-            class="check-btn"
+            class="btn-primary"
             title={tr('check_connection')}
             onclick={runProviderCheck}
             disabled={providerChecking}
@@ -165,7 +165,7 @@
           >
             <span class="dot dot-{providerResult.usable ? 'green' : 'red'}" aria-hidden="true"
             ></span>
-            <span>{providerResult.detail}</span>
+            <span class="result-text">{providerResult.detail}</span>
           </div>
         {/if}
       </div>
@@ -208,7 +208,7 @@
             autocomplete="off"
           />
           <button
-            class="check-btn"
+            class="btn-primary"
             title={tr('test_api_key')}
             onclick={runProviderCheck}
             disabled={providerChecking}
@@ -226,14 +226,14 @@
           >
             <span class="dot dot-{providerResult.usable ? 'green' : 'red'}" aria-hidden="true"
             ></span>
-            <span>{providerResult.detail}</span>
+            <span class="result-text">{providerResult.detail}</span>
           </div>
         {/if}
       </div>
     {/if}
 
     {#if config.llm_mode !== 'off'}
-      <div class="provider-fields cleanup-model-block">
+      <div class="provider-fields cleanup-model-block hairline-t">
         <label class="field-label" for="cleanup-model">{tr('cleanup_model')}</label>
         <select
           id="cleanup-model"
@@ -257,7 +257,7 @@
         {/if}
       </div>
 
-      <div class="provider-fields cleanup-model-block">
+      <div class="provider-fields cleanup-model-block hairline-t">
         <div class="toggle-row">
           <label class="toggle-label" for="llm-conversion">{tr('llm_image_desc')}</label>
           <button
@@ -303,7 +303,7 @@
     gap: var(--sp-3);
   }
   .section-title {
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -311,8 +311,8 @@
   }
 
   .dot {
-    width: 6px;
-    height: 6px;
+    width: var(--indicator-sm);
+    height: var(--indicator-sm);
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -324,8 +324,16 @@
   }
 
   /* LLM mode uses global .seg / .seg-btn */
+  .mode-seg {
+    align-self: flex-start;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .mode-seg > :global(.seg-btn) {
+    white-space: nowrap;
+  }
   .provider-note {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     padding: var(--sp-2) 0;
   }
@@ -336,7 +344,7 @@
     gap: var(--sp-2);
   }
   .field-label {
-    font-size: 10.5px;
+    font-size: var(--font-size-xs);
     font-weight: 500;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -344,15 +352,18 @@
   }
   .field-row {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--sp-2);
   }
   .field-input {
-    flex: 1;
+    flex: 1 1 16rem;
+    min-width: 0;
     background: var(--surface-1);
-    border: 1px solid var(--border);
+    border: var(--stroke-hairline) solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 6px var(--sp-3);
-    font-size: 12px;
+    min-height: var(--control-h);
+    padding-inline: var(--control-padding-inline);
+    font-size: var(--font-size-sm);
     font-family: var(--font-mono);
     color: var(--text-primary);
     outline: none;
@@ -367,10 +378,14 @@
   }
   .field-select {
     background: var(--surface-1);
-    border: 1px solid var(--border);
+    border: var(--stroke-hairline) solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 6px var(--sp-3);
-    font-size: 12px;
+    min-height: var(--control-h);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding-inline: var(--control-padding-inline);
+    font-size: var(--font-size-sm);
     font-family: var(--font-ui);
     color: var(--text-primary);
     outline: none;
@@ -381,42 +396,22 @@
     border-color: var(--accent);
   }
   .field-hint {
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     line-height: 1.5;
   }
-  .check-btn {
-    padding: 7px var(--sp-4);
-    font-size: 12.5px;
-    font-weight: 600;
-    font-family: var(--font-ui);
-    background: var(--accent);
-    color: var(--on-accent);
-    border: 1px solid var(--accent-edge);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background var(--transition-fast);
-  }
-  .check-btn:hover {
-    background: var(--accent-hover);
-  }
-  .check-btn:disabled {
-    opacity: 0.45;
-    cursor: default;
-  }
-  .check-btn:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
-    outline-offset: 2px;
-  }
-
   .provider-result {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--sp-2);
     padding: var(--sp-2) var(--sp-3);
     border-radius: var(--radius-sm);
-    font-size: 12px;
+    font-size: var(--font-size-sm);
+  }
+  .result-text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .result-ok {
     background: color-mix(in srgb, var(--green) 10%, var(--surface-1));
@@ -430,7 +425,6 @@
   .cleanup-model-block {
     margin-top: var(--sp-3);
     padding-top: var(--sp-3);
-    border-top: 1px solid var(--border);
   }
 
   /* LLM conversion toggle */
@@ -441,7 +435,7 @@
     gap: var(--sp-3);
   }
   .toggle-label {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--text-primary);
     cursor: pointer;
     flex: 1;
@@ -451,7 +445,7 @@
     width: 36px;
     height: 20px;
     background: var(--surface-3);
-    border: 1px solid transparent;
+    border: var(--stroke-hairline) solid transparent;
     border-radius: 99px;
     cursor: pointer;
     flex-shrink: 0;

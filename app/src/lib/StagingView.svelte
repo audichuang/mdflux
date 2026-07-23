@@ -123,8 +123,8 @@
     const sel = await open({
       multiple: true,
       filters: [
-        { name: 'Supported files', extensions: SUPPORTED_EXTS },
-        { name: 'All files', extensions: ['*'] },
+        { name: tr('supported_files'), extensions: SUPPORTED_EXTS },
+        { name: tr('all_files'), extensions: ['*'] },
       ],
     });
     if (!sel) return;
@@ -178,7 +178,7 @@
   <!-- File list -->
   <div
     class="panel-inset flex flex-col gap-1.5 p-2 min-h-[120px] max-h-[300px] overflow-y-auto transition-colors duration-200 {dragHover
-      ? 'bg-accent-dim ring-2 ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]'
+      ? 'bg-[var(--accent-dim)] ring-2 ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]'
       : ''}"
   >
     {#each files as f (f.path)}
@@ -186,7 +186,7 @@
         class="flex items-center gap-3 px-2.5 py-2 rounded-xl hover:bg-[color-mix(in_srgb,var(--text-primary)_4%,transparent)] transition-all group"
       >
         <span
-          class="flex-shrink-0 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-[var(--canvas)] text-zinc-400 group-hover:text-[var(--accent)] min-w-[48px] text-center uppercase tracking-wider transition-colors"
+          class="flex-shrink-0 text-[length:var(--font-size-2xs)] font-bold font-mono px-2 py-0.5 rounded-full bg-[var(--canvas)] text-zinc-400 group-hover:text-[var(--accent)] min-w-[48px] text-center uppercase tracking-wider transition-colors"
           >{f.ext || 'FILE'}</span
         >
         <span class="flex-1 min-w-0 text-sm font-medium text-zinc-300 truncate" title={f.path}
@@ -194,7 +194,7 @@
         >
         <span class="flex-shrink-0 text-xs font-mono text-zinc-500">{fmtSize(f.size)}</span>
         <button
-          class="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-transparent hover:bg-[var(--canvas)] text-zinc-500 hover:text-[var(--red)] transition-all cursor-pointer"
+          class="btn-tertiary btn-sm btn-icon flex-shrink-0 icon-circle icon-remove"
           title={tr('remove_file', { name: f.name })}
           aria-label={tr('remove_file', { name: f.name })}
           onclick={() => onRemove(f.path)}
@@ -229,21 +229,21 @@
       <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase"
         >{tr('save_output_to')}</span
       >
-      <div class="seg" role="group" aria-label={tr('output_location')}>
+      <div class="seg w-full sm:w-auto" role="group" aria-label={tr('output_location')}>
         <button
-          class="seg-btn"
+          class="seg-btn flex-1 min-w-0"
           class:active={setup.outputRule === 'next_to_source'}
           title={tr('tip_next_to_source')}
           onclick={() => setRule('next_to_source')}>{tr('next_to_source')}</button
         >
         <button
-          class="seg-btn"
+          class="seg-btn flex-1 min-w-0"
           class:active={setup.outputRule === 'fixed_folder'}
           title={tr('tip_one_folder')}
           onclick={() => setRule('fixed_folder')}>{tr('one_folder')}</button
         >
         <button
-          class="seg-btn"
+          class="seg-btn flex-1 min-w-0"
           class:active={setup.outputRule === 'mirror_tree'}
           title={tr('tip_mirror')}
           onclick={() => setRule('mirror_tree')}>{tr('mirror_folders')}</button
@@ -277,7 +277,7 @@
           </span>
           {#if setup.outputFolder}
             <button
-              class="flex items-center justify-center w-5 h-5 rounded-full hover:bg-[var(--surface-3)] text-zinc-500 hover:text-zinc-200 cursor-pointer"
+              class="btn-tertiary btn-sm btn-icon flex-shrink-0 icon-circle"
               title={tr('clear_folder')}
               aria-label={tr('clear_folder')}
               onclick={() => (setup.outputFolder = null)}
@@ -308,16 +308,18 @@
 
       {#if namePreview}
         <div class="flex items-center gap-2 text-xs text-zinc-400">
-          <span class="font-semibold tracking-wider text-[10px] text-zinc-500 uppercase"
+          <span
+            class="font-semibold tracking-wider text-[length:var(--font-size-2xs)] text-zinc-500 uppercase"
             >{tr('named_as')}</span
           >
           <span class="text-zinc-500">{tr('name_example')}</span>
-          <span class="font-mono text-zinc-300 font-semibold truncate max-w-[320px]"
-            >{namePreview}</span
+          <span
+            class="flex-1 min-w-0 font-mono text-zinc-300 font-semibold truncate"
+            title={namePreview}>{namePreview}</span
           >
           {#if onOpenDiagnostics}
             <button
-              class="text-[11px] text-[var(--accent)] hover:text-[var(--accent-hover)] underline underline-offset-2 transition-colors cursor-pointer bg-transparent border-none p-0"
+              class="text-[length:var(--font-size-xs)] text-[var(--accent)] hover:text-[var(--accent-hover)] underline underline-offset-2 transition-colors cursor-pointer bg-transparent border-none p-0"
               title={tr('file_name')}
               onclick={onOpenDiagnostics}>{tr('change_naming')}</button
             >
@@ -328,25 +330,25 @@
 
     <!-- Cleanup method (batch) -->
     <div class="flex flex-col gap-3 hairline-t pt-5">
-      <div class="flex items-center gap-3 justify-between">
+      <div class="flex flex-wrap items-center gap-3 justify-between">
         <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase"
           >{tr('clean_up')}</span
         >
-        <div class="seg" role="group" aria-label={tr('cleanup_method')}>
+        <div class="seg w-full sm:w-auto" role="group" aria-label={tr('cleanup_method')}>
           <button
-            class="seg-btn"
+            class="seg-btn flex-1 min-w-0"
             class:active={setup.method === 'none'}
             title={tr('tip_cleanup_off')}
             onclick={() => selectMethod('none')}>{tr('off')}</button
           >
           <button
-            class="seg-btn"
+            class="seg-btn flex-1 min-w-0"
             class:active={setup.method === 'rules'}
             title={tr('tip_cleanup_rules')}
             onclick={() => selectMethod('rules')}>{tr('rule_based')}</button
           >
           <button
-            class="seg-btn"
+            class="seg-btn flex-1 min-w-0"
             class:active={setup.method === 'ai'}
             disabled={!llmAvailable}
             title={llmAvailable ? tr('tip_cleanup_ai') : tr('tip_cleanup_ai_disabled')}
@@ -372,7 +374,9 @@
               />
               <div class="flex flex-col gap-0.5">
                 <span class="text-xs font-medium text-zinc-200">{tr(rule.labelKey)}</span>
-                <span class="text-[10px] text-zinc-500">{tr(rule.hintKey)}</span>
+                <span class="text-[length:var(--font-size-2xs)] text-zinc-500"
+                  >{tr(rule.hintKey)}</span
+                >
               </div>
             </label>
           {/each}
@@ -433,3 +437,16 @@
     {tr('convert_btn')}
   </button>
 </div>
+
+<style>
+  /* Canonical .btn-* live outside any @layer (unlayered), so Tailwind's
+     @layer utilities can't override them. Restore the circular shape and the
+     destructive red hover via scoped rules — scoped styles are also unlayered
+     and win on specificity. */
+  .icon-circle {
+    border-radius: 999px;
+  }
+  .icon-remove:hover:not(:disabled) {
+    color: var(--red);
+  }
+</style>

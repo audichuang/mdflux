@@ -71,72 +71,87 @@
   let speedText = $derived(detail ? formatSpeed(detail.speed) : '');
 </script>
 
-<div
-  class="flex-1 flex flex-col items-center justify-center gap-6 w-full max-w-[500px] self-center py-8"
->
-  <header class="text-center select-none">
-    <h1 class="text-lg font-bold text-zinc-50">{tr('setup_title')}</h1>
-    <p class="text-xs text-zinc-400 mt-1">{tr('setup_subtitle')}</p>
-  </header>
+<div class="flex-1 min-h-0 overflow-y-auto w-full">
+  <div
+    class="min-h-full flex flex-col items-center justify-center gap-6 w-full max-w-[var(--measure-setup)] mx-auto py-8"
+  >
+    <header class="text-center select-none">
+      <h1 class="text-lg font-bold text-zinc-50">{tr('setup_title')}</h1>
+      <p class="text-xs text-zinc-400 mt-1">{tr('setup_subtitle')}</p>
+    </header>
 
-  <Stepper steps={STEPS} {current} {done} />
+    <div class="panel-inset w-full p-[var(--sp-4)]">
+      <Stepper steps={STEPS} {current} {done} />
+    </div>
 
-  <div class="panel w-full p-5 flex flex-col gap-3.5 select-text" aria-live="polite">
-    <p class="text-xs font-semibold text-zinc-200">
-      {done ? tr('setup_complete') : progress.message}
+    <div class="panel w-full p-5 flex flex-col gap-3.5 select-text">
+      <p class="text-xs font-semibold text-zinc-200" aria-live="polite" aria-atomic="true">
+        {done ? tr('setup_complete') : progress.message}
+      </p>
+
+      {#if detail && !done}
+        <p
+          class="text-[length:var(--font-size-2xs)] font-mono text-zinc-400 break-all leading-normal"
+        >
+          {detail.label}
+        </p>
+      {/if}
+
+      {#if hasTotal && !done}
+        <div
+          class="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden"
+          role="progressbar"
+          aria-valuenow={Math.round(frac * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={tr('setup_progress')}
+        >
+          <div
+            class="h-full progress-fill rounded-full transition-all duration-150"
+            style="width: {frac * 100}%"
+          ></div>
+        </div>
+      {:else if !done}
+        <div
+          class="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden relative"
+          role="progressbar"
+          aria-busy="true"
+          aria-label={progress.message}
+        >
+          <div
+            class="shimmer-fill animate-indeterminate absolute h-full w-[45%] progress-fill rounded-full"
+          ></div>
+        </div>
+      {/if}
+
+      {#if !done && (sizeText || speedText)}
+        <div
+          class="flex items-center gap-4 text-[length:var(--font-size-2xs)] text-zinc-400 font-mono select-none"
+        >
+          {#if sizeText}<span>{sizeText}</span>{/if}
+          {#if hasTotal}<span>{Math.round(frac * 100)}%</span>{/if}
+          {#if speedText}<span class="speed-text font-semibold ml-auto">↓ {speedText}</span>{/if}
+        </div>
+      {/if}
+
+      {#if current === 2 && !done}
+        <ul
+          class="flex flex-col gap-2 pt-[var(--sp-4)] mt-[var(--sp-1)] hairline-t list-none select-none"
+        >
+          {#each PACKAGES as p}
+            <li class="flex items-baseline gap-2 py-[var(--sp-1)] text-xs">
+              <span class="font-semibold text-zinc-200">{p.name}</span>
+              <span class="text-[length:var(--font-size-2xs)] text-zinc-500">{p.note}</span>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </div>
+
+    <p class="text-[length:var(--font-size-xs)] text-zinc-500 select-none">
+      {tr('setup_footer')}
     </p>
-
-    {#if detail && !done}
-      <p class="text-[10px] font-mono text-zinc-400 break-all leading-normal">{detail.label}</p>
-    {/if}
-
-    {#if hasTotal && !done}
-      <div
-        class="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden"
-        role="progressbar"
-        aria-valuenow={Math.round(frac * 100)}
-        aria-valuemin={0}
-        aria-valuemax={100}
-      >
-        <div
-          class="h-full progress-fill rounded-full transition-all duration-150"
-          style="width: {frac * 100}%"
-        ></div>
-      </div>
-    {:else if !done}
-      <div
-        class="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden relative"
-        role="progressbar"
-        aria-busy="true"
-        aria-label={progress.message}
-      >
-        <div
-          class="shimmer-fill animate-indeterminate absolute h-full w-[45%] progress-fill rounded-full"
-        ></div>
-      </div>
-    {/if}
-
-    {#if !done && (sizeText || speedText)}
-      <div class="flex items-center gap-4 text-[10px] text-zinc-400 font-mono select-none">
-        {#if sizeText}<span>{sizeText}</span>{/if}
-        {#if hasTotal}<span>{Math.round(frac * 100)}%</span>{/if}
-        {#if speedText}<span class="speed-text font-semibold ml-auto">↓ {speedText}</span>{/if}
-      </div>
-    {/if}
-
-    {#if current === 2 && !done}
-      <ul class="flex flex-col gap-2 pt-3.5 mt-1.5 hairline-t list-none select-none">
-        {#each PACKAGES as p}
-          <li class="flex items-baseline gap-2 text-xs">
-            <span class="font-semibold text-zinc-200">{p.name}</span>
-            <span class="text-[10px] text-zinc-500">{p.note}</span>
-          </li>
-        {/each}
-      </ul>
-    {/if}
   </div>
-
-  <p class="text-[11px] text-zinc-500 select-none">{tr('setup_footer')}</p>
 </div>
 
 <style>
@@ -161,7 +176,7 @@
     .shimmer-fill {
       animation: none;
       width: 100%;
-      opacity: 0.35;
+      background: var(--accent-edge);
     }
   }
 </style>

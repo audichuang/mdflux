@@ -30,16 +30,24 @@
 
 <div class="flex-1 flex flex-col items-center justify-center gap-5">
   {#if sourceName}
-    <p class="text-xs font-mono text-zinc-500 max-w-[min(420px,90vw)] truncate" title={sourceName}>
+    <p
+      class="text-xs font-mono text-zinc-500 max-w-[min(var(--measure-status),90vw)] truncate"
+      title={sourceName}
+    >
       {sourceName}
     </p>
   {/if}
-  <p class="text-sm font-semibold text-zinc-300 min-h-[1.4em]">
+  <p
+    class="text-sm font-semibold text-zinc-300 min-h-[1.4em]"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
     {stageLabel}
   </p>
 
   <div
-    class="w-full max-w-[280px] h-2 bg-[var(--surface-2)] rounded-full overflow-hidden"
+    class="w-full max-w-[var(--measure-progress)] h-2 bg-[var(--surface-2)] rounded-full overflow-hidden"
     role="progressbar"
     aria-label={tr('conversion_progress')}
     aria-busy="true"
@@ -80,7 +88,7 @@
     .fill {
       animation: none;
       width: 100%;
-      opacity: 0.35;
+      background: var(--accent-edge);
     }
   }
 </style>

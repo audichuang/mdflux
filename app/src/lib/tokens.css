@@ -54,6 +54,11 @@
   /* ── Typography ───────────────────────────────────────────────────────── */
   --font-ui: 'Inter', 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+  --font-size-2xs: 10px;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 15px;
 
   /* ── Spacing scale ────────────────────────────────────────────────────── */
   --sp-1: 4px;
@@ -64,6 +69,25 @@
   --sp-6: 24px;
   --sp-8: 32px;
   --sp-12: 48px;
+
+  /* ── Controls and indicators ──────────────────────────────────────────── */
+  --control-h-sm: 30px;
+  --control-h: 34px;
+  --control-gap: 6px;
+  --control-padding-inline: var(--sp-3);
+  --indicator-sm: 6px;
+  --indicator-md: 10px;
+  --stroke-hairline: 1px;
+  --stroke-strong: 2px;
+
+  /* ── Layout measures ──────────────────────────────────────────────────── */
+  --shell-gutter: clamp(var(--sp-4), 4vw, var(--sp-8));
+  --measure-setup: 500px;
+  --measure-status: 420px;
+  --measure-progress: 280px;
+  --reader-gutter: clamp(var(--sp-5), 4vw, calc(var(--sp-5) * 2));
+  --reader-max-width: 72rem;
+  --reader-max-width-wide: 80rem;
 
   /* ── Radii ────────────────────────────────────────────────────────────── */
   --radius-sm: 12px; /* soft rounded buttons, badges, inputs */
@@ -186,14 +210,14 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  height: 34px;
+  gap: var(--control-gap);
+  height: var(--control-h);
   padding: 0 15px;
   font-size: 12.5px;
   font-weight: 500;
   font-family: var(--font-ui);
   border-radius: var(--radius-sm);
-  border: 1px solid transparent;
+  border: var(--stroke-hairline) solid transparent;
   cursor: pointer;
   white-space: nowrap;
   transition: all var(--transition-fast);
@@ -221,9 +245,13 @@ body {
 }
 
 .btn-sm {
-  height: 30px;
+  height: var(--control-h-sm);
   padding: 0 12px;
   font-size: 11.5px;
+}
+.btn-icon {
+  width: var(--control-h-sm);
+  padding: 0;
 }
 
 /* Full-width hero CTA (e.g. convert) — same terracotta family, larger hit target */
@@ -294,21 +322,22 @@ body {
 .seg {
   display: inline-flex;
   background: var(--seg-track);
-  border: 1px solid transparent; /* track only — no hard chrome frame */
+  border: var(--stroke-hairline) solid transparent; /* track only — no hard chrome frame */
   border-radius: 999px;
   padding: 3px;
-  gap: 2px;
+  gap: var(--stroke-strong);
 }
 .seg-btn {
   padding: 5px 12px;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   font-family: var(--font-ui);
-  border: 1px solid transparent;
+  border: var(--stroke-hairline) solid transparent;
   border-radius: 999px;
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
+  white-space: nowrap;
   transition: all var(--transition-fast);
 }
 .seg-btn:hover:not(:disabled):not(.active) {
@@ -329,7 +358,7 @@ body {
 /* Soft panel — elevation instead of ink-box frames */
 .panel {
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: var(--stroke-hairline) solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--panel-shadow);
   overflow: hidden;
@@ -340,10 +369,10 @@ body {
   border-radius: var(--radius);
 }
 .hairline-b {
-  border-bottom: 1px solid var(--divider);
+  border-bottom: var(--stroke-hairline) solid var(--divider);
 }
 .hairline-t {
-  border-top: 1px solid var(--divider);
+  border-top: var(--stroke-hairline) solid var(--divider);
 }
 .seg-btn:disabled {
   opacity: 0.4;

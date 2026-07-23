@@ -43,7 +43,7 @@
   function copyFailures() {
     const text = items
       .filter((i) => i.status === 'failed')
-      .map((i) => `${i.filename}: ${i.error?.detail ?? 'unknown error'}`)
+      .map((i) => `${i.filename}: ${i.error?.detail ?? tr('unknown_error')}`)
       .join('\n');
     navigator.clipboard
       .writeText(text)
@@ -126,22 +126,20 @@
         />
       </svg>
       <span>
-        {tr('cleanup_batch_applied')}{cleanupChanges > 0
-          ? cleanupChanges === 1
-            ? tr('cleanup_batch_changes', { count: cleanupChanges })
-            : tr('cleanup_batch_changes_plural', { count: cleanupChanges })
-          : ''}.
+        {cleanupChanges === 0
+          ? tr('cleanup_batch_summary_0')
+          : cleanupChanges === 1
+            ? tr('cleanup_batch_summary_1', { count: cleanupChanges })
+            : tr('cleanup_batch_summary_many', { count: cleanupChanges })}
       </span>
     </div>
   {/if}
 
-  <ul
-    class="panel-inset flex-1 overflow-y-auto divide-y divide-[var(--divider)]"
-    aria-label={tr('conversion_results')}
-  >
+  <ul class="panel-inset flex-1 overflow-y-auto" aria-label={tr('conversion_results')}>
     {#each visible as item (item.id || item.path)}
       <li
-        class="flex items-start gap-3 p-3 transition-colors row-hover {item.status === 'failed'
+        class="hairline-b flex items-start gap-3 p-3 transition-colors row-hover {item.status ===
+        'failed'
           ? 'row-failed'
           : ''} {item.status === 'cancelled' ? 'opacity-40' : ''}"
       >
@@ -158,20 +156,25 @@
         <div class="flex-1 min-w-0 flex flex-col gap-1">
           <span class="text-xs font-semibold text-zinc-200 truncate">{item.filename}</span>
           {#if item.status === 'done' && item.output_path}
-            <span class="text-[10px] font-mono text-zinc-500 truncate" title={item.output_path}
-              >→ {item.output_path}</span
+            <span
+              class="text-[length:var(--font-size-2xs)] font-mono text-zinc-500 truncate"
+              title={item.output_path}>→ {item.output_path}</span
             >
             {#if item.warnings?.length}
-              <span class="text-[10px] text-warn mt-0.5 leading-normal"
+              <span
+                class="detail-text text-[length:var(--font-size-2xs)] text-warn mt-0.5 leading-normal"
                 >⚠ {item.warnings.join(' · ')}</span
               >
             {/if}
           {:else if item.status === 'failed' && item.error}
-            <span class="text-[10px] text-err mt-0.5 leading-normal"
+            <span
+              class="detail-text text-[length:var(--font-size-2xs)] text-err mt-0.5 leading-normal"
               >{item.error.title} — {item.error.detail}</span
             >
           {:else if item.status === 'cancelled'}
-            <span class="text-[10px] text-zinc-500 mt-0.5">{tr('cancelled')}</span>
+            <span class="text-[length:var(--font-size-2xs)] text-zinc-500 mt-0.5"
+              >{tr('cancelled')}</span
+            >
           {/if}
         </div>
 
@@ -216,6 +219,11 @@
 </div>
 
 <style>
+  /* .hairline-b is unlayered; a layered `last:border-b-0` utility can't cancel
+     it, so strip the trailing row border with a scoped rule instead. */
+  li:last-child {
+    border-bottom: none;
+  }
   .stat-pill {
     display: inline-flex;
     align-items: baseline;
@@ -280,5 +288,10 @@
   }
   .row-failed {
     background: color-mix(in srgb, var(--red) 5%, transparent);
+  }
+  .detail-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 </style>

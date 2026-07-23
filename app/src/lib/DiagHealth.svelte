@@ -184,26 +184,26 @@
     </div>
   {:else if capsError}
     <div class="load-error">
-      <span>{tr('caps_load_error', { error: capsError })}</span>
-      <button class="retry-btn" onclick={loadCaps}>{tr('retry')}</button>
+      <span class="error-text">{tr('caps_load_error', { error: capsError })}</span>
+      <button class="btn-secondary btn-sm" onclick={loadCaps}>{tr('retry')}</button>
     </div>
   {:else if caps}
     <section class="section">
       <h2 class="section-title">{tr('section_runtime')}</h2>
-      <div class="runtime-grid">
-        <div class="runtime-item">
+      <div class="runtime-grid panel-inset">
+        <div class="runtime-item hairline-b">
           <span class="runtime-label">{tr('label_python')}</span>
           <span class="runtime-value">{caps.runtime.python_version}</span>
         </div>
-        <div class="runtime-item">
+        <div class="runtime-item hairline-b">
           <span class="runtime-label">{tr('label_markitdown')}</span>
           <span class="runtime-value">{caps.runtime.markitdown_version}</span>
         </div>
-        <div class="runtime-item">
+        <div class="runtime-item hairline-b">
           <span class="runtime-label">{tr('label_sidecar')}</span>
           <span class="runtime-value">{caps.runtime.sidecar_version}</span>
         </div>
-        <div class="runtime-item span2">
+        <div class="runtime-item">
           <span class="runtime-label">{tr('label_venv')}</span>
           <span class="runtime-value mono ellipsis" title={caps.runtime.venv_path}
             >{caps.runtime.venv_path}</span
@@ -214,9 +214,13 @@
 
     <section class="section">
       <h2 class="section-title">{tr('section_formats')}</h2>
-      <div class="cap-list">
+      <div class="cap-list panel-inset">
         {#each caps.formats as fmt}
-          <div id="fmt-{fmt.key}" class="cap-row" class:highlighted={highlight === fmt.key}>
+          <div
+            id="fmt-{fmt.key}"
+            class="cap-row hairline-b"
+            class:highlighted={highlight === fmt.key}
+          >
             <span class="dot dot-{dotColor(fmt.status)}" aria-hidden="true"></span>
             <span class="cap-label">{fmt.label}</span>
             <span class="cap-exts">{fmt.extensions.join(' · ')}</span>
@@ -225,6 +229,7 @@
               <span
                 class="cap-detail"
                 class:cap-detail-red={fmt.status === 'missing' || fmt.status === 'broken'}
+                title={detailText(fmt)}
               >
                 {detailText(fmt)}
               </span>
@@ -236,8 +241,8 @@
 
     <section class="section">
       <h2 class="section-title">{tr('section_optional')}</h2>
-      <div class="cap-list">
-        <div class="cap-row cap-row-wrap">
+      <div class="cap-list panel-inset">
+        <div class="cap-row cap-row-wrap hairline-b">
           <span
             class="dot dot-{ocrState.status === 'installed'
               ? 'green'
@@ -257,7 +262,7 @@
           {:else}
             <span class="cap-badge badge-amber">{tr('badge_not_installed')}</span>
             <button
-              class="install-btn"
+              class="btn-secondary btn-sm"
               onclick={() => installEngine('ocr')}
               disabled={installing !== null}
             >
@@ -271,15 +276,15 @@
             </div>
           {:else if ocrState.status === 'failed' && ocrState.error}
             <div class="install-error">
-              <span>{ocrState.error.split('\n')[0]}</span>
+              <span class="error-text">{ocrState.error.split('\n')[0]}</span>
               <button
-                class="install-btn"
+                class="btn-secondary btn-sm"
                 onclick={() => installEngine('ocr')}
                 disabled={installing !== null}>{tr('retry')}</button
               >
             </div>
           {:else}
-            <span class="cap-detail">{caps.optional.ocr.note}</span>
+            <span class="cap-detail" title={caps.optional.ocr.note}>{caps.optional.ocr.note}</span>
           {/if}
         </div>
 
@@ -303,7 +308,7 @@
           {:else}
             <span class="cap-badge badge-amber">{tr('badge_not_installed')}</span>
             <button
-              class="install-btn"
+              class="btn-secondary btn-sm"
               onclick={() => installEngine('audio')}
               disabled={installing !== null}
             >
@@ -318,15 +323,17 @@
             </div>
           {:else if audioState.status === 'failed' && audioState.error}
             <div class="install-error">
-              <span>{audioState.error.split('\n')[0]}</span>
+              <span class="error-text">{audioState.error.split('\n')[0]}</span>
               <button
-                class="install-btn"
+                class="btn-secondary btn-sm"
                 onclick={() => installEngine('audio')}
                 disabled={installing !== null}>{tr('retry')}</button
               >
             </div>
           {:else}
-            <span class="cap-detail">{caps.optional.audio.note}</span>
+            <span class="cap-detail" title={caps.optional.audio.note}
+              >{caps.optional.audio.note}</span
+            >
           {/if}
         </div>
       </div>
@@ -348,7 +355,7 @@
   .spinner-sm {
     width: 16px;
     height: 16px;
-    border: 2px solid var(--border);
+    border: var(--stroke-strong) solid var(--border);
     border-top-color: var(--accent);
     border-radius: 50%;
     flex-shrink: 0;
@@ -369,29 +376,21 @@
     align-items: center;
     gap: var(--sp-4);
     padding: var(--sp-4);
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--red);
     background: color-mix(in srgb, var(--red) 8%, var(--surface-1));
-    border: 1px solid color-mix(in srgb, var(--red) 25%, transparent);
+    border: var(--stroke-hairline) solid color-mix(in srgb, var(--red) 25%, transparent);
     border-radius: var(--radius-sm);
+    flex-wrap: wrap;
   }
-  .retry-btn {
-    background: var(--surface-2);
-    border: 1px solid var(--border-strong);
-    font-size: 11.5px;
-    font-weight: 600;
-    font-family: var(--font-ui);
-    color: var(--text-primary);
-    padding: 5px var(--sp-3);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition:
-      background var(--transition-fast),
-      border-color var(--transition-fast);
+  .error-text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
-  .retry-btn:hover {
-    background: var(--surface-3);
-    border-color: var(--border-strong);
+  .load-error > :global(button),
+  .install-error > :global(button) {
+    flex-shrink: 0;
   }
 
   /* Section */
@@ -401,7 +400,7 @@
     gap: var(--sp-3);
   }
   .section-title {
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -410,34 +409,31 @@
 
   /* Runtime grid */
   .runtime-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: var(--divider);
-    border: none;
-    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
   }
   .runtime-item {
-    background: var(--surface-1);
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: baseline;
+    gap: var(--sp-3);
     padding: var(--sp-2) var(--sp-3);
   }
-  .runtime-item.span2 {
-    grid-column: span 2;
+  .runtime-item:last-child {
+    border-bottom: none;
   }
   .runtime-label {
-    font-size: 10px;
+    font-size: var(--font-size-2xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--text-muted);
+    flex: 0 0 30%;
   }
   .runtime-value {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--text-primary);
     font-family: var(--font-mono);
+    min-width: 0;
   }
   .runtime-value.ellipsis {
     overflow: hidden;
@@ -450,17 +446,16 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    background: var(--surface-2);
-    border: none;
-    border-radius: var(--radius);
     overflow: hidden;
   }
   .cap-row {
-    display: flex;
+    display: grid;
+    grid-template-columns:
+      var(--indicator-sm) minmax(0, 1fr) auto auto
+      minmax(0, 180px);
     align-items: center;
     gap: var(--sp-2);
-    padding: 7px var(--sp-3);
-    border-bottom: 1px solid var(--divider);
+    padding: var(--sp-2) var(--sp-3);
     transition: background var(--transition-fast);
   }
   .cap-row:last-child {
@@ -485,8 +480,8 @@
   }
 
   .dot {
-    width: 6px;
-    height: 6px;
+    width: var(--indicator-sm);
+    height: var(--indicator-sm);
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -501,21 +496,21 @@
   }
 
   .cap-label {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--text-primary);
     flex: 1;
     min-width: 0;
   }
   .cap-exts {
-    font-size: 10px;
+    font-size: var(--font-size-2xs);
     color: var(--text-muted);
     font-family: var(--font-mono);
     white-space: nowrap;
   }
   .cap-badge {
-    font-size: 10px;
+    font-size: var(--font-size-2xs);
     font-weight: 500;
-    padding: 1px 6px;
+    padding: var(--stroke-hairline) var(--indicator-sm);
     border-radius: 99px;
     white-space: nowrap;
   }
@@ -532,13 +527,13 @@
     color: var(--red);
   }
   .cap-detail {
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     font-family: var(--font-mono);
-    white-space: nowrap;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 180px;
+    white-space: nowrap;
   }
   .cap-detail-red {
     color: var(--red);
@@ -547,44 +542,28 @@
 
   /* Optional engine install UI */
   .cap-row-wrap {
-    flex-wrap: wrap;
-    gap: var(--sp-2) var(--sp-2);
+    row-gap: var(--sp-2);
   }
-  .install-btn {
-    padding: 5px 12px;
-    font-size: 11.5px;
-    font-weight: 500;
-    font-family: var(--font-ui);
-    background: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all var(--transition-fast);
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
+  .cap-row-wrap > .cap-detail {
+    grid-column: 2 / -1;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
-  .install-btn:hover:not(:disabled) {
-    background: var(--surface-1);
-    border-color: var(--border-strong);
-  }
-  .install-btn:disabled {
-    opacity: 0.45;
-    cursor: default;
+  .cap-row-wrap > :global(.btn-secondary) {
+    grid-column: 5;
   }
   .install-size {
     opacity: 0.75;
     font-weight: 400;
   }
   .install-progress-wrap {
+    grid-column: 2 / -1;
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--control-gap);
     background: var(--surface-1);
-    border: 1px solid var(--border);
+    border: var(--stroke-hairline) solid var(--border);
     border-radius: var(--radius-sm);
     padding: var(--sp-2) var(--sp-3);
   }
@@ -623,21 +602,59 @@
     }
   }
   .install-progress-msg {
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
   }
   .install-error {
+    grid-column: 2 / -1;
     width: 100%;
     display: flex;
     align-items: center;
     gap: var(--sp-3);
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     color: var(--red);
     padding: var(--sp-1) 0;
   }
   .optional-note {
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     padding: var(--sp-1) 0 0;
+  }
+
+  @media (max-width: 700px) {
+    .cap-row {
+      grid-template-columns: var(--indicator-sm) minmax(0, 1fr) auto;
+    }
+    .cap-row > .dot {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .cap-label {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .cap-badge {
+      grid-column: 3;
+      grid-row: 1;
+    }
+    .cap-exts {
+      grid-column: 2;
+      grid-row: 2;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cap-detail,
+    .cap-row-wrap > .cap-detail,
+    .install-progress-wrap,
+    .install-error {
+      grid-column: 2 / -1;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .cap-row-wrap > :global(.btn-secondary) {
+      grid-column: 3;
+      grid-row: 2;
+    }
   }
 </style>

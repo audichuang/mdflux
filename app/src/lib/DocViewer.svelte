@@ -53,7 +53,7 @@
 </script>
 
 <div class="doc-shell flex-1 flex flex-col min-h-0">
-  <div class="doc-chrome flex items-center gap-3 px-5 py-3 hairline-b flex-shrink-0">
+  <div class="doc-chrome flex flex-wrap items-center gap-3 px-5 py-3 hairline-b flex-shrink-0">
     <button class="btn-secondary btn-sm" onclick={onBack} title={tr('back')}>
       <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
         <path
@@ -70,38 +70,42 @@
       >{name}</span
     >
 
-    <div class="seg" role="group" aria-label={tr('preview')}>
-      <button
-        class="seg-btn"
-        class:active={view === 'preview'}
-        title={tr('preview')}
-        onclick={() => (view = 'preview')}>{tr('preview')}</button
-      >
-      <button
-        class="seg-btn"
-        class:active={view === 'source'}
-        title={tr('source')}
-        onclick={() => (view = 'source')}>{tr('source')}</button
-      >
-    </div>
+    <div class="doc-actions flex w-full sm:w-auto flex-wrap items-center gap-2">
+      <div class="seg flex-1 sm:flex-none" role="group" aria-label={tr('preview')}>
+        <button
+          class="seg-btn flex-1 sm:flex-none"
+          class:active={view === 'preview'}
+          title={tr('preview')}
+          onclick={() => (view = 'preview')}>{tr('preview')}</button
+        >
+        <button
+          class="seg-btn flex-1 sm:flex-none"
+          class:active={view === 'source'}
+          title={tr('source')}
+          onclick={() => (view = 'source')}>{tr('source')}</button
+        >
+      </div>
 
-    {#if path}
-      <button class="btn-secondary btn-sm" onclick={reveal} title={tr('reveal_in_folder')}>
-        {tr('reveal_in_folder')}
+      {#if path}
+        <button class="btn-secondary btn-sm" onclick={reveal} title={tr('reveal_in_folder')}>
+          {tr('reveal_in_folder')}
+        </button>
+      {/if}
+
+      <button class="btn-secondary btn-sm" onclick={copy} title={tr('copy')}>
+        {copyFlash === 'copied'
+          ? tr('copied')
+          : copyFlash === 'failed'
+            ? tr('failed_short')
+            : tr('copy')}
       </button>
-    {/if}
-
-    <button class="btn-secondary btn-sm" onclick={copy} title={tr('copy')}>
-      {copyFlash === 'copied'
-        ? tr('copied')
-        : copyFlash === 'failed'
-          ? tr('failed_short')
-          : tr('copy')}
-    </button>
+    </div>
   </div>
 
   {#if revealError}
-    <p class="text-xs text-err px-5 py-2 flex-shrink-0" role="alert">{revealError}</p>
+    <p class="reveal-error text-xs text-err px-5 py-2 flex-shrink-0" role="alert">
+      {revealError}
+    </p>
   {/if}
 
   <div
@@ -117,7 +121,7 @@
       </div>
     {:else}
       <pre
-        class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0 doc-col">{markdown}</pre>
+        class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre overflow-x-auto break-normal select-text m-0 doc-col">{markdown}</pre>
     {/if}
   </div>
 </div>
@@ -129,20 +133,25 @@
   }
   .doc-scroll {
     background: transparent;
-    padding: 24px clamp(20px, 3vw, 40px) 40px;
+    padding: var(--sp-6) var(--reader-gutter) calc(var(--sp-5) * 2);
   }
   .doc-col {
-    max-width: min(72rem, 100%);
+    max-width: min(var(--reader-max-width), 100%);
     margin: 0 auto;
     width: 100%;
   }
   .text-err {
     color: var(--red);
   }
+  .reveal-error {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
 
   @media (min-width: 1600px) {
     .doc-col {
-      max-width: min(80rem, 100%);
+      max-width: min(var(--reader-max-width-wide), 100%);
     }
   }
 </style>

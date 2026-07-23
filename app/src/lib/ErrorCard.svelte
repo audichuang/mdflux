@@ -68,12 +68,18 @@
     font-weight: 600;
     color: var(--text-primary);
     flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .dismiss {
     color: var(--text-muted);
     cursor: pointer;
     font-size: 12px;
-    padding: 0 4px;
+    inline-size: var(--sp-8);
+    block-size: var(--sp-8);
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
     border: none;
     background: transparent;
   }
@@ -85,6 +91,8 @@
     color: var(--text-secondary);
     line-height: 1.55;
     margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .actions {
     display: flex;
@@ -100,5 +108,8 @@
     color: var(--accent);
     font-weight: 600;
     margin: 0;
+    flex: 1 1 12rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 </style>

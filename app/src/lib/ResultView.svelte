@@ -321,7 +321,7 @@
 <div class="result-shell flex-1 flex flex-col min-h-0">
   <!-- Header: filename + view toggle -->
   <div
-    class="result-chrome flex items-center justify-between gap-3 px-5 py-3 hairline-b flex-shrink-0"
+    class="result-chrome flex flex-wrap items-center justify-between gap-3 px-5 py-3 hairline-b flex-shrink-0"
   >
     <div class="flex items-center gap-2 min-w-0 text-zinc-400" title={sourceStem}>
       <svg width="14" height="14" viewBox="0 0 15 15" fill="none" aria-hidden="true">
@@ -336,25 +336,25 @@
       <span class="text-xs font-semibold text-zinc-300 truncate">{sourceStem}</span>
     </div>
 
-    <div class="seg" role="group" aria-label={tr('view_mode')}>
+    <div class="seg w-full sm:w-auto" role="group" aria-label={tr('view_mode')}>
       <button
-        class="seg-btn"
+        class="seg-btn flex-1 min-w-0 sm:flex-none"
         class:active={cleanup.viewMode === 'preview'}
         onclick={() => setView('preview')}>{tr('preview')}</button
       >
       <button
-        class="seg-btn"
+        class="seg-btn flex-1 min-w-0 sm:flex-none"
         class:active={cleanup.viewMode === 'source'}
         onclick={() => setView('source')}>{tr('source')}</button
       >
       {#if hasChanges}
         <button
-          class="seg-btn"
+          class="seg-btn flex-1 min-w-0 sm:flex-none"
           class:active={cleanup.viewMode === 'split'}
           onclick={() => setView('split')}>{tr('split')}</button
         >
         <button
-          class="seg-btn"
+          class="seg-btn flex-1 min-w-0 sm:flex-none"
           class:active={cleanup.viewMode === 'changes'}
           onclick={() => setView('changes')}>{tr('changes')}</button
         >
@@ -391,7 +391,9 @@
       </div>
 
       {#if summaryLine}
-        <span class="text-[11px] text-zinc-500 truncate max-w-[240px]">{summaryLine}</span>
+        <span class="text-[length:var(--font-size-xs)] text-zinc-500 truncate max-w-[240px]"
+          >{summaryLine}</span
+        >
       {/if}
 
       {#if !cleanupSeen && cleanup.method === 'none'}
@@ -443,12 +445,14 @@
               />
               <div class="flex-1 flex flex-col gap-0.5">
                 <span class="text-xs font-medium text-zinc-200">{tr(rule.labelKey)}</span>
-                <span class="text-[10px] text-zinc-500">{tr(rule.hintKey)}</span>
+                <span class="text-[length:var(--font-size-2xs)] text-zinc-500"
+                  >{tr(rule.hintKey)}</span
+                >
               </div>
               {#if cleanup.rulesSummary && cleanup.rules[rule.key]}
                 {@const c = ruleCounts[rule.key] ?? 0}
                 <span
-                  class="count-pill flex-shrink-0 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full min-w-[22px] text-center {c ===
+                  class="count-pill flex-shrink-0 text-[length:var(--font-size-2xs)] font-mono font-semibold px-2 py-0.5 rounded-full min-w-[22px] text-center {c ===
                   0
                     ? 'count-zero'
                     : ''}"
@@ -484,7 +488,7 @@
           </p>
           {#if llmMode === 'api'}
             <p
-              class="text-[11px] text-[var(--amber)] rounded-xl px-3 py-2"
+              class="text-[length:var(--font-size-xs)] text-[var(--amber)] rounded-xl px-3 py-2"
               style="background: color-mix(in srgb, var(--amber) 12%, transparent)"
             >
               {tr('ai_api_warn')}
@@ -517,11 +521,11 @@
   <!-- Content -->
   {#if cleanup.viewMode === 'split' && hasChanges}
     <div
-      class="result-body flex-1 flex min-h-0 divide-x divide-[var(--divider)] flex-col md:flex-row"
+      class="result-body flex-1 flex min-h-0 divide-y divide-[var(--divider)] md:divide-y-0 md:divide-x flex-col md:flex-row"
     >
       <div class="flex-1 min-w-0 flex flex-col min-h-0">
         <div
-          class="flex-shrink-0 px-6 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hairline-b"
+          class="split-label flex-shrink-0 py-2 text-[length:var(--font-size-2xs)] font-semibold text-zinc-500 uppercase tracking-wider hairline-b"
         >
           {tr('before_cleanup')}
         </div>
@@ -541,7 +545,7 @@
       </div>
       <div class="flex-1 min-w-0 flex flex-col min-h-0">
         <div
-          class="flex-shrink-0 px-6 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider hairline-b"
+          class="split-label flex-shrink-0 py-2 text-[length:var(--font-size-2xs)] font-semibold text-zinc-500 uppercase tracking-wider hairline-b"
         >
           {tr('after_cleanup')}
         </div>
@@ -588,7 +592,7 @@
                     : 'text-zinc-400'}"
               >
                 <span
-                  class="flex-shrink-0 w-3 text-center text-[10px] text-zinc-600 select-none"
+                  class="flex-shrink-0 w-3 text-center text-[length:var(--font-size-2xs)] text-zinc-600 select-none"
                   aria-hidden="true"
                   >{row.type === 'add' ? '+' : row.type === 'del' ? '−' : ''}</span
                 >
@@ -604,7 +608,7 @@
         </div>
       {:else}
         <pre
-          class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-all select-text m-0 result-col">{activeMarkdown}</pre>
+          class="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre overflow-x-auto break-normal select-text m-0 result-col">{activeMarkdown}</pre>
       {/if}
     </div>
   {/if}
@@ -614,8 +618,8 @@
     class="result-chrome flex items-center justify-between gap-3 px-5 py-3 hairline-t flex-shrink-0"
   >
     <span
-      class="inline-flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 px-1 min-w-0"
-      title="Source format · {converterPath}"
+      class="inline-flex items-center gap-1.5 text-[length:var(--font-size-2xs)] font-mono text-zinc-400 px-1 min-w-0"
+      title={tr('source_format_path', { path: converterPath })}
     >
       <span class="truncate">{tr('from_format', { format: detectedFormat })}</span>
       {#if warnings.length}<span
@@ -700,17 +704,20 @@
   }
   .result-scroll {
     background: transparent;
-    padding: 24px clamp(20px, 3vw, 40px) 40px;
+    padding: var(--sp-6) var(--reader-gutter) calc(var(--sp-5) * 2);
+  }
+  .split-label {
+    padding-inline: var(--reader-gutter);
   }
   .result-col {
-    max-width: min(72rem, 100%);
+    max-width: min(var(--reader-max-width), 100%);
     margin: 0 auto;
     width: 100%;
   }
 
   @media (min-width: 1600px) {
     .result-col {
-      max-width: min(80rem, 100%);
+      max-width: min(var(--reader-max-width-wide), 100%);
     }
   }
 

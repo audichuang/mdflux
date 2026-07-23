@@ -16,10 +16,8 @@
   ] as const;
 </script>
 
-<div class="flex items-center gap-3 select-none" title={tr('intelligence')}>
-  <span class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mode-label"
-    >{tr('intelligence')}</span
-  >
+<div class="mode-switch flex items-center select-none" title={tr('intelligence')}>
+  <span class="font-semibold uppercase tracking-wider mode-label">{tr('intelligence')}</span>
   <div class="seg" aria-label={tr('intelligence')} role="group">
     {#each MODES as m}
       <button
@@ -36,9 +34,11 @@
 </div>
 
 <style>
-  @media (max-width: 1100px) {
-    .mode-label {
-      display: none;
-    }
+  .mode-switch {
+    gap: var(--sp-3);
+  }
+  .mode-label {
+    color: var(--text-muted);
+    font-size: var(--font-size-2xs);
   }
 </style>

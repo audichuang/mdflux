@@ -64,8 +64,8 @@
     const selected = await open({
       multiple: true,
       filters: [
-        { name: 'Supported files', extensions: SUPPORTED_EXTS },
-        { name: 'All files', extensions: ['*'] },
+        { name: tr('supported_files'), extensions: SUPPORTED_EXTS },
+        { name: tr('all_files'), extensions: ['*'] },
       ],
     });
     if (!selected) return;
@@ -144,7 +144,9 @@
           />
         </svg>
       </div>
-      <p class="text-[11px] text-zinc-500 tracking-wide">{tr('drop_tagline')}</p>
+      <p class="text-[length:var(--font-size-xs)] text-zinc-500 tracking-wide">
+        {tr('drop_tagline')}
+      </p>
       <p class="text-sm font-semibold text-zinc-200">{tr('drop_files')}</p>
       <p class="text-xs text-zinc-400">
         {tr('or')}
@@ -153,13 +155,19 @@
           >{tr('browse_choose')}</span
         >
       </p>
-      <p class="text-[10px] font-mono tracking-wider text-zinc-500 mt-2.5 uppercase">
+      <p
+        class="text-[length:var(--font-size-2xs)] font-mono tracking-wider text-zinc-500 mt-2.5 uppercase"
+      >
         {tr('supported_formats')}
       </p>
-      <p class="text-[10px] text-zinc-500 mt-1 max-w-[280px] leading-relaxed">
+      <p
+        class="text-[length:var(--font-size-2xs)] text-zinc-500 mt-1 max-w-[var(--measure-progress)] leading-relaxed"
+      >
         {tr('drop_folder_hint')}
       </p>
-      <p class="text-[10px] text-zinc-600 mt-0.5">{tr('shortcut_open')}</p>
+      <p class="text-[length:var(--font-size-2xs)] text-zinc-600 mt-0.5">
+        {tr('shortcut_open')}
+      </p>
     </div>
   {/if}
 </div>
@@ -171,7 +179,7 @@
   .border-ring {
     position: absolute;
     inset: 0;
-    border-radius: 1rem;
+    border-radius: var(--radius-lg);
     padding: 1px;
     background: conic-gradient(
       from var(--angle, 0deg),

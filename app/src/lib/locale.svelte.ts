@@ -70,6 +70,8 @@ const translations: Record<Lang, Record<string, string>> = {
     drop_aria: 'Drop files or a folder, or click to browse',
     drop_title: 'Drop one file, several files, or a folder — or click to pick files',
     shortcut_open: '⌘/Ctrl+O to open',
+    supported_files: 'Supported files',
+    all_files: 'All files',
 
     // Staging
     file_ready: 'file ready',
@@ -179,6 +181,7 @@ const translations: Record<Lang, Record<string, string>> = {
     save_failed: 'Could not save: {error}',
     lines_diff: 'lines',
     cleanup_failed_silent: 'Cleanup could not run — showing the original text.',
+    source_format_path: 'Source format · {path}',
 
     // Convert progress
     stage_downloading: 'Downloading from the cloud…',
@@ -194,6 +197,7 @@ const translations: Record<Lang, Record<string, string>> = {
     setup_subtitle: 'One-time setup of the local conversion engine.',
     setup_complete: 'Setup complete.',
     setup_footer: 'Internet required · this runs once',
+    setup_progress: 'Setup progress',
     step_tools: 'Setup tools',
     step_tools_desc: 'Download uv',
     step_python: 'Python 3.12',
@@ -237,9 +241,10 @@ const translations: Record<Lang, Record<string, string>> = {
     filter_all: 'All',
     filter_failed: 'Failed only',
     filter_results: 'Filter results',
-    cleanup_batch_applied: 'Cleanup applied to every converted file',
-    cleanup_batch_changes: ' — {count} change in total',
-    cleanup_batch_changes_plural: ' — {count} changes in total',
+    cleanup_batch_summary_0: 'Cleanup applied to every converted file.',
+    cleanup_batch_summary_1: 'Cleanup applied to every converted file — {count} change in total.',
+    cleanup_batch_summary_many:
+      'Cleanup applied to every converted file — {count} changes in total.',
     conversion_queue: 'Conversion queue',
     conversion_results: 'Conversion results',
     warn_empty_content: 'Converted, but the file had no extractable content',
@@ -312,6 +317,7 @@ const translations: Record<Lang, Record<string, string>> = {
     tip_write_folder: 'Write all .md files into one chosen folder',
     tip_write_mirror: 'Recreate the source folder structure under a chosen root',
     no_folder_yet: 'No folder chosen yet',
+    sample_filename: 'Annual Report.pdf',
 
     llm_off_note: 'No intelligence features active. Conversions use MarkItDown only.',
     server_url: 'Server URL',
@@ -391,6 +397,8 @@ const translations: Record<Lang, Record<string, string>> = {
     drop_aria: '拖曳檔案或資料夾，或點擊瀏覽',
     drop_title: '可拖入單一檔案、多個檔案或資料夾 — 也可點擊選擇',
     shortcut_open: '⌘/Ctrl+O 開啟檔案',
+    supported_files: '支援的檔案',
+    all_files: '所有檔案',
 
     // Staging
     file_ready: '個檔案已就緒',
@@ -498,6 +506,7 @@ const translations: Record<Lang, Record<string, string>> = {
     save_failed: '無法儲存：{error}',
     lines_diff: '行',
     cleanup_failed_silent: '清理無法執行 — 顯示原文。',
+    source_format_path: '來源格式 · {path}',
 
     // Convert progress
     stage_downloading: '正在從雲端下載…',
@@ -513,6 +522,7 @@ const translations: Record<Lang, Record<string, string>> = {
     setup_subtitle: '一次性安裝本機轉換引擎。',
     setup_complete: '設定完成。',
     setup_footer: '需要網路 · 僅執行一次',
+    setup_progress: '設定進度',
     step_tools: '設定工具',
     step_tools_desc: '下載 uv',
     step_python: 'Python 3.12',
@@ -556,9 +566,9 @@ const translations: Record<Lang, Record<string, string>> = {
     filter_all: '全部',
     filter_failed: '僅失敗',
     filter_results: '篩選結果',
-    cleanup_batch_applied: '已對每個成功檔案套用清理',
-    cleanup_batch_changes: ' — 共 {count} 處變更',
-    cleanup_batch_changes_plural: ' — 共 {count} 處變更',
+    cleanup_batch_summary_0: '已對每個成功檔案套用清理。',
+    cleanup_batch_summary_1: '已對每個成功檔案套用清理，共 {count} 處變更。',
+    cleanup_batch_summary_many: '已對每個成功檔案套用清理，共 {count} 處變更。',
     conversion_queue: '轉換佇列',
     conversion_results: '轉換結果',
     warn_empty_content: '已轉換，但檔案沒有可擷取內容',
@@ -629,6 +639,7 @@ const translations: Record<Lang, Record<string, string>> = {
     tip_write_folder: '所有 .md 寫入同一個資料夾',
     tip_write_mirror: '在選定根目錄下重建來源資料夾結構',
     no_folder_yet: '尚未選擇資料夾',
+    sample_filename: '年度報告.pdf',
 
     llm_off_note: '未啟用智慧功能。轉換僅使用 MarkItDown。',
     server_url: '伺服器 URL',

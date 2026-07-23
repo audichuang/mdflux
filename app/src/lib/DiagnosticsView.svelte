@@ -53,8 +53,8 @@
 
 <div class="diag-wrap">
   <!-- Header -->
-  <div class="diag-header">
-    <button class="back-btn" onclick={onBack} aria-label={tr('diag_back')}>
+  <div class="diag-header hairline-b">
+    <button class="btn-secondary btn-sm" onclick={onBack} aria-label={tr('diag_back')}>
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
         <path
           d="M9 2L4 7l5 5"
@@ -68,7 +68,7 @@
     </button>
     <span class="diag-title">{tr('diag_title')}</span>
     <button
-      class="refresh-btn"
+      class="btn-tertiary btn-sm btn-icon"
       onclick={() => health?.loadCaps()}
       disabled={capsLoading}
       aria-label={tr('diag_refresh')}
@@ -93,28 +93,30 @@
     </button>
   </div>
 
-  <div class="diag-tabs" role="tablist" aria-label={tr('diag_title')}>
-    <button
-      class="diag-tab"
-      class:active={diagTab === 'health'}
-      role="tab"
-      aria-selected={diagTab === 'health'}
-      onclick={() => (diagTab = 'health')}>{tr('diag_tab_health')}</button
-    >
-    <button
-      class="diag-tab"
-      class:active={diagTab === 'output'}
-      role="tab"
-      aria-selected={diagTab === 'output'}
-      onclick={() => (diagTab = 'output')}>{tr('diag_tab_output')}</button
-    >
-    <button
-      class="diag-tab"
-      class:active={diagTab === 'intelligence'}
-      role="tab"
-      aria-selected={diagTab === 'intelligence'}
-      onclick={() => (diagTab = 'intelligence')}>{tr('diag_tab_intelligence')}</button
-    >
+  <div class="diag-tabs hairline-b">
+    <div class="seg" role="tablist" aria-label={tr('diag_title')}>
+      <button
+        class="seg-btn"
+        class:active={diagTab === 'health'}
+        role="tab"
+        aria-selected={diagTab === 'health'}
+        onclick={() => (diagTab = 'health')}>{tr('diag_tab_health')}</button
+      >
+      <button
+        class="seg-btn"
+        class:active={diagTab === 'output'}
+        role="tab"
+        aria-selected={diagTab === 'output'}
+        onclick={() => (diagTab = 'output')}>{tr('diag_tab_output')}</button
+      >
+      <button
+        class="seg-btn"
+        class:active={diagTab === 'intelligence'}
+        role="tab"
+        aria-selected={diagTab === 'intelligence'}
+        onclick={() => (diagTab = 'intelligence')}>{tr('diag_tab_intelligence')}</button
+      >
+    </div>
   </div>
 
   <!-- Scrollable body -->
@@ -137,6 +139,7 @@
     flex-direction: column;
     flex: 1;
     min-height: 0;
+    min-width: 0;
   }
 
   /* Header */
@@ -145,68 +148,14 @@
     align-items: center;
     gap: var(--sp-3);
     padding-bottom: var(--sp-4);
-    border-bottom: 1px solid var(--divider);
     margin-bottom: var(--sp-4);
     flex-shrink: 0;
-  }
-  .back-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-1);
-    background: var(--surface-2);
-    border: 1px solid transparent;
-    color: var(--text-primary);
-    font-size: 12.5px;
-    font-weight: 600;
-    font-family: var(--font-ui);
-    cursor: pointer;
-    padding: 6px 12px;
-    border-radius: var(--radius-sm);
-    box-shadow: var(--seg-shadow);
-    transition:
-      color var(--transition-fast),
-      background var(--transition-fast),
-      border-color var(--transition-fast);
-  }
-  .back-btn:hover {
-    background: var(--surface-3);
-  }
-  .back-btn:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
   }
   .diag-title {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
     flex: 1;
-  }
-  .refresh-btn {
-    background: var(--surface-2);
-    border: 1px solid transparent;
-    color: var(--text-secondary);
-    box-shadow: var(--seg-shadow);
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition:
-      color var(--transition-fast),
-      background var(--transition-fast),
-      border-color var(--transition-fast);
-  }
-  .refresh-btn:hover {
-    color: var(--text-primary);
-    background: var(--surface-3);
-  }
-  .refresh-btn:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-  .refresh-btn:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
   }
   .spinning {
     animation: spin 0.8s linear infinite;
@@ -234,35 +183,13 @@
 
   /* Tab nav */
   .diag-tabs {
-    display: flex;
-    gap: 4px;
     flex-shrink: 0;
+    min-width: 0;
+    overflow-x: auto;
     margin-bottom: var(--sp-4);
     padding-bottom: var(--sp-3);
-    border-bottom: 1px solid var(--divider);
   }
-  .diag-tab {
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 500;
-    font-family: var(--font-ui);
-    color: var(--text-muted);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-  }
-  .diag-tab:hover {
-    color: var(--text-secondary);
-    background: color-mix(in srgb, var(--text-primary) 4%, transparent);
-  }
-  .diag-tab.active {
-    color: var(--text-primary);
-    background: var(--surface-1);
-    box-shadow: var(--seg-shadow);
-  }
-  :root[data-theme='dark'] .diag-tab.active {
-    background: var(--surface-2);
+  .diag-tabs > :global(.seg) {
+    flex-shrink: 0;
   }
 </style>

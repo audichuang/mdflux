@@ -88,13 +88,11 @@
     </button>
   </div>
 
-  <ul
-    class="panel-inset flex-1 overflow-y-auto divide-y divide-[var(--divider)]"
-    aria-label={tr('conversion_queue')}
-  >
+  <ul class="panel-inset flex-1 overflow-y-auto" aria-label={tr('conversion_queue')}>
     {#each items as item (item.id || item.path)}
       <li
-        class="flex items-start gap-3 p-3 transition-colors row-hover {item.status === 'failed'
+        class="hairline-b flex items-start gap-3 p-3 transition-colors row-hover {item.status ===
+        'failed'
           ? 'row-failed'
           : ''} {item.status === 'cancelled' ? 'opacity-40' : ''}"
       >
@@ -153,7 +151,9 @@
         </span>
 
         <div class="flex-1 min-w-0 flex flex-col gap-1.5">
-          <span class="text-xs font-semibold text-zinc-200 truncate">{item.filename}</span>
+          <span class="text-xs font-semibold text-zinc-200 truncate" title={item.path}
+            >{item.filename}</span
+          >
 
           {#if item.status === 'running' && item.frac !== null}
             <div
@@ -177,17 +177,21 @@
               <div class="shimmer-fill absolute inset-0"></div>
             </div>
           {:else if item.status === 'failed' && item.error}
-            <span class="text-[10px] text-err truncate"
+            <span
+              class="text-[length:var(--font-size-2xs)] text-err truncate"
+              title="{item.error.title} — {item.error.detail}"
               >{item.error.title} — {item.error.detail}</span
             >
           {:else}
-            <span class="text-[10px] text-zinc-500">{statusLabel(item.status)}</span>
+            <span class="text-[length:var(--font-size-2xs)] text-zinc-500"
+              >{statusLabel(item.status)}</span
+            >
           {/if}
         </div>
 
         {#if item.status === 'done' && onOpen}
           <button
-            class="btn-secondary btn-sm flex-shrink-0 self-center ml-2"
+            class="btn-secondary btn-sm flex-shrink-0 self-center"
             title={tr('view_md')}
             onclick={() => onOpen?.(item)}>{tr('view_btn')}</button
           >
@@ -198,6 +202,11 @@
 </div>
 
 <style>
+  /* .hairline-b is unlayered; a layered `last:border-b-0` utility can't cancel
+     it, so strip the trailing row border with a scoped rule instead. */
+  li:last-child {
+    border-bottom: none;
+  }
   .progress-fill {
     background: var(--accent);
   }

@@ -89,6 +89,7 @@
   }
   .step {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -102,7 +103,7 @@
     justify-content: center;
   }
   .line {
-    height: 2px;
+    height: var(--stroke-strong);
     flex: 1;
     background: var(--divider);
     transition: background var(--transition);
@@ -115,16 +116,16 @@
   }
   .marker {
     flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
+    width: var(--sp-8);
+    height: var(--sp-8);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1.5px solid var(--border-strong);
+    border: var(--stroke-hairline) solid var(--border-strong);
     background: var(--surface-1);
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     font-weight: 600;
     font-family: var(--font-mono);
     transition: all var(--transition);
@@ -146,9 +147,9 @@
     color: var(--on-accent);
   }
   .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
+    width: var(--indicator-md);
+    height: var(--indicator-md);
+    border-radius: 50%;
     background: var(--accent);
     animation: pulse 1.4s ease-in-out infinite;
   }
@@ -157,13 +158,14 @@
   }
   .labels {
     display: flex;
+    min-width: 0;
     flex-direction: column;
-    gap: 2px;
-    margin-top: 8px;
-    padding: 0 4px;
+    gap: var(--sp-1);
+    margin-top: var(--sp-2);
+    padding-inline: var(--sp-1);
   }
   .title {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-muted);
     transition: color var(--transition);
@@ -179,9 +181,13 @@
     color: var(--red);
   }
   .desc {
-    font-size: 10px;
+    font-size: var(--font-size-2xs);
     color: var(--text-muted);
     line-height: 1.35;
+  }
+  .title,
+  .desc {
+    overflow-wrap: anywhere;
   }
   @keyframes pulse {
     0%,

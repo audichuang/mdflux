@@ -70,21 +70,10 @@
   .theme-btn {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 4px 8px;
+    gap: var(--sp-1);
+    min-height: var(--control-h-sm);
   }
   .theme-label {
-    font-size: 11px;
     line-height: 1;
-  }
-
-  /* Compact: icon-only when header is tight */
-  @media (max-width: 900px) {
-    .theme-label {
-      display: none;
-    }
-    .theme-btn {
-      padding: 4px 7px;
-    }
   }
 </style>

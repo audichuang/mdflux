@@ -638,7 +638,7 @@
 
 <div class="shell">
   <!-- Header -->
-  <header>
+  <header class="hairline-b">
     <span class="wordmark">MDFlux</span>
     {#if phase === 'ready'}
       <button
@@ -717,8 +717,10 @@
     {#if errorBanner}
       <div class="error-banner" role="alert" transition:fade={{ duration: 200 }}>
         {errorBanner}
-        <button class="banner-close" onclick={() => (errorBanner = null)} aria-label={tr('dismiss')}
-          >×</button
+        <button
+          class="banner-close btn-tertiary btn-sm btn-icon"
+          onclick={() => (errorBanner = null)}
+          aria-label={tr('dismiss')}>×</button
         >
       </div>
     {/if}
@@ -816,7 +818,7 @@
     {:else if phase === 'error'}
       <div class="error-wrap">
         <p class="error-msg">{errorMsg}</p>
-        <button class="action-btn" onclick={() => boot(errorBtn === 'Retry')}>
+        <button class="btn-primary" onclick={() => boot(errorBtn === 'Retry')}>
           {errorBtn}
         </button>
       </div>
@@ -825,7 +827,7 @@
 
   <!-- Health footer (hidden while in diagnostics, staging, or batch views) -->
   {#if phase === 'ready' && health && view === 'main' && batchItems === null && staged.length === 0 && !result && !converting}
-    <details class="health-footer">
+    <details class="health-footer hairline-t">
       <summary>
         <span>{tr('dependency_health')}</span>
         <span class="health-dots" aria-hidden="true">
@@ -847,7 +849,7 @@
         </span>
         {#if !allGreen()}<span class="warn-badge">{tr('issues_found')}</span>{/if}
       </summary>
-      <div class="health-grid">
+      <div class="health-grid panel-inset">
         {@render HealthRow({ label: tr('label_python'), value: health.python_version, ok: true })}
         {@render HealthRow({
           label: tr('label_markitdown'),
@@ -862,7 +864,7 @@
           })}
         {/each}
         {#if !allGreen()}
-          <button class="repair-btn" onclick={() => boot(true)}>{tr('repair')}</button>
+          <button class="btn-primary btn-sm" onclick={() => boot(true)}>{tr('repair')}</button>
         {/if}
       </div>
     </details>
@@ -871,7 +873,7 @@
 
 <!-- HealthRow snippet -->
 {#snippet HealthRow({ label, value, ok }: { label: string; value: string; ok: boolean })}
-  <div class="health-row">
+  <div class="health-row hairline-b">
     <span class="dot" class:dot-green={ok} class:dot-red={!ok} aria-hidden="true"></span>
     <span class="row-label">{label}</span>
     <span class="row-value" class:muted-red={!ok}>{value}</span>
@@ -884,29 +886,29 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    padding: 0 var(--sp-8) var(--sp-6);
+    padding: 0 var(--shell-gutter) var(--sp-6);
   }
 
   /* Header */
   header {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: var(--sp-3);
     padding: var(--sp-6) 0 var(--sp-4);
-    border-bottom: 1px solid var(--divider, var(--border));
     margin-bottom: var(--sp-4);
     flex-shrink: 0;
   }
   .wordmark {
-    font-size: 15px;
+    font-size: var(--font-size-lg);
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--text-primary);
   }
   .badge {
-    font-size: 10px;
+    font-size: var(--font-size-2xs);
     font-weight: 600;
-    padding: 2px 8px;
+    padding: var(--stroke-strong) var(--sp-2);
     border-radius: 999px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -926,6 +928,8 @@
   }
   .badge-btn:not(:disabled) {
     cursor: pointer;
+    min-height: var(--control-h-sm);
+    padding-inline: var(--sp-2);
   }
   .badge-btn:disabled {
     cursor: default;
@@ -937,17 +941,20 @@
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: var(--sp-4);
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    min-width: 0;
+    gap: var(--sp-2);
   }
 
   /* Diagnostics icon button */
   .diag-btn {
     background: var(--surface-2);
-    border: 1px solid transparent;
+    border: var(--stroke-hairline) solid transparent;
     color: var(--text-secondary);
     cursor: pointer;
-    width: 34px;
-    height: 34px;
+    width: var(--control-h);
+    height: var(--control-h);
     border-radius: 999px;
     display: flex;
     align-items: center;
@@ -963,7 +970,7 @@
     background: var(--surface-3);
   }
   .diag-btn.diag-active {
-    color: var(--on-accent, #fff);
+    color: var(--on-accent);
     background: var(--accent);
     border-color: var(--accent-edge);
   }
@@ -988,30 +995,22 @@
     gap: var(--sp-3);
     padding: var(--sp-2) var(--sp-4);
     background: color-mix(in srgb, var(--red) 12%, transparent);
-    border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
+    border: var(--stroke-hairline) solid color-mix(in srgb, var(--red) 30%, transparent);
     border-radius: var(--radius-sm);
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--text-primary);
     margin-bottom: var(--sp-2);
     user-select: text;
   }
   .banner-close {
-    background: none;
-    border: none;
-    color: var(--text-muted);
     font-size: 16px;
-    cursor: pointer;
-    padding: 0 var(--sp-1);
     line-height: 1;
     flex-shrink: 0;
-  }
-  .banner-close:hover {
-    color: var(--text-primary);
   }
 
   /* Cancelled flash */
   .cancelled-notice {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     text-align: center;
     padding: var(--sp-2) 0;
@@ -1030,7 +1029,7 @@
   .spinner {
     width: 28px;
     height: 28px;
-    border: 2px solid var(--border);
+    border: var(--stroke-strong) solid var(--border);
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
@@ -1047,7 +1046,7 @@
   }
 
   .hint {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
   }
 
@@ -1059,7 +1058,7 @@
     justify-content: center;
     align-self: center;
     width: 100%;
-    max-width: 500px;
+    max-width: var(--measure-setup);
     gap: var(--sp-6);
   }
   .error-msg {
@@ -1068,42 +1067,23 @@
     color: var(--text-primary);
     white-space: pre-wrap;
     background: var(--surface-1);
-    border: 1px solid var(--border);
+    border: var(--stroke-hairline) solid var(--border);
     border-radius: var(--radius);
     padding: var(--sp-4);
     user-select: text;
   }
-  .action-btn {
+  .error-wrap > .btn-primary {
     align-self: flex-start;
-    padding: var(--sp-2) var(--sp-6);
-    font-size: 13px;
-    font-weight: 600;
-    font-family: var(--font-ui);
-    color: var(--on-accent, #fff);
-    background: var(--accent);
-    border: 1px solid var(--accent-edge);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition:
-      background var(--transition-fast),
-      transform var(--transition-fast);
-  }
-  .action-btn:hover {
-    background: var(--accent-hover);
-  }
-  .action-btn:active {
-    transform: translateY(1px);
   }
 
   /* Health footer */
   .health-footer {
     flex-shrink: 0;
-    border-top: 1px solid var(--border);
     margin-top: var(--sp-4);
     padding-top: var(--sp-3);
   }
   .health-footer > summary {
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     font-weight: 500;
     color: var(--text-muted);
     cursor: pointer;
@@ -1123,12 +1103,12 @@
   .health-dots {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--sp-1);
     margin-left: var(--sp-2);
   }
   .hdot {
-    width: 6px;
-    height: 6px;
+    width: var(--indicator-sm);
+    height: var(--indicator-sm);
     border-radius: 50%;
     background: var(--text-muted);
     flex-shrink: 0;
@@ -1141,11 +1121,11 @@
   }
 
   .warn-badge {
-    font-size: 10px;
+    font-size: var(--font-size-2xs);
     font-weight: 500;
     color: var(--amber);
     background: color-mix(in srgb, var(--amber) 12%, transparent);
-    padding: 1px 6px;
+    padding: var(--stroke-hairline) var(--indicator-sm);
     border-radius: 99px;
     text-transform: none;
     letter-spacing: 0;
@@ -1155,9 +1135,6 @@
     flex-direction: column;
     gap: 0;
     margin-top: var(--sp-3);
-    background: var(--surface-2);
-    border: none;
-    border-radius: var(--radius);
     overflow: hidden;
   }
   .health-row {
@@ -1165,14 +1142,13 @@
     align-items: center;
     gap: var(--sp-2);
     padding: var(--sp-2) var(--sp-3);
-    border-bottom: 1px solid var(--divider);
   }
   .health-row:last-child {
     border-bottom: none;
   }
   .dot {
-    width: 6px;
-    height: 6px;
+    width: var(--indicator-sm);
+    height: var(--indicator-sm);
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -1184,32 +1160,23 @@
   }
   .row-label {
     flex: 1;
-    font-size: 12px;
+    min-width: 0;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
   .row-value {
-    font-size: 11px;
+    max-inline-size: 50%;
+    overflow-wrap: anywhere;
+    text-align: end;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     font-family: var(--font-mono);
   }
   .row-value.muted-red {
     color: var(--red);
   }
-  .repair-btn {
+  .health-grid > .btn-primary {
     align-self: flex-start;
     margin: var(--sp-3);
-    padding: 7px var(--sp-4);
-    font-size: 12.5px;
-    font-weight: 600;
-    font-family: var(--font-ui);
-    color: var(--on-accent, #fff);
-    background: var(--accent);
-    border: 1px solid var(--accent-edge);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: background var(--transition-fast);
-  }
-  .repair-btn:hover {
-    background: var(--accent-hover);
   }
 </style>

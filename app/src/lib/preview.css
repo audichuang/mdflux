@@ -5,31 +5,35 @@
   color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.7;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.md-preview :is(h1, h2, h3, h4, h5, h6) {
+  line-height: 1.25;
 }
 
 .md-preview h1 {
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin: 0 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--divider);
+  margin: 0 0 var(--sp-3);
+  padding-bottom: var(--sp-2);
+  border-bottom: var(--stroke-hairline) solid var(--divider);
   color: var(--text-primary);
 }
 
 .md-preview h2 {
   font-size: 20px;
   font-weight: 700;
-  margin: 24px 0 8px;
+  margin: var(--sp-6) 0 var(--sp-2);
   color: var(--text-primary);
 }
 
 .md-preview h3 {
   font-size: 16px;
   font-weight: 600;
-  margin: 20px 0 8px;
+  margin: var(--sp-5) 0 var(--sp-2);
   color: var(--text-primary);
 }
 
@@ -38,28 +42,32 @@
 .md-preview h6 {
   font-size: 14px;
   font-weight: 600;
-  margin: 16px 0 4px;
+  margin: var(--sp-4) 0 var(--sp-1);
   color: var(--text-primary);
 }
 
 .md-preview p {
-  margin: 0 0 12px;
+  margin: 0 0 var(--sp-3);
 }
 
 .md-preview ul,
 .md-preview ol {
-  margin: 0 0 12px;
-  padding-left: 24px;
+  margin: 0 0 var(--sp-3);
+  padding-left: var(--sp-6);
 }
 
 .md-preview li {
-  margin: 2px 0;
+  margin: calc(var(--sp-1) / 2) 0;
+}
+
+.md-preview li > :is(ul, ol) {
+  margin-block: var(--sp-1) 0;
 }
 
 .md-preview a {
   color: var(--accent);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: calc(var(--sp-1) / 2);
 }
 
 .md-preview strong {
@@ -72,33 +80,37 @@
 }
 
 .md-preview blockquote {
-  margin: 0 0 12px;
-  padding: 4px 16px;
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-1) var(--sp-4);
   border-left: 3px solid color-mix(in srgb, var(--accent) 35%, var(--divider));
   color: var(--text-secondary);
 }
 
+.md-preview blockquote > :last-child {
+  margin-bottom: 0;
+}
+
 .md-preview hr {
   border: none;
-  border-top: 1px solid var(--divider);
-  margin: 20px 0;
+  border-top: var(--stroke-hairline) solid var(--divider);
+  margin: var(--sp-5) 0;
 }
 
 .md-preview code {
   font-family: var(--font-mono);
   font-size: 0.88em;
   background: var(--surface-2);
-  padding: 1px 5px;
-  border-radius: 6px;
+  padding: var(--stroke-hairline) calc(var(--sp-5) / 4);
+  border-radius: calc(var(--radius-sm) / 2);
 }
 
 .md-preview pre {
   background: color-mix(in srgb, var(--text-primary) 4%, transparent);
   border: none;
   border-radius: var(--radius-sm);
-  padding: 16px 18px;
+  padding: var(--sp-4) var(--sp-5);
   overflow-x: auto;
-  margin: 0 0 16px;
+  margin: 0 0 var(--sp-4);
 }
 
 .md-preview pre code {
@@ -111,33 +123,35 @@
 .md-preview table {
   border-collapse: separate;
   border-spacing: 0;
-  margin: 12px 0 24px;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: var(--sp-3) 0 var(--sp-6);
   font-size: 14px;
   width: 100%;
   min-width: 0;
   border-radius: 0;
   background: transparent;
-  overflow: visible;
-  border-top: 1px solid var(--divider);
-  border-bottom: 1px solid var(--divider);
+  border-top: var(--stroke-hairline) solid var(--divider);
+  border-bottom: var(--stroke-hairline) solid var(--divider);
 }
 
 .md-preview th,
 .md-preview td {
   border: none;
-  border-bottom: 1px solid var(--divider);
-  padding: 14px 4px 14px 0;
+  border-bottom: var(--stroke-hairline) solid var(--divider);
+  padding: calc(var(--sp-3) + calc(var(--sp-1) / 2)) var(--sp-1)
+    calc(var(--sp-3) + calc(var(--sp-1) / 2)) 0;
   text-align: left;
   vertical-align: top;
 }
 
 .md-preview th:not(:last-child),
 .md-preview td:not(:last-child) {
-  padding-right: 20px;
+  padding-right: var(--sp-5);
 }
 
-.md-preview tr:last-child th,
-.md-preview tr:last-child td {
+.md-preview tbody tr:last-child > * {
   border-bottom: none;
 }
 
@@ -148,12 +162,12 @@
   font-size: 12px;
   text-transform: none;
   letter-spacing: 0.01em;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: calc(var(--sp-2) + calc(var(--sp-1) / 2));
+  padding-bottom: calc(var(--sp-2) + calc(var(--sp-1) / 2));
 }
 
 .md-preview thead th {
-  border-bottom: 1px solid var(--border);
+  border-bottom: var(--stroke-hairline) solid var(--border);
 }
 
 .md-preview tbody tr:hover td {
