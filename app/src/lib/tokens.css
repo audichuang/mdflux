@@ -164,13 +164,11 @@
 }
 
 /* ── Base reset ───────────────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* NO hand-written `* { margin: 0; padding: 0 }` here. Tailwind's preflight
+   already resets those (plus box-sizing and border) inside `@layer base`, so
+   utilities can still override it. Everything in this file is UNLAYERED, and
+   unlayered always beats layered — a universal reset here silently kills every
+   `p-*` / `m-*` utility in the app. See AGENTS.md "UI / design". */
 
 body {
   background: var(--canvas);
