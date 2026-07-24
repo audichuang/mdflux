@@ -94,7 +94,7 @@
         class="hairline-b flex items-start gap-3 p-3 transition-colors row-hover {item.status ===
         'failed'
           ? 'row-failed'
-          : ''} {item.status === 'cancelled' ? 'opacity-40' : ''}"
+          : ''}"
       >
         <span
           class="flex-shrink-0 w-4 h-4 mt-0.5 flex items-center justify-center"
@@ -151,8 +151,11 @@
         </span>
 
         <div class="flex-1 min-w-0 flex flex-col gap-1.5">
-          <span class="text-xs font-semibold text-zinc-200 truncate" title={item.path}
-            >{item.filename}</span
+          <span
+            class="text-xs font-semibold truncate {item.status === 'cancelled'
+              ? 'text-zinc-400'
+              : 'text-zinc-200'}"
+            title={item.path}>{item.filename}</span
           >
 
           {#if item.status === 'running' && item.frac !== null}

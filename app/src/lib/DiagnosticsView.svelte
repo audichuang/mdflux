@@ -49,6 +49,33 @@
   // Health owns capability loading; the header refresh button drives it.
   let capsLoading = $state(true);
   let health = $state<ReturnType<typeof DiagHealth>>();
+
+  // Tab list — id/label + a ref slot for roving tabindex focus management.
+  const tabs: { key: DiagTab; labelKey: string }[] = [
+    { key: 'health', labelKey: 'diag_tab_health' },
+    { key: 'output', labelKey: 'diag_tab_output' },
+    { key: 'intelligence', labelKey: 'diag_tab_intelligence' },
+  ];
+  let tabEls: Partial<Record<DiagTab, HTMLButtonElement>> = {};
+
+  function selectTab(key: DiagTab) {
+    diagTab = key;
+  }
+
+  // WAI-ARIA tabs pattern: ArrowLeft/Right + Home/End move focus and selection.
+  function onTabsKeydown(e: KeyboardEvent) {
+    const idx = tabs.findIndex((t) => t.key === diagTab);
+    let nextIdx: number;
+    if (e.key === 'ArrowRight') nextIdx = (idx + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft') nextIdx = (idx - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') nextIdx = 0;
+    else if (e.key === 'End') nextIdx = tabs.length - 1;
+    else return;
+    e.preventDefault();
+    const next = tabs[nextIdx].key;
+    diagTab = next;
+    tabEls[next]?.focus();
+  }
 </script>
 
 <div class="diag-wrap">
@@ -94,42 +121,64 @@
   </div>
 
   <div class="diag-tabs hairline-b">
-    <div class="seg" role="tablist" aria-label={tr('diag_title')}>
-      <button
-        class="seg-btn"
-        class:active={diagTab === 'health'}
-        role="tab"
-        aria-selected={diagTab === 'health'}
-        onclick={() => (diagTab = 'health')}>{tr('diag_tab_health')}</button
-      >
-      <button
-        class="seg-btn"
-        class:active={diagTab === 'output'}
-        role="tab"
-        aria-selected={diagTab === 'output'}
-        onclick={() => (diagTab = 'output')}>{tr('diag_tab_output')}</button
-      >
-      <button
-        class="seg-btn"
-        class:active={diagTab === 'intelligence'}
-        role="tab"
-        aria-selected={diagTab === 'intelligence'}
-        onclick={() => (diagTab = 'intelligence')}>{tr('diag_tab_intelligence')}</button
-      >
+    <div
+      class="seg"
+      role="tablist"
+      tabindex="-1"
+      aria-label={tr('diag_title')}
+      onkeydown={onTabsKeydown}
+    >
+      {#each tabs as t (t.key)}
+        <button
+          bind:this={tabEls[t.key]}
+          class="seg-btn"
+          class:active={diagTab === t.key}
+          role="tab"
+          id={`diag-tab-${t.key}`}
+          aria-controls={`diag-panel-${t.key}`}
+          aria-selected={diagTab === t.key}
+          tabindex={diagTab === t.key ? 0 : -1}
+          onclick={() => selectTab(t.key)}>{tr(t.labelKey)}</button
+        >
+      {/each}
     </div>
   </div>
 
   <!-- Scrollable body -->
   <div class="diag-body">
-    <DiagHealth
-      bind:this={health}
-      bind:capsLoading
-      active={diagTab === 'health'}
-      {highlight}
-      onShowHealth={() => (diagTab = 'health')}
-    />
-    <DiagOutput active={diagTab === 'output'} {config} {onConfigChange} />
-    <DiagLlm active={diagTab === 'intelligence'} {config} {onConfigChange} />
+    <div
+      id="diag-panel-health"
+      role="tabpanel"
+      aria-labelledby="diag-tab-health"
+      tabindex="0"
+      hidden={diagTab !== 'health'}
+    >
+      <DiagHealth
+        bind:this={health}
+        bind:capsLoading
+        active={diagTab === 'health'}
+        {highlight}
+        onShowHealth={() => (diagTab = 'health')}
+      />
+    </div>
+    <div
+      id="diag-panel-output"
+      role="tabpanel"
+      aria-labelledby="diag-tab-output"
+      tabindex="0"
+      hidden={diagTab !== 'output'}
+    >
+      <DiagOutput active={diagTab === 'output'} {config} {onConfigChange} />
+    </div>
+    <div
+      id="diag-panel-intelligence"
+      role="tabpanel"
+      aria-labelledby="diag-tab-intelligence"
+      tabindex="0"
+      hidden={diagTab !== 'intelligence'}
+    >
+      <DiagLlm active={diagTab === 'intelligence'} {config} {onConfigChange} />
+    </div>
   </div>
 </div>
 
@@ -180,6 +229,15 @@
     gap: var(--sp-6);
     padding-right: var(--sp-1);
   }
+  /* Tabpanel wrapper: reproduces the flex column + gap that used to sit directly on
+     .diag-body's children (DiagHealth can render several sibling <section>s). Only
+     applied while visible — must not fight the [hidden] attribute's display:none. */
+  .diag-body > [role='tabpanel']:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    min-width: 0;
+  }
 
   /* Tab nav */
   .diag-tabs {
@@ -188,6 +246,14 @@
     overflow-x: auto;
     margin-bottom: var(--sp-4);
     padding-bottom: var(--sp-3);
+  }
+  /* Inactive-tab text sits on the seg track (canvas + translucent wash); nudge it
+     off --text-muted to keep a comfortable AA margin in light theme (~4.6:1 is thin). */
+  .diag-tabs :global(.seg-btn) {
+    color: var(--text-secondary);
+  }
+  .diag-tabs :global(.seg-btn.active) {
+    color: var(--text-primary);
   }
   .diag-tabs > :global(.seg) {
     flex-shrink: 0;

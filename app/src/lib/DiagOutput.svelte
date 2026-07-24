@@ -246,7 +246,9 @@
   .field-label {
     font-size: var(--font-size-xs);
     font-weight: 500;
-    color: var(--text-muted);
+    /* Required-field labels are necessary reading, not decorative — text-muted
+       reads too faint here even where it clears AA. */
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
@@ -273,7 +275,7 @@
   }
   .field-hint {
     font-size: var(--font-size-xs);
-    color: var(--text-muted);
+    color: var(--text-secondary);
     line-height: 1.5;
   }
 
@@ -344,7 +346,8 @@
   }
   .np-to {
     min-width: 0;
-    color: var(--accent);
+    /* text-primary, not --accent: accent-as-text on surface-1 fails AA in dark theme. */
+    color: var(--text-primary);
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -384,7 +387,13 @@
     left: 2px;
     width: 14px;
     height: 14px;
-    background: var(--on-accent);
+    /* Fixed, not --on-accent: dark's --on-accent is now near-black for CTA text,
+       which nearly vanishes on the off-state track (--surface-3). This flat warm
+       grey clears >=3:1 against --surface-3 in both themes; on-state relies on
+       track colour + thumb position (same pattern most OS toggles use) plus the
+       border below for an edge when the track is close in tone. */
+    background: #867f74;
+    border: var(--stroke-hairline) solid var(--border-strong);
     border-radius: 50%;
     transition: transform var(--transition-fast);
     box-shadow: var(--seg-shadow);

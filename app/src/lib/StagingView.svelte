@@ -395,7 +395,7 @@
   {#if heavyCount > 0}
     <div
       class="flex items-start gap-3 rounded-xl px-4 py-3.5 text-xs leading-normal"
-      style="background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent)"
+      style="background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--text-primary)"
     >
       <svg
         class="flex-shrink-0 mt-0.5"

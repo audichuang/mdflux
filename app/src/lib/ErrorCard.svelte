@@ -105,7 +105,8 @@
   }
   .hint {
     font-size: 12px;
-    color: var(--accent);
+    /* text-secondary, not --accent: accent fails AA on the red-tinted card bg. */
+    color: var(--text-secondary);
     font-weight: 600;
     margin: 0;
     flex: 1 1 12rem;

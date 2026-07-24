@@ -141,7 +141,7 @@
         class="hairline-b flex items-start gap-3 p-3 transition-colors row-hover {item.status ===
         'failed'
           ? 'row-failed'
-          : ''} {item.status === 'cancelled' ? 'opacity-40' : ''}"
+          : ''}"
       >
         <span
           class="flex-shrink-0 w-2 h-2 rounded-full mt-2
@@ -154,7 +154,11 @@
         </span>
 
         <div class="flex-1 min-w-0 flex flex-col gap-1">
-          <span class="text-xs font-semibold text-zinc-200 truncate">{item.filename}</span>
+          <span
+            class="text-xs font-semibold truncate {item.status === 'cancelled'
+              ? 'text-zinc-400'
+              : 'text-zinc-200'}">{item.filename}</span
+          >
           {#if item.status === 'done' && item.output_path}
             <span
               class="text-[length:var(--font-size-2xs)] font-mono text-zinc-500 truncate"
@@ -252,7 +256,7 @@
   .stat-l {
     font-size: 10px;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
@@ -267,6 +271,18 @@
   }
   .text-accent {
     color: var(--accent);
+  }
+  /* Stat numbers: status colour stays on the pill's tint background only —
+     as an 18px/700 foreground it still falls short of AA on its own 12% tint. */
+  .stat-n.text-ok,
+  .stat-n.text-err,
+  .stat-n.text-warn {
+    color: var(--text-primary);
+  }
+  /* Error/warning message body: keep status colour on the dot/tint, not the text. */
+  .detail-text.text-err,
+  .detail-text.text-warn {
+    color: var(--text-secondary);
   }
   .dot-ok {
     background: var(--green);

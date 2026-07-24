@@ -727,7 +727,7 @@
 
     {#if phase === 'checking' || phase === 'health-checking'}
       <div class="centered">
-        <div class="spinner" aria-label="Loading"></div>
+        <div class="spinner" aria-label={tr('loading')}></div>
         <p class="hint">{tr('checking_env')}</p>
       </div>
     {:else if phase === 'provisioning'}
@@ -1125,7 +1125,7 @@
     font-weight: 500;
     color: var(--amber);
     background: color-mix(in srgb, var(--amber) 12%, transparent);
-    padding: var(--stroke-hairline) var(--indicator-sm);
+    padding: 1px var(--sp-1-5);
     border-radius: 99px;
     text-transform: none;
     letter-spacing: 0;

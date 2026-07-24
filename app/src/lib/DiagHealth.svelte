@@ -510,21 +510,23 @@
   .cap-badge {
     font-size: var(--font-size-2xs);
     font-weight: 500;
-    padding: var(--stroke-hairline) var(--indicator-sm);
+    padding: 1px var(--sp-1-5);
     border-radius: 99px;
     white-space: nowrap;
   }
+  /* Status colour stays in the tint background only — as foreground text on its
+     own tint it falls short of AA (~4.2-4.4:1 light, red ~4:1 dark on surface-2). */
   .badge-green {
     background: color-mix(in srgb, var(--green) 15%, transparent);
-    color: var(--green);
+    color: var(--text-primary);
   }
   .badge-amber {
     background: color-mix(in srgb, var(--amber) 15%, transparent);
-    color: var(--amber);
+    color: var(--text-primary);
   }
   .badge-red {
     background: color-mix(in srgb, var(--red) 15%, transparent);
-    color: var(--red);
+    color: var(--text-primary);
   }
   .cap-detail {
     font-size: var(--font-size-xs);

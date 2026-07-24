@@ -33,6 +33,7 @@ const translations: Record<Lang, Record<string, string>> = {
     // Header
     ready: 'Ready',
     partial: 'Partial',
+    loading: 'Loading…',
     checking_env: 'Checking environment…',
     issues_found: 'Issues found',
     repair: 'Repair',
@@ -360,6 +361,7 @@ const translations: Record<Lang, Record<string, string>> = {
     // Header
     ready: '就緒',
     partial: '部份就緒',
+    loading: '載入中…',
     checking_env: '正在檢查執行環境…',
     issues_found: '偵測到異常',
     repair: '自動修復',

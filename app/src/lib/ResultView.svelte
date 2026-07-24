@@ -747,11 +747,12 @@
   }
 
   .count-pill {
-    color: var(--accent);
+    /* text-primary, not --accent: accent-on-accent-tint fails AA on its own tint. */
+    color: var(--text-primary);
     background: color-mix(in srgb, var(--accent) 14%, transparent);
   }
   .count-zero {
-    color: var(--text-muted);
+    color: var(--text-secondary);
     background: color-mix(in srgb, var(--text-primary) 6%, transparent);
   }
 
