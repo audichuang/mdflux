@@ -1,7 +1,7 @@
 # MDFlux — agent context
 
 Local-first desktop app: documents → clean Markdown.  
-**This clone is the `audichuang` fork** (offline packages + macOS arm64 + Homebrew). Upstream: `ibrahimqureshae/mdflux` (`upstream` remote).
+**This clone is the `audichuang` fork** (offline packages + macOS arm64 + Homebrew). Upstream: `ibrahimqureshae/mdflux` (`upstream` remote). **`gh` resolves to the upstream by default** (where you only have read access) — pass `-R audichuang/mdflux` on every release / run / secret query, or you silently read the wrong repo's state and draw wrong conclusions. `scripts/release.sh` already hardcodes the right repo.
 
 ## Architecture (non-negotiable)
 
@@ -25,7 +25,7 @@ Shell **never** converts; sidecar **never** owns UI. Coupling = NDJSON IPC only 
 | Markdown: **only** `preview.css` + `.md-preview`; tables = hairline rows | Duplicate preview CSS; grid cages / mini-card tables |
 | `tr()` / `locale.svelte.ts`; runes only in `*.svelte` / `*.svelte.ts` | Plain `.ts` `$state` (blank screen); second i18n store |
 | Override a `.btn-*` / `.hairline-*` via `.btn-icon` or scoped `<style>` (both unlayered) | Tailwind utilities (`p-0`, `rounded-full`, `hover:*`, `last:border-b-0`) on them — `.btn-*` are unlayered, so `@layer utilities` **silently loses** |
-| `tokens.css` is **entirely unlayered** — keep every selector class-scoped | A `*` or bare-element reset in it. Tailwind preflight already resets margin/padding/box-sizing in `@layer base`; an unlayered copy **silently kills every `p-*` / `m-*` in the app** (bit us in 0.2.3 — modal text clipped by its own border-radius) |
+| `tokens.css` is **entirely unlayered** — keep every selector class-scoped | A `*` or bare-element reset in it. Tailwind preflight already resets margin/padding/box-sizing in `@layer base`; an unlayered copy **silently kills every `p-*` / `m-*` in the app** (hit us in 0.2.3, fixed in 0.2.4 — modal text clipped by its own border-radius) |
 
 Canonical: `tokens.css`, `preview.css`, `theme.svelte.ts`, `locale.svelte.ts`, `ResultView.svelte`, `StagingView.svelte`.
 
