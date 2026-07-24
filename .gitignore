@@ -18,6 +18,7 @@ Thumbs.db
 
 # ── Internal working dirs (not part of the public repo) ───────────────────
 .claude/
+.codegraph/
 Marketing/
 benchmarks/
 _tests/
