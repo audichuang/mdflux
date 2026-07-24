@@ -32,9 +32,6 @@ app/src-tauri/gen/
 app/src-tauri/resources/runtime/**
 !app/src-tauri/resources/runtime/README.md
 
-# ── App-internal design note ──────────────────────────────────────────────
-app/ipc-contract-v1.md
-
 # ── Internal docs: ignore every root-level *.md EXCEPT the standard repo
 #    files. This is a whitelist, so future internal notes never leak in. ────
 /*.md
