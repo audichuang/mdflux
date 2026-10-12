@@ -288,6 +288,7 @@ jobs:
             end
 
             depends_on arch: :arm64
+            # Keep in sync with tauri.conf.json bundle.macOS.minimumSystemVersion (14.0).
             depends_on macos: ">= :sonoma"
 
             app "MDFlux.app"

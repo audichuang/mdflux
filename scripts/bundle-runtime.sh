@@ -67,8 +67,8 @@ case "$PLATFORM" in
     PY_URL="https://github.com/astral-sh/python-build-standalone/releases/download/${PY_TAG}/cpython-${PY_VER}%2B${PY_TAG}-aarch64-apple-darwin-install_only_stripped.tar.gz"
     UV_PLATFORM="aarch64-apple-darwin"
     # onnxruntime >=1.29 (pulled in by markitdown/magika and OCR) ships
-    # macosx_14_0 wheels only; match tauri.conf.json minimumSystemVersion.
-    export MACOSX_DEPLOYMENT_TARGET=14.0
+    # macosx_14_0 wheels only. Target the app's own floor so the two can't drift.
+    export MACOSX_DEPLOYMENT_TARGET="$(python3 -c "import json; print(json.load(open('$ROOT/app/src-tauri/tauri.conf.json'))['bundle']['macOS']['minimumSystemVersion'])")"
     PY_MARKER="python/bin/python3"
     SITE_PACKAGES="python/lib/python3.12/site-packages"
     PLATFORM_LABEL="macos-aarch64"

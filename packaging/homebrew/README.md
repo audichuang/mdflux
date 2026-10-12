@@ -50,5 +50,5 @@ Without it, Windows + mac packages still publish; only the tap job fails on tags
 
 ## Draft cask
 
-`Casks/mdflux.rb` here is the template shape (livecheck, `depends_on macos: :big_sur`, zap paths).  
+`Casks/mdflux.rb` here is the template shape (livecheck, `depends_on macos: ">= :sonoma"`, zap paths).  
 CI embeds real `version` / `sha256` into the live tap file — do not commit a real sha into this draft.

@@ -27,7 +27,7 @@ cask "mdflux" do
   end
 
   # First ship: Apple Silicon only. Intel mac can use online provision later.
-  depends_on macos: :big_sur
+  depends_on macos: ">= :sonoma"
   depends_on arch: :arm64
 
   app "MDFlux.app"

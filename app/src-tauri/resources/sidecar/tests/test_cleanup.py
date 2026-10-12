@@ -1,16 +1,20 @@
 """Unit tests for deterministic Markdown cleanup (no network, no models).
 
-Run from this directory:
-  python3 -m unittest test_cleanup.py -v
-Or via app scripts:
+Run via app scripts:
   npm run test:sidecar
 """
 
 from __future__ import annotations
 
+import sys
 import unittest
+from pathlib import Path
 
-import cleanup
+SIDECAR_DIR = Path(__file__).resolve().parents[1]
+if str(SIDECAR_DIR) not in sys.path:
+    sys.path.insert(0, str(SIDECAR_DIR))
+
+import cleanup  # noqa: E402
 
 
 class TestCleanApi(unittest.TestCase):
