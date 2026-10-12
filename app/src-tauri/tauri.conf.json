@@ -34,7 +34,7 @@
     "shortDescription": "Convert documents to clean Markdown — offline.",
     "longDescription": "MDFlux turns PDFs, Office files, and more into clean Markdown. Offline packages embed a private Python runtime and MarkItDown (Windows NSIS/portable; macOS arm64 DMG). Optional OCR/audio engines are not included in the basic offline build.",
     "macOS": {
-      "minimumSystemVersion": "11.0"
+      "minimumSystemVersion": "14.0"
     },
     "icon": [
       "icons/32x32.png",

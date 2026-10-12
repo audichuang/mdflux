@@ -11,7 +11,7 @@ import {
 
 describe('format lists', () => {
   it('includes core document formats', () => {
-    for (const ext of ['pdf', 'docx', 'pptx', 'xlsx', 'epub', 'html', 'csv', 'json']) {
+    for (const ext of ['pdf', 'docx', 'pptx', 'xlsx', 'epub', 'html', 'csv', 'json', 'txt', 'md']) {
       expect(CORE_EXTS).toContain(ext);
       expect(SUPPORTED_EXTS).toContain(ext);
     }

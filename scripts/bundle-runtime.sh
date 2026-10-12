@@ -66,6 +66,9 @@ case "$PLATFORM" in
   macos-arm64)
     PY_URL="https://github.com/astral-sh/python-build-standalone/releases/download/${PY_TAG}/cpython-${PY_VER}%2B${PY_TAG}-aarch64-apple-darwin-install_only_stripped.tar.gz"
     UV_PLATFORM="aarch64-apple-darwin"
+    # onnxruntime >=1.29 (pulled in by markitdown/magika and OCR) ships
+    # macosx_14_0 wheels only; match tauri.conf.json minimumSystemVersion.
+    export MACOSX_DEPLOYMENT_TARGET=14.0
     PY_MARKER="python/bin/python3"
     SITE_PACKAGES="python/lib/python3.12/site-packages"
     PLATFORM_LABEL="macos-aarch64"

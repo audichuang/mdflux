@@ -15,6 +15,8 @@ export const CORE_EXTS = [
   'json',
   'xml',
   'epub',
+  'txt',
+  'md',
 ];
 
 /** Image formats — converted via the optional OCR engine. */

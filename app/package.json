@@ -14,7 +14,7 @@
     "test": "vitest run && npm run test:sidecar",
     "test:unit": "vitest run",
     "test:watch": "vitest",
-    "test:sidecar": "python3 -m unittest discover -s src-tauri/resources/sidecar -p 'test_*.py' -v",
+    "test:sidecar": "python3 -m unittest discover -s src-tauri/resources/sidecar -p 'test_*.py' -v && python3 -m unittest discover -s src-tauri/resources/sidecar/tests -t src-tauri/resources/sidecar/tests -p 'test_*.py' -v",
     "tauri": "tauri"
   },
   "license": "MIT",

@@ -182,7 +182,7 @@ On already-clean files the output is close to identical, because under the hood 
 
 #### macOS (Homebrew)
 
-**Apple Silicon only** (arm64). Tracks stable versioned releases (`v*`), not the floating `offline-latest` tag.
+**Apple Silicon only** (arm64), **macOS 14 Sonoma or newer**. Tracks stable versioned releases (`v*`), not the floating `offline-latest` tag.
 
 ```bash
 brew tap audichuang/tap
